@@ -4,13 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VAULT ZERO — Git Escape Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ─── DESIGN TOKENS ───────────────────────────────────────── */
+:root {
+  --bg:           #0d0f0e;
+  --surface:      #1a1c1b;
+  --surface-hi:   #1e201f;
+  --surface-top:  #282a29;
+  --border:       #2a2c2b;
+  --border-dim:   #3d4943;
+  --primary:      #1D9E75;
+  --primary-dim:  #68dbae;
+  --text:         #d1d5db;
+  --text-dim:     #87948c;
+  --text-muted:   #3d4943;
+  --ok:           #68dbae;
+  --err:          #ffb4ab;
+  --warn:         #c8a87a;
+  --font:         'JetBrains Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0; }
 
 body {
-  background: #050505;
-  color: #c8c8c8;
-  font-family: 'Courier New', Courier, monospace;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
   height: 100vh;
   overflow: hidden;
 }
@@ -19,12 +41,11 @@ body {
 #introScreen {
   position: fixed;
   inset: 0;
-  background: #030303;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 300;
-  flex-direction: column;
 }
 .transmission {
   max-width: 600px;
@@ -32,49 +53,56 @@ body {
   text-align: center;
 }
 .tx-header {
-  color: #d4a017;
+  color: var(--primary);
   font-size: 11px;
+  font-weight: 500;
   letter-spacing: 5px;
+  text-transform: uppercase;
   margin-bottom: 20px;
   animation: blink 1.5s step-end infinite;
 }
 @keyframes blink { 50% { opacity: 0.3; } }
 .vault-logo {
-  font-size: 44px;
-  color: #d4a017;
-  letter-spacing: 10px;
-  margin-bottom: 8px;
-  text-shadow: 0 0 30px #d4a01755;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 12px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
 }
 .vault-sub {
-  font-size: 10px;
-  color: #444;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
   letter-spacing: 6px;
+  text-transform: uppercase;
   margin-bottom: 40px;
 }
 .tx-body {
-  color: #a0c8a0;
+  color: var(--text-dim);
   font-size: 13px;
   line-height: 2;
-  border-left: 2px solid #4caf50;
-  padding: 20px 25px;
+  border-left: 1px solid var(--primary);
+  padding: 20px 24px;
   text-align: left;
-  margin-bottom: 30px;
-  background: #0a150a;
+  margin-bottom: 32px;
+  background: var(--surface);
 }
-.tx-body strong { color: #d4a017; }
+.tx-body strong { color: var(--primary); font-weight: 500; }
 .enter-btn {
-  background: transparent;
-  border: 1px solid #d4a017;
-  color: #d4a017;
+  background: var(--primary);
+  border: none;
+  color: #0d0f0e;
   padding: 12px 40px;
-  font-family: inherit;
+  font-family: var(--font);
   font-size: 12px;
+  font-weight: 700;
   letter-spacing: 4px;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
-.enter-btn:hover { background: #d4a01722; }
+.enter-btn:hover { background: var(--primary-dim); }
 
 /* ─── GAME SHELL ──────────────────────────────────────────── */
 #gameShell {
@@ -87,45 +115,49 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 20px;
-  background: #0a0a0a;
-  border-bottom: 1px solid #1e1a0a;
+  padding: 8px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 .vault-tag {
-  color: #d4a017;
-  font-size: 13px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 5px;
-  font-weight: bold;
+  text-transform: uppercase;
 }
 #roomInfo {
-  color: #888;
+  color: var(--text-dim);
   font-size: 11px;
+  font-weight: 500;
   letter-spacing: 2px;
+  text-transform: uppercase;
 }
 .hint-btn {
   background: transparent;
-  border: 1px solid #d4a01766;
-  color: #d4a017;
+  border: 1px solid var(--border-dim);
+  color: var(--text-dim);
   padding: 4px 14px;
-  font-family: inherit;
+  font-family: var(--font);
   font-size: 10px;
+  font-weight: 500;
   letter-spacing: 2px;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: border-color 0.15s, color 0.15s;
 }
-.hint-btn:hover { background: #d4a01718; }
+.hint-btn:hover { border-color: var(--primary); color: var(--primary); }
 
 .progress-bar {
-  height: 2px;
-  background: #111;
+  height: 1px;
+  background: var(--border);
   flex-shrink: 0;
 }
 .progress-fill {
   height: 100%;
-  background: #d4a017;
+  background: var(--primary);
   transition: width 0.6s ease;
-  box-shadow: 0 0 8px #d4a01788;
 }
 
 .panels {
@@ -140,92 +172,92 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid #141414;
+  border-right: 1px solid var(--border);
 }
 .panel:last-child { border-right: none; }
 
 .panel-header {
-  padding: 7px 15px;
-  background: #0a0a0a;
-  color: #d4a017;
+  padding: 7px 16px;
+  background: var(--surface);
+  color: var(--text-dim);
   font-size: 10px;
+  font-weight: 500;
   letter-spacing: 4px;
-  border-bottom: 1px solid #141414;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 /* ─── FOX COMMS ───────────────────────────────────────────── */
-.fox-panel { background: #060b06; }
+.fox-panel { background: var(--bg); }
 .fox-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-height: 0;
 }
 .fox-msg {
-  background: #0a160a;
-  border-left: 2px solid #4caf5088;
-  padding: 10px 12px;
-  font-size: 11.5px;
-  line-height: 1.7;
-  color: #90b890;
+  background: var(--surface);
+  border-left: 1px solid var(--primary);
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--text-dim);
   opacity: 0;
   transform: translateY(6px);
-  animation: slideIn 0.4s ease forwards;
+  animation: slideIn 0.35s ease forwards;
 }
 .fox-msg .fox-tag {
-  color: #d4a017;
+  color: var(--primary);
   font-size: 9px;
-  letter-spacing: 3px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
   display: block;
-  margin-bottom: 8px;
-}
-.fox-msg.sys {
-  background: #141008;
-  border-left-color: #d4a01788;
-  color: #c0b080;
+  margin-bottom: 10px;
 }
 @keyframes slideIn {
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── TERMINAL ────────────────────────────────────────────── */
-.terminal-panel { background: #020202; }
+.terminal-panel { background: var(--bg); }
 .terminal-out {
   flex: 1;
   overflow-y: auto;
-  padding: 14px 16px;
-  font-size: 12.5px;
+  padding: 16px;
+  font-size: 13px;
   line-height: 1.75;
   min-height: 0;
 }
 .t { white-space: pre-wrap; word-break: break-all; }
-.t.cmd  { color: #555; }
-.t.ok   { color: #44cc77; }
-.t.err  { color: #ff5533; }
-.t.warn { color: #ffaa33; }
-.t.br   { color: #88aaff; }
-.t.cm   { color: #ffcc44; }
-.t.hl   { color: #d4a017; }
-.t.dim  { color: #444; }
-.t.sys  { color: #c8c8c8; }
+.t.cmd  { color: var(--text-muted); }
+.t.ok   { color: var(--ok); }
+.t.err  { color: var(--err); }
+.t.warn { color: var(--warn); }
+.t.br   { color: var(--primary-dim); }
+.t.cm   { color: var(--primary-dim); }
+.t.hl   { color: var(--primary); }
+.t.dim  { color: var(--text-muted); }
+.t.sys  { color: var(--text); }
 
 .terminal-in-row {
   display: flex;
   align-items: center;
-  padding: 9px 14px;
-  border-top: 1px solid #111;
-  background: #020202;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
   flex-shrink: 0;
 }
 .prompt {
-  color: #d4a017;
-  font-size: 12px;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
-  margin-right: 6px;
+  margin-right: 8px;
   flex-shrink: 0;
 }
 #termInput {
@@ -233,14 +265,14 @@ body {
   background: transparent;
   border: none;
   outline: none;
-  color: #e8e8e8;
-  font-family: inherit;
-  font-size: 12.5px;
-  caret-color: #d4a017;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  caret-color: var(--primary);
 }
 
 /* ─── GIT TREE ────────────────────────────────────────────── */
-.tree-panel { background: #040408; }
+.tree-panel { background: var(--bg); }
 #gitTree {
   flex: 1;
   width: 100%;
@@ -252,95 +284,106 @@ body {
   display: none;
   position: fixed;
   inset: 0;
-  background: #000000cc;
+  background: rgba(13,15,14,0.88);
   z-index: 100;
   align-items: center;
   justify-content: center;
 }
 #hintModal.open { display: flex; }
 .hint-box {
-  background: #0a0a0a;
-  border: 1px solid #d4a017;
+  background: var(--surface);
+  border: 1px solid var(--primary);
   padding: 28px 32px;
   max-width: 460px;
   width: 90%;
 }
 .hint-lvl {
-  color: #d4a017;
+  color: var(--primary);
   font-size: 10px;
+  font-weight: 700;
   letter-spacing: 3px;
+  text-transform: uppercase;
   margin-bottom: 14px;
 }
 .hint-txt {
-  color: #c8c8c8;
+  color: var(--text);
   font-size: 13px;
   line-height: 1.8;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 .hint-txt code {
-  color: #d4a017;
-  background: #111;
-  padding: 1px 5px;
+  color: var(--primary-dim);
+  background: var(--bg);
+  padding: 1px 6px;
 }
-.modal-btns { display: flex; gap: 10px; }
+.modal-btns { display: flex; gap: 8px; }
 .btn {
   background: transparent;
-  border: 1px solid #333;
-  color: #777;
-  padding: 6px 18px;
-  font-family: inherit;
+  border: 1px solid var(--border-dim);
+  color: var(--text-dim);
+  padding: 7px 18px;
+  font-family: var(--font);
   font-size: 10px;
+  font-weight: 500;
   letter-spacing: 2px;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: border-color 0.15s, color 0.15s;
 }
-.btn:hover { background: #ffffff0d; }
-.btn.gold {
-  border-color: #d4a017;
-  color: #d4a017;
+.btn:hover { border-color: var(--text-dim); color: var(--text); }
+.btn.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #0d0f0e;
+  font-weight: 700;
 }
+.btn.primary:hover { background: var(--primary-dim); border-color: var(--primary-dim); }
 
 /* ─── ROOM COMPLETE ───────────────────────────────────────── */
 #roomDone {
   display: none;
   position: fixed;
   inset: 0;
-  background: #000000dd;
+  background: rgba(13,15,14,0.92);
   z-index: 200;
   align-items: center;
   justify-content: center;
 }
 #roomDone.open { display: flex; }
 .done-box {
-  background: #080808;
-  border: 1px solid #d4a017;
-  padding: 40px 50px;
+  background: var(--surface);
+  border: 1px solid var(--primary);
+  padding: 40px 48px;
   text-align: center;
   max-width: 500px;
   width: 90%;
 }
 .done-title {
-  color: #d4a017;
-  font-size: 18px;
+  color: var(--primary);
+  font-size: 16px;
+  font-weight: 700;
   letter-spacing: 6px;
-  margin-bottom: 14px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
 }
 .done-stats {
-  color: #555;
+  color: var(--text-dim);
   font-size: 11px;
-  margin-bottom: 22px;
+  font-weight: 500;
+  margin-bottom: 24px;
   line-height: 2;
+  letter-spacing: 1px;
 }
 .done-msg {
-  color: #90b890;
-  font-size: 12.5px;
+  color: var(--text-dim);
+  font-size: 13px;
   font-style: italic;
   margin-bottom: 28px;
-  padding: 14px 18px;
-  border-left: 2px solid #4caf50;
+  padding: 14px 16px;
+  border-left: 1px solid var(--primary);
   text-align: left;
-  background: #0a150a;
-  line-height: 1.7;
+  background: var(--bg);
+  line-height: 1.8;
 }
 
 /* ─── FILE EDITOR OVERLAY ─────────────────────────────────── */
@@ -348,50 +391,55 @@ body {
   display: none;
   position: fixed;
   inset: 0;
-  background: #000000cc;
+  background: rgba(13,15,14,0.88);
   z-index: 50;
   align-items: center;
   justify-content: center;
 }
 #fileEditor.open { display: flex; }
 .editor-box {
-  background: #0a0a0a;
-  border: 1px solid #333;
+  background: var(--surface);
+  border: 1px solid var(--border-dim);
   padding: 24px 28px;
   width: 520px;
   max-width: 95vw;
 }
 .editor-title {
-  color: #d4a017;
+  color: var(--text-dim);
   font-size: 10px;
+  font-weight: 700;
   letter-spacing: 3px;
+  text-transform: uppercase;
   margin-bottom: 12px;
 }
 #fileContent {
   width: 100%;
   height: 150px;
-  background: #050505;
-  border: 1px solid #1e1e1e;
-  color: #e0e0e0;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
   padding: 12px;
   outline: none;
   resize: vertical;
-  line-height: 1.6;
+  line-height: 1.7;
+  transition: border-color 0.15s;
 }
+#fileContent:focus { border-color: var(--primary); }
 .editor-hint {
-  color: #555;
+  color: var(--text-muted);
   font-size: 11px;
   margin: 10px 0 14px;
 }
+.editor-hint code { color: var(--primary-dim); }
 
 /* ─── END SCREEN ──────────────────────────────────────────── */
 #endScreen {
   display: none;
   position: fixed;
   inset: 0;
-  background: #030303;
+  background: var(--bg);
   align-items: center;
   justify-content: center;
   z-index: 400;
@@ -399,17 +447,18 @@ body {
 #endScreen.open { display: flex; }
 .end-inner { max-width: 600px; width: 90%; text-align: center; }
 .end-logo {
-  font-size: 36px;
-  color: #d4a017;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text);
   letter-spacing: 8px;
+  text-transform: uppercase;
   margin-bottom: 30px;
-  text-shadow: 0 0 30px #d4a01777;
 }
 
 /* ─── SCROLLBAR ───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--border); }
 </style>
 </head>
 <body>
@@ -470,7 +519,7 @@ body {
     <div class="hint-txt" id="hintTxt"></div>
     <div class="modal-btns">
       <button class="btn" onclick="closeHint()">CLOSE</button>
-      <button class="btn gold" id="nextHintBtn" onclick="moreHint()">DEEPER HINT →</button>
+      <button class="btn primary" id="nextHintBtn" onclick="moreHint()">DEEPER HINT →</button>
     </div>
   </div>
 </div>
@@ -481,7 +530,7 @@ body {
     <div class="done-title">ROOM CLEARED</div>
     <div class="done-stats" id="doneStats"></div>
     <div class="done-msg" id="doneMsg"></div>
-    <button class="btn gold" onclick="goNextRoom()">NEXT ROOM →</button>
+    <button class="btn primary" onclick="goNextRoom()">NEXT ROOM →</button>
   </div>
 </div>
 
@@ -492,7 +541,7 @@ body {
     <textarea id="fileContent"></textarea>
     <div class="editor-hint">change <code>"entry_window": null</code> → <code>"entry_window": "02:00"</code></div>
     <div class="modal-btns">
-      <button class="btn gold" onclick="saveFile()">SAVE FILE</button>
+      <button class="btn primary" onclick="saveFile()">SAVE FILE</button>
       <button class="btn" onclick="cancelFile()">CANCEL</button>
     </div>
   </div>
@@ -1105,36 +1154,36 @@ const ROOMS = [
 const TREE = {
   r1_initial: {
     branches: [
-      { name: "main", y: 60, color: "#4caf50", commits: [{x:40}, {x:90}] }
+      { name: "main", y: 60, color: "#1D9E75", commits: [{x:40}, {x:90}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 1 }
   },
   r1_branches: {
     branches: [
-      { name: "main",                   y: 50,  color: "#4caf50", commits: [{x:40}, {x:85}] },
-      { name: "security-audit-2019",    y: 130, color: "#555",    commits: [{x:40}, {x:85}, {x:130}] },
-      { name: "fox/vault-schematics",   y: 210, color: "#d4a017", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
+      { name: "main",                   y: 50,  color: "#1D9E75", commits: [{x:40}, {x:85}] },
+      { name: "security-audit-2019",    y: 130, color: "#3d4943", commits: [{x:40}, {x:85}, {x:130}] },
+      { name: "fox/vault-schematics",   y: 210, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 1 },
     headBranchY: 50
   },
   r1_on_fox: {
     branches: [
-      { name: "main",                 y: 55,  color: "#4caf50", commits: [{x:40}, {x:85}] },
-      { name: "fox/vault-schematics", y: 160, color: "#d4a017", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
+      { name: "main",                 y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}] },
+      { name: "fox/vault-schematics", y: 160, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
     ],
     HEAD: { type: "branch", ref: "fox/vault-schematics", ci: 3, branchY: 160 }
   },
   r1_detached: {
     branches: [
-      { name: "main",                 y: 55,  color: "#4caf50", commits: [{x:40}, {x:85}] },
-      { name: "fox/vault-schematics", y: 160, color: "#d4a017", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
+      { name: "main",                 y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}] },
+      { name: "fox/vault-schematics", y: 160, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
     ],
     HEAD: { type: "detached", cx: 130, cy: 160 }
   },
   r2_remote: {
     branches: [
-      { name: "main", y: 80, color: "#4caf50", commits: [{x:40}, {x:90}, {x:140}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 2, branchY: 80 },
     extras: [
@@ -1143,89 +1192,89 @@ const TREE = {
   },
   r2_fork: {
     branches: [
-      { name: "main", y: 80, color: "#4caf50", commits: [{x:40}, {x:90}, {x:140}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 2, branchY: 80 },
     extras: [
-      { type: "remote-box", x: 30,  y: 160, label: "upstream (syndicate)", color: "#555" },
-      { type: "remote-box", x: 130, y: 160, label: "origin (your fork)",   color: "#d4a017" },
+      { type: "remote-box", x: 30,  y: 160, label: "upstream (syndicate)", color: "#3d4943" },
+      { type: "remote-box", x: 130, y: 160, label: "origin (your fork)",   color: "#1D9E75" },
       { type: "arrow", x1: 140, y1: 100, x2: 170, y2: 155 }
     ]
   },
   r2_cloned: {
     branches: [
-      { name: "main (local)",  y: 70,  color: "#4caf50", commits: [{x:40}, {x:90}, {x:140}] },
-      { name: "origin/main",   y: 140, color: "#d4a01799", commits: [{x:40}, {x:90}, {x:140}], dashed: true }
+      { name: "main (local)",  y: 70,  color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] },
+      { name: "origin/main",   y: 140, color: "#1D9E7566", commits: [{x:40}, {x:90}, {x:140}], dashed: true }
     ],
     HEAD: { type: "branch", ref: "main", ci: 2, branchY: 70 }
   },
   r3_clean: {
     branches: [
-      { name: "main", y: 80, color: "#4caf50", commits: [{x:40}, {x:90}, {x:140}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 2, branchY: 80 }
   },
   r3_feature: {
     branches: [
-      { name: "main",                    y: 60,  color: "#4caf50", commits: [{x:40}, {x:90}, {x:140}] },
-      { name: "operative/entry-window",  y: 140, color: "#88aaff", commits: [{x:140}] }
+      { name: "main",                    y: 60,  color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] },
+      { name: "operative/entry-window",  y: 140, color: "#7eb8d4", commits: [{x:140}] }
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 0, branchY: 140 }
   },
   r3_staged: {
     branches: [
-      { name: "main",                    y: 60,  color: "#4caf50", commits: [{x:40}, {x:90}, {x:140}] },
-      { name: "operative/entry-window",  y: 140, color: "#88aaff", commits: [{x:140}] }
+      { name: "main",                    y: 60,  color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] },
+      { name: "operative/entry-window",  y: 140, color: "#7eb8d4", commits: [{x:140}] }
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 0, branchY: 140 },
     extras: [{ type: "staged-indicator", x: 10, y: 240 }]
   },
   r3_committed: {
     branches: [
-      { name: "main",                    y: 60,  color: "#4caf50", commits: [{x:40}, {x:90}, {x:140}] },
-      { name: "operative/entry-window",  y: 140, color: "#88aaff", commits: [{x:140}, {x:190}] }
+      { name: "main",                    y: 60,  color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] },
+      { name: "operative/entry-window",  y: 140, color: "#7eb8d4", commits: [{x:140}, {x:190}] }
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 1, branchY: 140 }
   },
   r4_ahead: {
     branches: [
-      { name: "main",                    y: 55,  color: "#4caf50", commits: [{x:40}, {x:85}, {x:130}] },
-      { name: "operative/entry-window",  y: 120, color: "#88aaff", commits: [{x:130}, {x:180}] },
-      { name: "origin/entry-window",     y: 185, color: "#88aaff55", commits: [{x:130}], dashed: true }
+      { name: "main",                    y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}] },
+      { name: "operative/entry-window",  y: 120, color: "#7eb8d4", commits: [{x:130}, {x:180}] },
+      { name: "origin/entry-window",     y: 185, color: "#7eb8d455", commits: [{x:130}], dashed: true }
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 1, branchY: 120 }
   },
   r4_pushed: {
     branches: [
-      { name: "main",                    y: 55,  color: "#4caf50", commits: [{x:40}, {x:85}, {x:130}] },
-      { name: "operative/entry-window",  y: 120, color: "#88aaff", commits: [{x:130}, {x:180}] },
-      { name: "origin/entry-window",     y: 185, color: "#88aaff55", commits: [{x:130}, {x:180}], dashed: true }
+      { name: "main",                    y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}] },
+      { name: "operative/entry-window",  y: 120, color: "#7eb8d4", commits: [{x:130}, {x:180}] },
+      { name: "origin/entry-window",     y: 185, color: "#7eb8d455", commits: [{x:130}, {x:180}], dashed: true }
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 1, branchY: 120 }
   },
   r5_dirty: {
     branches: [
-      { name: "main", y: 80, color: "#4caf50", commits: [{x:30}, {x:70}, {x:110}, {x:150}, {x:190}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [{x:30}, {x:70}, {x:110}, {x:150}, {x:190}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 4, branchY: 80 },
     extras: [{ type: "dirty-indicator", x: 10, y: 200 }]
   },
   r6_dirty: {
     branches: [
-      { name: "main", y: 80, color: "#4caf50", commits: [{x:30}, {x:70}, {x:110}, {x:150}, {x:190}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [{x:30}, {x:70}, {x:110}, {x:150}, {x:190}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 4, branchY: 80 },
     extras: [{ type: "dirty-indicator", x: 10, y: 200 }]
   },
   r6_partial: {
     branches: [
-      { name: "main", y: 80, color: "#4caf50", commits: [{x:30}, {x:70}, {x:110}, {x:150}, {x:190}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [{x:30}, {x:70}, {x:110}, {x:150}, {x:190}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 4, branchY: 80 }
   },
   r6_reverted: {
     branches: [
-      { name: "main", y: 80, color: "#4caf50", commits: [{x:25}, {x:60}, {x:95}, {x:130}, {x:165}, {x:205}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [{x:25}, {x:60}, {x:95}, {x:130}, {x:165}, {x:205}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 5, branchY: 80 },
     extras: [{ type: "revert-label", x: 205, y: 80 }]
@@ -1252,7 +1301,7 @@ function renderTree(stateKey) {
   // Defs (arrowhead marker)
   const defs = svgEl('defs', {});
   const marker = svgEl('marker', { id:'arr', markerWidth:'7', markerHeight:'5', refX:'0', refY:'2.5', orient:'auto' });
-  const poly = svgEl('polygon', { points:'0 0, 7 2.5, 0 5', fill:'#888' });
+  const poly = svgEl('polygon', { points:'0 0, 7 2.5, 0 5', fill:'#3d4943' });
   marker.appendChild(poly);
   defs.appendChild(marker);
   svg.appendChild(defs);
@@ -1298,7 +1347,7 @@ function renderTree(stateKey) {
       x: labelX, y: branch.y + 4,
       fill: branch.dashed ? branch.color : branch.color,
       'font-size': '8.5',
-      'font-family': 'Courier New',
+      'font-family': 'JetBrains Mono, Courier New',
       opacity: branch.dashed ? '0.5' : '0.8'
     });
     lbl.textContent = branch.name;
@@ -1313,9 +1362,9 @@ function renderTree(stateKey) {
       const cx = h.cx, cy = h.cy;
       svg.appendChild(svgEl('polygon', {
         points: `${cx},${cy-11} ${cx+9},${cy} ${cx},${cy+11} ${cx-9},${cy}`,
-        fill: 'none', stroke: '#ff6644', 'stroke-width': '1.5'
+        fill: 'none', stroke: '#ffb4ab', 'stroke-width': '1.5'
       }));
-      const t = svgEl('text', { x: cx, y: cy - 17, fill: '#ff6644', 'font-size': '9', 'font-family': 'Courier New', 'text-anchor': 'middle' });
+      const t = svgEl('text', { x: cx, y: cy - 17, fill: '#ffb4ab', 'font-size': '9', 'font-family': 'JetBrains Mono, Courier New', 'text-anchor': 'middle' });
       t.textContent = 'HEAD (detached)';
       svg.appendChild(t);
     } else {
@@ -1330,12 +1379,12 @@ function renderTree(stateKey) {
           svg.appendChild(svgEl('line', {
             x1: c.x, y1: branch.y - 14,
             x2: c.x, y2: branch.y - 7,
-            stroke: '#ffffff88', 'stroke-width': '1',
+            stroke: '#87948c', 'stroke-width': '1',
             'marker-end': 'url(#arr)'
           }));
           const t = svgEl('text', {
             x: c.x, y: branch.y - 18,
-            fill: '#ffffffaa', 'font-size': '9', 'font-family': 'Courier New', 'text-anchor': 'middle'
+            fill: '#87948c', 'font-size': '9', 'font-family': 'JetBrains Mono, Courier New', 'text-anchor': 'middle'
           });
           t.textContent = 'HEAD';
           svg.appendChild(t);
@@ -1348,21 +1397,21 @@ function renderTree(stateKey) {
   (state.extras || []).forEach(ex => {
     if (ex.type === 'remote-box') {
       svg.appendChild(svgEl('rect', { x: ex.x, y: ex.y, width: '90', height: '22', rx: '2', fill: 'none', stroke: ex.color, 'stroke-width': '1', opacity: '0.6' }));
-      const t = svgEl('text', { x: ex.x + 4, y: ex.y + 14, fill: ex.color, 'font-size': '8', 'font-family': 'Courier New', opacity: '0.8' });
+      const t = svgEl('text', { x: ex.x + 4, y: ex.y + 14, fill: ex.color, 'font-size': '8', 'font-family': 'JetBrains Mono, Courier New', opacity: '0.8' });
       t.textContent = ex.label;
       svg.appendChild(t);
     } else if (ex.type === 'arrow') {
-      svg.appendChild(svgEl('line', { x1: ex.x1, y1: ex.y1, x2: ex.x2, y2: ex.y2, stroke: '#555', 'stroke-width': '1', 'stroke-dasharray': '3,3', 'marker-end': 'url(#arr)' }));
+      svg.appendChild(svgEl('line', { x1: ex.x1, y1: ex.y1, x2: ex.x2, y2: ex.y2, stroke: '#3d4943', 'stroke-width': '1', 'stroke-dasharray': '3,3', 'marker-end': 'url(#arr)' }));
     } else if (ex.type === 'staged-indicator') {
-      const t = svgEl('text', { x: ex.x, y: ex.y, fill: '#44cc77', 'font-size': '9', 'font-family': 'Courier New' });
+      const t = svgEl('text', { x: ex.x, y: ex.y, fill: '#68dbae', 'font-size': '9', 'font-family': 'JetBrains Mono, Courier New' });
       t.textContent = '● changes staged';
       svg.appendChild(t);
     } else if (ex.type === 'dirty-indicator') {
-      const t = svgEl('text', { x: ex.x, y: ex.y, fill: '#ff6644', 'font-size': '9', 'font-family': 'Courier New' });
+      const t = svgEl('text', { x: ex.x, y: ex.y, fill: '#ffb4ab', 'font-size': '9', 'font-family': 'JetBrains Mono, Courier New' });
       t.textContent = '⚠ working tree dirty';
       svg.appendChild(t);
     } else if (ex.type === 'revert-label') {
-      const t = svgEl('text', { x: ex.x - 3, y: ex.y - 14, fill: '#44cc77', 'font-size': '8', 'font-family': 'Courier New', 'text-anchor': 'middle' });
+      const t = svgEl('text', { x: ex.x - 3, y: ex.y - 14, fill: '#68dbae', 'font-size': '8', 'font-family': 'JetBrains Mono, Courier New', 'text-anchor': 'middle' });
       t.textContent = 'revert↑';
       svg.appendChild(t);
     }
@@ -1739,7 +1788,7 @@ document.querySelector('.terminal-panel').addEventListener('click', () => inp.fo
 // ═══════════════════════════════════════════════════════════════════════
 
 // Initial tree states per room (before any command succeeds)
-TREE['r1_initial'] = { branches: [{name:'main', y:90, color:'#4caf50', commits:[{x:40},{x:100}]}], HEAD: {type:'branch', ref:'main', ci:1, branchY:90} };
+TREE['r1_initial'] = { branches: [{name:'main', y:90, color:'#1D9E75', commits:[{x:40},{x:100}]}], HEAD: {type:'branch', ref:'main', ci:1, branchY:90} };
 TREE['r2_initial'] = TREE['r2_remote'];
 TREE['r3_initial'] = TREE['r3_clean'];
 TREE['r4_initial'] = TREE['r4_ahead'];
