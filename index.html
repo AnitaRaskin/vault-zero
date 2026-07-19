@@ -472,7 +472,7 @@ body {
     <div class="tx-body">
       <strong>From: Fox</strong><br><br>
       "You want in on the Vault Zero job? Prove you can handle the tools first.<br><br>
-      A previous crew hid the schematics in a repo years ago. Never merged. Could be anywhere.<br><br>
+      A previous crew breached Vault Zero's system and buried the access credentials inside their own repo. Never merged. Still in there.<br><br>
       Find it. I'll be watching."
     </div>
     <button class="enter-btn" onclick="startGame()">[ ENTER THE REPO ]</button>
@@ -539,7 +539,7 @@ body {
   <div class="editor-box">
     <div class="editor-title">EDIT FILE: security-config.json</div>
     <textarea id="fileContent"></textarea>
-    <div class="editor-hint">change <code>"entry_window": null</code> → <code>"entry_window": "02:00"</code></div>
+    <div class="editor-hint">change <code>"maintenance_window": null</code> → <code>"maintenance_window": "02:00"</code></div>
     <div class="modal-btns">
       <button class="btn primary" onclick="saveFile()">SAVE FILE</button>
       <button class="btn" onclick="cancelFile()">CANCEL</button>
@@ -577,10 +577,10 @@ const ROOMS = [
   {
     id: 1,
     name: 'THE BLUEPRINT',
-    intro: 'The vault schematics were hidden in this repo by a previous operative. Never merged. Find the branch, find the commit, read the file.',
+    intro: "A previous operative breached Vault Zero's system and buried the access credentials inside their own repo. Never merged. We know it's in here — find the branch, find the commit, read the file.",
     stages: [
       {
-        foxMsg: "the blueprint exists. someone hid it and never merged it. start by figuring out what branches are in this repo.",
+        foxMsg: "the access map exists. someone on the inside hid it and never merged it. start by figuring out what branches are in this repo.",
         task: "Find ALL branches including remote ones.",
         accepted: ["git branch -a"],
         output: [
@@ -603,7 +603,7 @@ const ROOMS = [
       },
       {
         foxMsg: "one of those branches has what you need. the name should give it away.",
-        task: "Switch to the branch that has the schematics.",
+        task: "Switch to the branch that has the access credentials.",
         accepted: ["git checkout fox/vault-schematics", "git switch fox/vault-schematics",
                    "git checkout origin/fox/vault-schematics"],
         output: [
@@ -625,7 +625,7 @@ const ROOMS = [
         task: "View the commit log on this branch.",
         accepted: ["git log --oneline", "git log", "git log --all", "git log --oneline --all"],
         output: [
-          ["a3f9c12 (HEAD -> fox/vault-schematics) hide the blueprint — do not merge", "cm"],
+          ["a3f9c12 (HEAD -> fox/vault-schematics) hide the access map — do not merge", "cm"],
           ["b7e2d45 update access routes", "sys"],
           ["c1a8f33 initial repo setup", "dim"],
         ],
@@ -634,7 +634,7 @@ const ROOMS = [
       },
       {
         foxMsg: "that commit at a3f9c12. go there. you'll detach from the branch — that's expected. read-only.",
-        task: "Checkout the specific commit where the blueprint was hidden.",
+        task: "Checkout the specific commit where the access map was hidden.",
         accepted: ["git checkout a3f9c12"],
         output: [
           ["Note: switching to 'a3f9c12'.", "sys"],
@@ -642,7 +642,7 @@ const ROOMS = [
           ["You are in 'detached HEAD' state. You can look around and make experimental", "warn"],
           ["changes and commit them, but they won't be tracked to any branch.", "warn"],
           ["", ""],
-          ["HEAD is now at a3f9c12 hide the blueprint — do not merge", "cm"],
+          ["HEAD is now at a3f9c12 hide the access map — do not merge", "cm"],
         ],
         tree: "r1_detached",
         wrong: {
@@ -656,18 +656,21 @@ const ROOMS = [
         output: [
           ["", ""],
           ["┌─────────────────────────────────┐", "hl"],
-          ["│       VAULT ZERO BLUEPRINT      │", "hl"],
+          ["│     VAULT ZERO — SYSTEM MAP     │", "hl"],
           ["│                                 │", "hl"],
-          ["│  Level B2  ┌──┐  ┌──┐  ┌──┐   │", "hl"],
-          ["│  ──────────┤  ├──┤  ├──┤  │   │", "hl"],
-          ["│  Corridor  │  │  │  │  │V0│   │", "hl"],
-          ["│  ──────────┤  ├──┤  ├──┤  │   │", "hl"],
-          ["│            └──┘  └──┘  └──┘   │", "hl"],
-          ["│  Entry: North corridor, B2      │", "hl"],
-          ["│  Window: 02:00 — 02:15          │", "hl"],
+          ["│  [INTERNET]                     │", "hl"],
+          ["│      │                          │", "hl"],
+          ["│  [API GATEWAY]  ←── public      │", "hl"],
+          ["│      │                          │", "hl"],
+          ["│  [AUTH SERVICE] ←── target      │", "hl"],
+          ["│      │                          │", "hl"],
+          ["│  [CORE DB / V0] ←── the vault   │", "hl"],
+          ["│                                 │", "hl"],
+          ["│  Admin endpoint: /internal/v0   │", "hl"],
+          ["│  Monitoring off: 02:00 — 02:15  │", "hl"],
           ["└─────────────────────────────────┘", "hl"],
           ["", ""],
-          ["entry window opens at 02:00. fifteen minutes.", "ok"],
+          ["monitoring goes dark at 02:00. fifteen minutes.", "ok"],
         ],
         tree: "r1_detached",
         wrong: {
@@ -684,7 +687,7 @@ const ROOMS = [
         "run: git branch -a"
       ],
       [
-        "look at the branch names. one of them has something to do with the vault schematics.",
+        "look at the branch names. one of them was created by someone on the inside.",
         "you switch branches with git checkout or git switch, followed by the branch name.",
         "run: git checkout fox/vault-schematics"
       ],
@@ -836,7 +839,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "modify the config. the entry window needs to open at 02:00. i've opened the file for you.",
+        foxMsg: "modify the config. the maintenance window — when their monitoring goes offline — needs to be set to 02:00. i've opened the file for you.",
         task: "Edit security-config.json, then stage it with git add.",
         fileEdit: true,
         accepted: ["git add security-config.json", "git add ."],
@@ -854,7 +857,7 @@ const ROOMS = [
         foxMsg: "save your work. every checkpoint matters — write a useful message. this is for the crew.",
         task: "Commit the staged change with a descriptive message.",
         flexCommit: true,
-        accepted: ["git commit -m \"open entry window at 02:00\""],
+        accepted: ["git commit -m \"set maintenance window to 02:00\""],
         output: [],
         tree: "r3_committed",
         wrong: {
@@ -882,7 +885,7 @@ const ROOMS = [
       [
         "a commit is a saved snapshot with a message describing what you did.",
         "git commit -m \"...\" sets the message inline. make it readable.",
-        "run: git commit -m \"open entry window at 02:00\""
+        "run: git commit -m \"set maintenance window to 02:00\""
       ]
     ]
   },
@@ -955,7 +958,7 @@ const ROOMS = [
   {
     id: 5,
     name: 'READ THE ROOM',
-    intro: "The alarm tripped at 01:47. Something changed that shouldn't have. Find what happened, when, and who did it — before the guards trace it to the crew.",
+    intro: "The IDS tripped at 01:47. Something changed that shouldn't have. Find what happened, when, and who did it — before their security team traces the intrusion back to us.",
     stages: [
       {
         foxMsg: "something's wrong. before anything else — what state is the repo in right now?",
@@ -981,8 +984,8 @@ const ROOMS = [
         output: [
           ["d8f2a11 (HEAD -> main) merge alarm bypass — URGENT", "cm"],
           ["e3c4b20 temp fix — remove before push", "err"],
-          ["f1a9c33 update guard rotation schedule", "sys"],
-          ["a3f9c12 open entry window at 02:00", "sys"],
+          ["f1a9c33 update monitoring cycle config", "sys"],
+          ["a3f9c12 set maintenance window to 02:00", "sys"],
           ["c1a8f33 initial repo setup", "dim"],
           ["", ""],
           ["⚠  note e3c4b20 — 'remove before push'. it was pushed.", "warn"],
@@ -1004,10 +1007,10 @@ const ROOMS = [
           ["diff --git a/alarm-config.json b/alarm-config.json", "dim"],
           ["--- a/alarm-config.json", "dim"],
           ["+++ b/alarm-config.json", "dim"],
-          ["-    \"trigger_threshold\": 5", "err"],
-          ["+    \"trigger_threshold\": 1", "ok"],
+          ["-    \"ids_threshold\": 5", "err"],
+          ["+    \"ids_threshold\": 1", "ok"],
           ["", ""],
-          ["⚠  there it is. threshold lowered from 5 to 1. tripped on the first guard movement.", "warn"],
+          ["⚠  there it is. threshold lowered from 5 to 1. IDS triggered on the first login attempt.", "warn"],
         ],
         tree: "r5_dirty",
         wrong: {
@@ -1684,10 +1687,10 @@ function loadRoom() {
 // ═══════════════════════════════════════════════════════════════════════
 
 const FILE_BEFORE = `{
-  "facility": "vault-zero",
-  "entry_window": null,
-  "alarm_threshold": 5,
-  "guard_rotation": "04:00"
+  "system": "vault-zero",
+  "maintenance_window": null,
+  "ids_threshold": 5,
+  "monitoring_cycle": "04:00"
 }`;
 
 function openEditor() {
@@ -1701,19 +1704,19 @@ function saveFile() {
   const val = document.getElementById('fileContent').value;
   document.getElementById('fileEditor').classList.remove('open');
 
-  if (val.includes('"entry_window": "02:00"')) {
+  if (val.includes('"maintenance_window": "02:00"')) {
     G.fileEditDone = true;
     tprint([
       ['security-config.json saved.', 'ok'],
       ['', ''],
-      ['  "entry_window": null  →  "entry_window": "02:00"', 'dim'],
+      ['  "maintenance_window": null  →  "maintenance_window": "02:00"', 'dim'],
       ['', ''],
       ['now stage the change.', 'sys']
     ]);
   } else {
     tprint([
       ['file saved but the change is wrong.', 'err'],
-      ['entry_window should be "02:00", not null.', 'warn'],
+      ['"maintenance_window" should be "02:00", not null.', 'warn'],
       ['type: edit security-config.json to try again.', 'dim']
     ]);
   }
