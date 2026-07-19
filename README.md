@@ -43,4 +43,12 @@ Based on [Beginner Git Guide for Beginners](https://www.wix.engineering) by Maor
 
 ## Built with
 
-Vanilla JS. Single HTML file. No dependencies, no build step, no login.
+Vanilla JS. No dependencies, no build step, no login.
+
+```
+index.html      — structure
+style.css       — design system
+js/data.js      — room content, commands, tree states
+js/renderer.js  — SVG git tree
+js/engine.js    — game logic
+```
