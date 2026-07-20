@@ -1,0 +1,43 @@
+/* ─── DESIGN TOKENS ───────────────────────────────────────── */
+:root {
+  --bg:           #0d0f0e;
+  --surface:      #1a1c1b;
+  --surface-hi:   #1e201f;
+  --surface-top:  #282a29;
+  --border:       #2a2c2b;
+  --border-dim:   #3d4943;
+  --primary:      #1D9E75;
+  --primary-dim:  #68dbae;
+  --text:         #d1d5db;
+  --text-dim:     #87948c;
+  --text-muted:   #3d4943;
+  --ok:           #68dbae;
+  --err:          #ffb4ab;
+  --warn:         #c8a87a;
+  --font:         'JetBrains Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0; cursor: crosshair !important; }
+
+/* ─── SCROLLBAR ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 2px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface-top); }
+
+/* ─── SCANLINE ────────────────────────────────────────────── */
+.scanline {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to bottom, transparent, rgba(29,158,117,0.13), transparent);
+  pointer-events: none;
+  z-index: 999;
+  animation: scanline 9s linear infinite;
+}
+
+/* ─── SHARED KEYFRAMES ────────────────────────────────────── */
+@keyframes scanline  { from { transform: translateY(-4px); } to { transform: translateY(100vh); } }
+@keyframes blink     { 50% { opacity: 0.3; } }
+@keyframes fadeUp    { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cur-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }

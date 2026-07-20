@@ -56,11 +56,17 @@ A previous crew left access credentials buried in a repo — never merged, still
 Vanilla JS + Supabase for the leaderboard. No build step, no framework.
 
 ```
-index.html        — hub landing page (mission select)
-git-heist.html    — GIT_HEIST escape room
-style.css         — design system
-js/data.js        — room content, commands, tree states
-js/renderer.js    — SVG git tree
-js/engine.js      — game logic
-js/supabase.js    — score saving + leaderboard
+index.html          — hub landing page (mission select)
+git-heist.html      — GIT_HEIST escape room
+
+css/
+  shared.css        — design tokens, reset, scanline, shared keyframes
+  hub.css           — hub landing page styles
+  game.css          — game (terminal, panels, modals, police mechanic)
+
+js/
+  data.js           — room content, commands, tree state definitions
+  renderer.js       — SVG git tree renderer
+  engine.js         — game logic (terminal, hints, scoring, quiz)
+  supabase.js       — score saving + leaderboard
 ```
