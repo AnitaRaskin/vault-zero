@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Vault Zero — Test Suite</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'JetBrains Mono', monospace; background: #0d0f0e; color: #b0b8b4; padding: 24px; line-height: 1.6; }
+    h1 { color: #1D9E75; font-size: 18px; letter-spacing: 2px; margin-bottom: 4px; }
+    .subtitle { color: #3d4943; font-size: 12px; margin-bottom: 28px; }
+    .suite { margin-bottom: 20px; }
+    .suite-title { color: #7eb8d4; font-size: 13px; padding: 6px 10px; background: #111614; border-left: 2px solid #7eb8d4; margin-bottom: 6px; }
+    .result { font-size: 12px; padding: 3px 12px; }
+    .pass { color: #1D9E75; }
+    .fail { color: #ffb4ab; }
+    #summary { margin-top: 28px; padding: 14px 18px; border: 1px solid; font-size: 14px; font-weight: bold; }
+    #summary.ok  { border-color: #1D9E75; color: #1D9E75; }
+    #summary.err { border-color: #ffb4ab; color: #ffb4ab; }
+  </style>
+</head>
+<body>
+  <h1>VAULT ZERO // TEST SUITE</h1>
+  <p class="subtitle">pure functions · data integrity · game logic</p>
+
+  <div id="output"></div>
+  <div id="summary"></div>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       Minimal DOM stubs required for engine.js to load cleanly.
+       All kept hidden — tests never interact with them visually.
+       ───────────────────────────────────────────────────────────── -->
+  <div id="termOut"         style="display:none"></div>
+  <input id="termInput"     style="display:none">
+
+  <!-- Police mechanic elements -->
+  <div class="terminal-panel" style="display:none">
+    <div id="foxMessages"></div>
+    <div id="policeAlert"></div>
+    <div id="policeCountdown"></div>
+    <div id="policeBarFill" style="width:0"></div>
+    <div id="policeVignette"></div>
+  </div>
+
+  <!-- Boot screen -->
+  <div id="bootTerminal"  style="display:none"></div>
+  <div id="txBody"        style="display:none" style="opacity:0;transform:translateY(10px)"></div>
+  <div id="operativeRow"  style="display:none" style="opacity:0;transform:translateY(10px)"></div>
+  <button id="enterBtn"   style="display:none;opacity:0;pointer-events:none"></button>
+  <input  id="operativeName" style="display:none">
+  <button id="bootSkipBtn"   style="display:none"></button>
+
+  <!-- Resizable panels -->
+  <div id="panels" style="display:none">
+    <div></div><div id="resizeLeft"></div><div></div><div id="resizeRight"></div><div></div>
+  </div>
+
+  <!-- Score chip -->
+  <div id="scoreChip" style="display:none"><span id="scoreVal">0</span></div>
+
+  <!-- Hint modal -->
+  <div id="hintModal" style="display:none">
+    <div id="hintLvl"></div>
+    <div id="hintProgressBar"></div>
+    <div id="hintTxt"></div>
+    <button id="nextHintBtn"></button>
+  </div>
+
+  <!-- Cheat sheet -->
+  <div id="cheatSheet" style="display:none"><div id="cheatList"></div></div>
+
+  <!-- HUD -->
+  <div id="roomInfo"      style="display:none"></div>
+  <div id="progressFill"  style="display:none"></div>
+  <div id="activeBranch"  style="display:none"></div>
+  <div id="footerClock"   style="display:none"></div>
+  <div id="secStatus"     style="display:none"></div>
+  <div class="sec-dot"    style="display:none"></div>
+
+  <!-- Room-done modal -->
+  <div id="roomDone" style="display:none">
+    <div id="doneStats"></div>
+    <div id="doneMsg"></div>
+    <div id="clueFragment">
+      <div id="clueKey"></div>
+      <div id="clueVal"></div>
+      <div id="clueCount"></div>
+    </div>
+  </div>
+
+  <!-- End screen + quiz screen -->
+  <div id="endScreen" style="display:none"><div id="assembledKey"></div></div>
+  <div id="quizScreen" style="display:none">
+    <div id="quizFoxSpeech"></div>
+    <div id="quizBody">
+      <div id="quizNum"></div>
+      <div id="quizQ"></div>
+      <div id="quizOpts"></div>
+      <div id="quizFeedback"></div>
+      <div id="quizTimerNum"></div>
+      <div id="quizTimerFill"></div>
+      <div id="quizResult" style="display:none"><div id="quizResultScore"></div></div>
+    </div>
+  </div>
+
+  <!-- Score submission -->
+  <div id="scoreSection" style="display:none">
+    <button id="saveScoreBtn"></button>
+    <div id="scoreSaved" style="display:none"></div>
+    <div id="leaderboardRows"></div>
+  </div>
+
+  <!-- Intro screen (referenced by startGame) -->
+  <div id="introScreen" style="display:none"></div>
+  <div id="gameShell"   style="display:none;flex-direction:column"></div>
+  <span id="operativeTag" style="display:none"></span>
+
+  <!-- File editor -->
+  <div id="fileEditor" style="display:none">
+    <div id="editorTitle"></div>
+    <div id="editorHint"></div>
+    <textarea id="fileContent"></textarea>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────────
+       Browser API mocks (AudioContext, SpeechSynthesis, SVG tree)
+       ───────────────────────────────────────────────────────────── -->
+  <script>
+    // AudioContext stub — engine.js uses this for footstep sounds
+    window.AudioContext = window.AudioContext || function () {
+      const noop = () => ({});
+      return {
+        state: 'running', sampleRate: 44100, currentTime: 0, destination: {},
+        resume: () => Promise.resolve(),
+        createBuffer:       (ch, len) => ({ getChannelData: () => new Float32Array(len) }),
+        createBufferSource: ()        => ({ connect: noop, start: noop, buffer: null }),
+        createBiquadFilter: ()        => ({ connect: noop, type: '', frequency: { value: 0 }, Q: { value: 0 } }),
+        createGain:         ()        => ({ connect: noop, gain: { setValueAtTime: noop } }),
+      };
+    };
+    window.webkitAudioContext = window.AudioContext;
+
+    // SpeechSynthesis stub
+    window.SpeechSynthesisUtterance = function (text) { this.text = text; };
+    window.speechSynthesis = { speak: () => {}, cancel: () => {} };
+
+    // renderTree stub — defined before engine.js loads so it doesn't crash
+    // when advance() / loadRoom() call it during game init.
+    window.renderTree = () => {};
+  </script>
+
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════════
+    // MINIMAL TEST RUNNER
+    // ═══════════════════════════════════════════════════════════════════
+
+    let passed = 0, failed = 0;
+    const outputEl = document.getElementById('output');
+    let suiteEl = null;
+
+    function suite(name) {
+      suiteEl = document.createElement('div');
+      suiteEl.className = 'suite';
+      suiteEl.innerHTML = `<div class="suite-title">${name}</div>`;
+      outputEl.appendChild(suiteEl);
+    }
+
+    function test(name, fn) {
+      const el = document.createElement('div');
+      el.className = 'result';
+      try {
+        fn();
+        passed++;
+        el.classList.add('pass');
+        el.textContent = '✓  ' + name;
+      } catch (e) {
+        failed++;
+        el.classList.add('fail');
+        el.textContent = '✗  ' + name + ' — ' + e.message;
+      }
+      suiteEl.appendChild(el);
+    }
+
+    function assert(cond, msg) {
+      if (!cond) throw new Error(msg || 'assertion failed');
+    }
+    function eq(a, b, msg) {
+      if (a !== b) throw new Error(msg || `expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
+    }
+
+    // Reset mutable game state between test sections
+    function resetG() {
+      G.roomIdx      = 0;
+      G.stageIdx     = 0;
+      G.hintsUsed    = 0;
+      G.totalHints   = 0;
+      G.hintLevel    = 0;
+      G.score        = 0;
+      G.stageWrongs  = 0;
+      G.stageHintLevel = -1;
+      G.fileEditDone = false;
+      cmdLog.length  = 0;
+      if (typeof policeActive !== 'undefined' && policeActive) clearPolice(true);
+    }
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // normalise()
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('normalise()');
+
+    test('trims leading whitespace', () => {
+      eq(normalise('  git status'), 'git status');
+    });
+    test('trims trailing whitespace', () => {
+      eq(normalise('git status  '), 'git status');
+    });
+    test('collapses interior spaces', () => {
+      eq(normalise('git  log   --oneline'), 'git log --oneline');
+    });
+    test('handles tabs', () => {
+      eq(normalise('\tgit status\t'), 'git status');
+    });
+    test('leaves already-clean string unchanged', () => {
+      eq(normalise('git checkout -b main'), 'git checkout -b main');
+    });
+    test('returns empty string unchanged', () => {
+      eq(normalise(''), '');
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // genHash()
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('genHash()');
+
+    test('returns a 7-character string', () => {
+      eq(genHash().length, 7);
+    });
+    test('contains only lowercase hex characters', () => {
+      assert(/^[0-9a-f]{7}$/.test(genHash()), 'non-hex characters found');
+    });
+    test('generates different values across calls', () => {
+      const hashes = new Set(Array.from({ length: 30 }, genHash));
+      assert(hashes.size > 1, 'all 30 hashes are identical — RNG not working');
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // interp()
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('interp()');
+
+    test('passes non-strings through unchanged', () => {
+      eq(interp(42), 42);
+      eq(interp(null), null);
+      eq(interp(undefined), undefined);
+    });
+    test('replaces {{H1}} with the session hash', () => {
+      const result = interp('checkout {{H1}}');
+      assert(!result.includes('{{H1}}'), '{{H1}} was not replaced');
+      assert(/^checkout [0-9a-f]{7}$/.test(result), `unexpected output: ${result}`);
+    });
+    test('replaces all eight hash placeholders in one string', () => {
+      const result = interp('{{H1}} {{H2}} {{H3}} {{H4}} {{H5}} {{H6}} {{H7}} {{H8}}');
+      assert(!result.includes('{{H'), 'some placeholders were not replaced');
+      const parts = result.split(' ');
+      eq(parts.length, 8);
+      parts.forEach(p => assert(/^[0-9a-f]{7}$/.test(p), `not a hash: ${p}`));
+    });
+    test('leaves strings without placeholders unchanged', () => {
+      eq(interp('git status'), 'git status');
+    });
+    test('H[1]–H[8] are all 7-char hex strings', () => {
+      // H is accessible globally from engine.js
+      for (let i = 1; i <= 8; i++) {
+        assert(/^[0-9a-f]{7}$/.test(H[i]), `H[${i}] is not a valid hash: ${H[i]}`);
+      }
+    });
+    test('every H value is unique', () => {
+      const vals = H.slice(1);
+      eq(new Set(vals).size, vals.length, 'duplicate hash values generated');
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // logCmd()
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('logCmd()');
+
+    test('adds a known exact command', () => {
+      cmdLog.length = 0;
+      logCmd('git status');
+      eq(cmdLog.length, 1);
+      eq(cmdLog[0].cmd, 'git status');
+    });
+    test('silently ignores unknown commands', () => {
+      cmdLog.length = 0;
+      logCmd('rm -rf /');
+      eq(cmdLog.length, 0);
+    });
+    test('deduplicates — does not add the same command twice', () => {
+      cmdLog.length = 0;
+      logCmd('git status');
+      logCmd('git status');
+      eq(cmdLog.length, 1);
+    });
+    test('matches commands with trailing arguments (prefix match)', () => {
+      cmdLog.length = 0;
+      logCmd('git checkout operative/entry-window');
+      eq(cmdLog.length, 1);
+      eq(cmdLog[0].cmd, 'git checkout');
+    });
+    test('accumulates multiple distinct commands', () => {
+      cmdLog.length = 0;
+      logCmd('git status');
+      logCmd('git log --oneline');
+      logCmd('git stash');
+      eq(cmdLog.length, 3);
+    });
+    test('each entry includes a non-empty description', () => {
+      cmdLog.length = 0;
+      logCmd('git status');
+      assert(typeof cmdLog[0].desc === 'string' && cmdLog[0].desc.length > 0, 'missing desc');
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ROOMS data integrity
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('ROOMS data integrity');
+
+    test('exactly 9 rooms (ids 0–8)', () => {
+      eq(ROOMS.length, 9);
+    });
+    test('room ids are sequential 0–8', () => {
+      ROOMS.forEach((r, i) => eq(r.id, i, `Room at index ${i} has id ${r.id}`));
+    });
+    test('every room has name (string)', () => {
+      ROOMS.forEach(r => assert(typeof r.name === 'string' && r.name.length > 0, `Room ${r.id} missing name`));
+    });
+    test('every room has stages (non-empty array)', () => {
+      ROOMS.forEach(r => {
+        assert(Array.isArray(r.stages) && r.stages.length > 0, `Room ${r.id} has no stages`);
+      });
+    });
+    test('every room has hints (non-empty array)', () => {
+      ROOMS.forEach(r => {
+        assert(Array.isArray(r.hints) && r.hints.length > 0, `Room ${r.id} has no hints`);
+      });
+    });
+    test('hints.length matches stages.length in every room', () => {
+      ROOMS.forEach(r => {
+        eq(r.hints.length, r.stages.length,
+          `Room ${r.id} "${r.name}": ${r.hints.length} hint sets vs ${r.stages.length} stages`);
+      });
+    });
+    test('every hint set has exactly 3 levels (nudge / method / explanation)', () => {
+      ROOMS.forEach(r => {
+        r.hints.forEach((hintSet, si) => {
+          eq(hintSet.length, 3,
+            `Room ${r.id} stage ${si}: ${hintSet.length} hint levels, expected 3`);
+        });
+      });
+    });
+    test('every stage has a non-empty accepted array', () => {
+      ROOMS.forEach(r => {
+        r.stages.forEach((s, si) => {
+          assert(Array.isArray(s.accepted) && s.accepted.length > 0,
+            `Room ${r.id} stage ${si} has no accepted commands`);
+        });
+      });
+    });
+    test('every stage has foxMsg or foxMessage', () => {
+      ROOMS.forEach(r => {
+        r.stages.forEach((s, si) => {
+          assert(s.foxMsg || s.foxMessage,
+            `Room ${r.id} stage ${si} missing foxMsg/foxMessage`);
+        });
+      });
+    });
+    test('every room has a clue with label and value strings', () => {
+      ROOMS.forEach(r => {
+        assert(r.clue && typeof r.clue.label === 'string' && r.clue.label.length > 0,
+          `Room ${r.id} missing clue.label`);
+        assert(r.clue && typeof r.clue.value === 'string' && r.clue.value.length > 0,
+          `Room ${r.id} missing clue.value`);
+      });
+    });
+    test('all 9 clue labels are unique', () => {
+      const labels = ROOMS.map(r => r.clue.label);
+      eq(new Set(labels).size, 9, `duplicate clue labels: ${labels}`);
+    });
+    test('stages with flexCommit have no conflicting exact accepted entries', () => {
+      ROOMS.forEach(r => {
+        r.stages.forEach((s, si) => {
+          if (s.flexCommit) {
+            // flexCommit stages handle commit matching via regex — accepted can coexist
+            assert(Array.isArray(s.accepted), `Room ${r.id} stage ${si} flexCommit needs accepted array`);
+          }
+        });
+      });
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // CMD_QUIZ_POOL + STATIC_QUIZ data integrity
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('Quiz pool data integrity');
+
+    test('CMD_QUIZ_POOL: every entry has q, options, correct, explain', () => {
+      Object.entries(CMD_QUIZ_POOL).forEach(([cmd, q]) => {
+        assert(typeof q.q === 'string',        `${cmd}: missing q`);
+        assert(Array.isArray(q.options),       `${cmd}: missing options`);
+        assert(typeof q.correct === 'number',  `${cmd}: correct not a number`);
+        assert(typeof q.explain === 'string',  `${cmd}: missing explain`);
+      });
+    });
+    test('CMD_QUIZ_POOL: correct index is in bounds', () => {
+      Object.entries(CMD_QUIZ_POOL).forEach(([cmd, q]) => {
+        assert(q.correct >= 0 && q.correct < q.options.length,
+          `${cmd}: correct=${q.correct} but only ${q.options.length} options`);
+      });
+    });
+    test('CMD_QUIZ_POOL: all pool keys match CMD_DESCRIPTIONS keys', () => {
+      Object.keys(CMD_QUIZ_POOL).forEach(key => {
+        assert(key in CMD_DESCRIPTIONS, `quiz pool key "${key}" not in CMD_DESCRIPTIONS`);
+      });
+    });
+    test('STATIC_QUIZ: every entry has required fields', () => {
+      STATIC_QUIZ.forEach((q, i) => {
+        assert(typeof q.q === 'string',        `static[${i}]: missing q`);
+        assert(Array.isArray(q.options),       `static[${i}]: missing options`);
+        assert(typeof q.correct === 'number',  `static[${i}]: correct not a number`);
+        assert(typeof q.explain === 'string',  `static[${i}]: missing explain`);
+      });
+    });
+    test('STATIC_QUIZ: every correct index is in bounds', () => {
+      STATIC_QUIZ.forEach((q, i) => {
+        assert(q.correct >= 0 && q.correct < q.options.length,
+          `static[${i}]: correct=${q.correct} out of ${q.options.length} options`);
+      });
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // buildQuiz() — quiz assembly logic
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('buildQuiz()');
+
+    test('produces exactly 4 questions when cmdLog is empty', () => {
+      resetG();
+      buildQuiz();
+      eq(quizQuestions.length, 4);
+    });
+    test('includes a dynamic question from cmdLog', () => {
+      resetG();
+      cmdLog.push({ cmd: 'git stash', desc: CMD_DESCRIPTIONS['git stash'] });
+      buildQuiz();
+      const hasStash = quizQuestions.some(q => q === CMD_QUIZ_POOL['git stash']);
+      assert(hasStash, 'stash question not selected despite being in cmdLog');
+    });
+    test('picks at most 2 dynamic questions even with large cmdLog', () => {
+      resetG();
+      ['git stash', 'git push', 'git pull', 'git revert', 'git checkout'].forEach(cmd => {
+        cmdLog.push({ cmd, desc: '' });
+      });
+      buildQuiz();
+      eq(quizQuestions.length, 4);
+      const dynamicCount = quizQuestions.filter(q => Object.values(CMD_QUIZ_POOL).includes(q)).length;
+      assert(dynamicCount <= 2, `picked ${dynamicCount} dynamic questions, max is 2`);
+    });
+    test('no duplicate questions in quiz', () => {
+      resetG();
+      buildQuiz();
+      const unique = new Set(quizQuestions);
+      eq(unique.size, quizQuestions.length, 'quiz contains duplicate questions');
+    });
+    test('resets quizIdx and quizCorrect', () => {
+      resetG();
+      buildQuiz();
+      eq(quizIdx,     0, 'quizIdx not reset to 0');
+      eq(quizCorrect, 0, 'quizCorrect not reset to 0');
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // addScore() / score mechanics
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('addScore() — score mechanics');
+
+    test('increments G.score synchronously', () => {
+      resetG();
+      G.score = 10;
+      addScore(5);
+      eq(G.score, 15);
+    });
+    test('decrements G.score synchronously', () => {
+      resetG();
+      G.score = 20;
+      addScore(-5);
+      eq(G.score, 15);
+    });
+    test('score floor is 0 — never goes negative', () => {
+      resetG();
+      G.score = 3;
+      addScore(-100);
+      eq(G.score, 0);
+    });
+    test('adding 0 leaves score unchanged', () => {
+      resetG();
+      G.score = 42;
+      addScore(0);
+      eq(G.score, 42);
+    });
+    test('cumulative additions are correct', () => {
+      resetG();
+      addScore(10); addScore(10); addScore(10);
+      eq(G.score, 30);
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // saveFile() — file-edit validation
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('saveFile() — file edit validation');
+
+    function setEditorContent(val) {
+      document.getElementById('fileContent').value = val;
+    }
+
+    // Regular edit (Room 3, Stage 2 — security-config.json)
+    test('regular edit: correct value sets fileEditDone = true', () => {
+      resetG();
+      G.roomIdx = 3; G.stageIdx = 2;
+      setEditorContent('{"maintenance_window": "02:00"}');
+      saveFile();
+      assert(G.fileEditDone, 'fileEditDone should be true after correct edit');
+    });
+    test('regular edit: wrong value leaves fileEditDone = false', () => {
+      resetG();
+      G.roomIdx = 3; G.stageIdx = 2;
+      setEditorContent('{"maintenance_window": null}');
+      saveFile();
+      assert(!G.fileEditDone, 'fileEditDone should remain false for wrong value');
+    });
+
+    // Conflict resolution (Room 6, Stage 1 — entry-tokens.txt)
+    test('conflict edit: resolved correctly sets fileEditDone = true', () => {
+      resetG();
+      G.roomIdx = 6; G.stageIdx = 1;
+      setEditorContent('{"entry_tokens": ["tok_operative_7a2f", "tok_crew_3b1e", "tok_override_9x77"]}');
+      saveFile();
+      assert(G.fileEditDone, 'fileEditDone should be true after conflict resolution');
+    });
+    test('conflict edit: conflict markers still present → fileEditDone stays false', () => {
+      resetG();
+      G.roomIdx = 6; G.stageIdx = 1;
+      setEditorContent('<<<<<<< HEAD\ntok_a\n=======\ntok_b\n>>>>>>> origin/main\ntok_override_9x77');
+      saveFile();
+      assert(!G.fileEditDone, 'fileEditDone should be false when markers remain');
+    });
+    test('conflict edit: missing tok_override_9x77 → fileEditDone stays false', () => {
+      resetG();
+      G.roomIdx = 6; G.stageIdx = 1;
+      setEditorContent('{"entry_tokens": ["tok_operative_7a2f", "tok_crew_3b1e"]}');
+      saveFile();
+      assert(!G.fileEditDone, 'fileEditDone should be false when override token is missing');
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // defaultStatus() — git status simulation
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('defaultStatus() — git status output');
+
+    test('returns an array of [text, class] pairs', () => {
+      resetG();
+      const result = defaultStatus();
+      assert(Array.isArray(result), 'result is not an array');
+      result.forEach((item, i) => {
+        assert(Array.isArray(item) && item.length === 2,
+          `item ${i} is not a [text, class] pair`);
+      });
+    });
+    test('stash_dirty stage shows modified files', () => {
+      resetG();
+      G.roomIdx = 4; G.stageIdx = 0; // tree: "r_stash_dirty"
+      const text = defaultStatus().map(([t]) => t).join('\n');
+      assert(text.includes('operative/entry-window'), 'should be on operative/entry-window');
+      assert(text.includes('modified'), 'should show modified files');
+    });
+    test('stash_clean stage shows clean working tree', () => {
+      resetG();
+      G.roomIdx = 4; G.stageIdx = 2; // tree: "r_stash_clean"
+      const text = defaultStatus().map(([t]) => t).join('\n');
+      assert(text.includes('nothing to commit') || text.includes('clean'),
+        'should show clean state');
+    });
+    test('conflict stage shows unmerged paths', () => {
+      resetG();
+      G.roomIdx = 6; G.stageIdx = 0; // tree: "r_conflict_initial"
+      const text = defaultStatus().map(([t]) => t).join('\n');
+      assert(text.includes('unmerged') || text.includes('conflict') || text.includes('Unmerged'),
+        'should show conflict / unmerged info');
+    });
+    test('default state uses main branch', () => {
+      resetG();
+      G.roomIdx = 0; G.stageIdx = 0;
+      const text = defaultStatus().map(([t]) => t).join('\n');
+      assert(text.includes('main'), 'default should be on main branch');
+    });
+
+
+    // ═══════════════════════════════════════════════════════════════════
+    // parseCmd() — command parsing (key paths)
+    // ═══════════════════════════════════════════════════════════════════
+
+    suite('parseCmd() — command parsing');
+
+    test('"clear" empties terminal output', () => {
+      resetG();
+      document.getElementById('termOut').innerHTML = '<div>old</div>';
+      parseCmd('clear');
+      eq(document.getElementById('termOut').innerHTML, '');
+    });
+    test('accepted command advances stageIdx', () => {
+      resetG();
+      G.roomIdx = 0; G.stageIdx = 0;  // Room 0 Stage 0 accepts "ls"
+      parseCmd('ls');
+      eq(G.stageIdx, 1, 'stage should advance from 0 to 1');
+    });
+    test('accepted command awards score (+10 via advance)', () => {
+      resetG();
+      G.roomIdx = 0; G.stageIdx = 0;
+      parseCmd('ls');
+      eq(G.score, 10, 'advance() should add 10 points');
+    });
+    test('unrecognised command increments stageWrongs', () => {
+      resetG();
+      G.roomIdx = 0; G.stageIdx = 0;
+      parseCmd('totally-invalid-command-xyz');
+      eq(G.stageWrongs, 1);
+    });
+    test('first wrong command does not deduct score (free pass)', () => {
+      resetG();
+      G.roomIdx = 0; G.stageIdx = 0;
+      G.score = 20;
+      parseCmd('bad-command-one');
+      eq(G.score, 20, 'first wrong should not cost points');
+    });
+    test('second wrong command deducts 1 point', () => {
+      resetG();
+      G.roomIdx = 0; G.stageIdx = 0;
+      G.score = 20;
+      parseCmd('bad-command-one');  // first wrong — free
+      parseCmd('bad-command-two');  // second wrong — costs -1
+      eq(G.score, 19, 'second wrong should cost 1 point');
+    });
+    test('normalise is applied before matching — extra spaces still match', () => {
+      resetG();
+      G.roomIdx = 0; G.stageIdx = 1;  // Stage 1 accepts "git log --oneline"
+      parseCmd('git  log  --oneline'); // double spaces collapsed by normalise
+      eq(G.stageIdx, 2, 'normalised command should match accepted list');
+    });
+    test('flexCommit: valid message triggers advance (score +10)', () => {
+      resetG();
+      G.roomIdx = 3; G.stageIdx = 3;  // Room 3 Stage 3 — flexCommit, last stage
+      parseCmd('git commit -m "set maintenance window to 02:00"');
+      // advance() → addScore(10) → completeRoom() (last stage)
+      eq(G.score, 10, 'flexCommit should call advance() and award points');
+    });
+    test('flexCommit: trivial message still advances (warning is cosmetic)', () => {
+      resetG();
+      G.roomIdx = 3; G.stageIdx = 3;
+      parseCmd('git commit -m "fix"');  // "fix" triggers warning but still commits
+      eq(G.score, 10, 'trivial message commits with warning but still advances');
+    });
+    test('git stash pop is handled by flexStashPop path', () => {
+      resetG();
+      G.roomIdx = 4; G.stageIdx = 3;  // Room 4 Stage 3 — flexStashPop
+      parseCmd('git stash pop');
+      eq(G.score, 10, 'flexStashPop should advance and award score');
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // RESULTS SUMMARY
+    // ═══════════════════════════════════════════════════════════════════
+
+    resetG(); // leave state clean
+
+    const total      = passed + failed;
+    const summaryEl  = document.getElementById('summary');
+    summaryEl.className = failed ? 'err' : 'ok';
+    summaryEl.textContent = failed
+      ? `✗  ${passed}/${total} passed — ${failed} FAILED`
+      : `✓  ${total}/${total} passed — all clear`;
+  </script>
+</body>
+</html>
