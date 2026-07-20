@@ -1096,50 +1096,57 @@ body.resizing-col    { user-select: none; }
   display: none;
   flex-direction: column;
   flex-shrink: 0;
-  background: rgba(255,180,171,0.04);
-  border-bottom: 1px solid var(--err);
+  background: rgba(255,180,171,0.05);
+  border-top: 2px solid rgba(255,180,171,0.55);
+  border-bottom: 2px solid rgba(255,180,171,0.55);
 }
 #policeAlert.active {
   display: flex;
-  animation: policeSlideIn 0.25s ease;
+  animation: policeSlideIn 0.2s ease;
+}
+#policeAlert.urgent-mode {
+  animation: policePulse 0.5s ease-in-out infinite;
+  border-color: var(--err);
 }
 @keyframes policeSlideIn {
-  from { opacity: 0; transform: translateY(-4px); }
+  from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes policePulse {
+  0%, 100% { background: rgba(255,180,171,0.06); }
+  50%      { background: rgba(255,180,171,0.2);  }
 }
 .police-strip {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 20px;
+  padding: 8px 20px;
 }
-.police-strip-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.police-strip-left { display: flex; align-items: center; gap: 12px; }
 .police-flash {
   color: var(--err);
+  font-size: 14px;
   animation: blink 0.35s step-end infinite;
-  font-size: 11px;
+}
+#policeAlert.urgent-mode .police-flash {
+  font-size: 17px;
+  animation: blink 0.2s step-end infinite;
 }
 .police-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 4px;
+  letter-spacing: 5px;
   color: var(--err);
   text-transform: uppercase;
 }
-.police-sub {
-  font-size: 9px;
-  color: var(--text-muted);
-  letter-spacing: 1.5px;
+#policeAlert.urgent-mode .police-label {
+  font-size: 13px;
+  letter-spacing: 6px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255,60,40,0.9);
 }
-.police-strip-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.police-sub { font-size: 9px; color: var(--text-muted); letter-spacing: 1.5px; }
+.police-strip-right { display: flex; align-items: center; gap: 10px; }
 .police-timer-label {
   font-size: 9px;
   color: var(--text-muted);
@@ -1147,22 +1154,60 @@ body.resizing-col    { user-select: none; }
   text-transform: uppercase;
 }
 .police-countdown {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--err);
   letter-spacing: 3px;
   font-variant-numeric: tabular-nums;
-  min-width: 36px;
+  min-width: 44px;
   text-align: right;
+  transition: font-size 0.15s;
 }
-.police-countdown.urgent { animation: blink 0.4s step-end infinite; }
-.police-bar { height: 2px; background: var(--surface-top); }
+.police-countdown.urgent {
+  font-size: 22px;
+  letter-spacing: 4px;
+  color: #fff;
+  text-shadow: 0 0 14px rgba(255,50,40,1);
+  animation: blink 0.35s step-end infinite;
+}
+.police-bar { height: 4px; background: var(--surface-top); }
 .police-bar-fill {
   height: 100%;
   background: var(--err);
   width: 100%;
   transition: width 1s linear;
 }
+#policeAlert.urgent-mode .police-bar-fill {
+  background: #ff3c28;
+  box-shadow: 0 0 8px rgba(255,60,40,0.9);
+}
+
+/* Terminal urgency */
 .terminal-panel.police-active {
-  box-shadow: 0 0 0 1px rgba(255,180,171,0.18) inset;
+  box-shadow: 0 0 0 1px rgba(255,180,171,0.2) inset;
+}
+.terminal-panel.police-urgent {
+  animation: termUrgent 0.7s ease-in-out infinite;
+}
+@keyframes termUrgent {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255,60,50,0.3) inset; }
+  50%      { box-shadow: 0 0 0 2px rgba(255,60,50,0.7) inset, 0 0 28px rgba(255,60,50,0.12) inset; }
+}
+
+/* Screen vignette (red edge glow when urgent) */
+.police-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 997;
+  opacity: 0;
+  box-shadow: 0 0 130px rgba(255,50,40,0.38) inset;
+  transition: opacity 0.4s;
+}
+.police-vignette.active {
+  animation: vignetteFlash 0.55s ease-in-out infinite;
+}
+@keyframes vignetteFlash {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
 }
