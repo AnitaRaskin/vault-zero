@@ -958,7 +958,7 @@ body.resizing-col    { user-select: none; }
 #leaderboardRows { padding: 8px 0; }
 .lb-row {
   display: grid;
-  grid-template-columns: 32px 1fr 64px 80px;
+  grid-template-columns: 32px 1fr 64px 52px;
   gap: 8px;
   padding: 7px 16px;
   border-bottom: 1px solid var(--border);
@@ -969,7 +969,7 @@ body.resizing-col    { user-select: none; }
 .lb-row:last-child { border-bottom: none; }
 .lb-rank  { color: var(--text-muted); font-size: 10px; }
 .lb-name  { color: var(--primary-dim); font-weight: 500; letter-spacing: 1px; }
-.lb-time  { color: var(--text); text-align: right; font-size: 12px; letter-spacing: 1px; }
+.lb-score { color: var(--ok); text-align: right; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
 .lb-rooms { color: var(--text-muted); font-size: 9px; text-align: right; letter-spacing: 0.5px; }
 .lb-empty {
   padding: 16px;
@@ -983,6 +983,41 @@ body.resizing-col    { user-select: none; }
   color: var(--err);
   letter-spacing: 0.5px;
   line-height: 1.6;
+}
+
+/* ─── LIVE SCORE CHIP ─────────────────────────────────────── */
+.score-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 12px;
+  border: 1px solid var(--border-dim);
+  background: var(--surface);
+}
+.score-chip-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.score-chip-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 1px;
+  min-width: 38px;
+  text-align: right;
+  transition: color 0.25s;
+}
+.score-chip.dropping .score-chip-val {
+  color: var(--err);
+}
+@keyframes chipPop {
+  0%   { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.score-chip.dropping {
+  animation: chipPop 0.2s ease-out;
 }
 
 /* ─── FOOTER STATUS BAR ───────────────────────────────────── */

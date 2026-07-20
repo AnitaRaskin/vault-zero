@@ -7,6 +7,7 @@ const G = {
   roomStart: 0,
   missionStart: 0,
   fileEditDone: false,
+  score: 1000,
   clues: [],
   savedProgress: JSON.parse(localStorage.getItem('vz_progress') || '{}')
 };
@@ -91,6 +92,37 @@ function downloadCheatSheet() {
 
 function room()  { return ROOMS[G.roomIdx]; }
 function stage() { return room().stages[G.stageIdx]; }
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// LIVE SCORE
+// ═══════════════════════════════════════════════════════════════════════
+
+function deductScore(amount) {
+  const chip = document.getElementById('scoreChip');
+  const el   = document.getElementById('scoreVal');
+  if (!chip || !el) return;
+
+  const target = Math.max(0, G.score - amount);
+  const from   = G.score;
+  G.score = target;
+
+  chip.classList.remove('dropping');
+  void chip.offsetWidth; // force reflow so animation restarts
+  chip.classList.add('dropping');
+  setTimeout(() => chip.classList.remove('dropping'), 700);
+
+  // Tick the number down visually
+  const steps   = Math.min(amount, 25);
+  const stepVal = Math.ceil((from - target) / steps);
+  let current   = from;
+  function tick() {
+    current = Math.max(target, current - stepVal);
+    el.textContent = current;
+    if (current > target) setTimeout(tick, 16);
+  }
+  tick();
+}
 
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -594,6 +626,7 @@ function openHint() {
   document.getElementById('hintModal').classList.add('open');
   G.hintsUsed++;
   G.totalHints++;
+  deductScore(10);
 }
 
 function moreHint() {
@@ -616,6 +649,7 @@ function moreHint() {
   if (G.hintLevel === hints.length - 1) {
     G.totalHints += 3;
     G.hintsUsed += 3;
+    deductScore(30);
   }
 
   setHintDisplay(G.hintLevel, hints);
@@ -842,6 +876,7 @@ async function submitScore() {
     totalTime,
     roomsCompleted: G.clues.length,
     hintsUsed:      G.totalHints,
+    finalScore:     G.score,
     commandsUsed:   cmdLog.map(e => e.cmd)
   });
 
@@ -875,11 +910,12 @@ function renderLeaderboard(board) {
     const m = Math.floor(t / 60);
     const s = String(t % 60).padStart(2, '0');
     const rooms = row.rooms_completed || 0;
+    const score = row.final_score != null ? row.final_score : '—';
     return `<div class="lb-row">
       <span class="lb-rank">#${i + 1}</span>
       <span class="lb-name">${row.codename}</span>
-      <span class="lb-time">${m}:${s}</span>
-      <span class="lb-rooms">${rooms}/${ROOMS.length} rooms</span>
+      <span class="lb-score">${score}</span>
+      <span class="lb-rooms">${rooms}/${ROOMS.length}</span>
     </div>`;
   }).join('');
 }
