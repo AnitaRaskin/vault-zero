@@ -165,13 +165,15 @@ let policeActive     = false;
 let policeSecondsLeft = 0;
 let policeIntervalId  = null;
 
-function triggerPolice() {
+function triggerPolice(skipMsg) {
   if (policeActive) return;
   policeActive      = true;
   policeSecondsLeft = POLICE_SECONDS;
 
-  const msg = POLICE_WARNINGS[G.stageWrongs % POLICE_WARNINGS.length];
-  setTimeout(() => foxMsg(msg, 'sys'), 100);
+  if (!skipMsg) {
+    const msg = POLICE_WARNINGS[G.stageWrongs % POLICE_WARNINGS.length];
+    setTimeout(() => foxMsg(msg, 'sys'), 100);
+  }
 
   document.getElementById('policeAlert').classList.add('active');
   document.querySelector('.terminal-panel').classList.add('police-active');
@@ -479,9 +481,8 @@ function advance(treeState) {
 
     setTimeout(() => {
       foxMsg(stage().foxMessage || stage().foxMsg);
-      if (stage().fileEdit) {
-        setTimeout(openEditor, 900);
-      }
+      if (stage().fileEdit) setTimeout(openEditor, 900);
+      if (stage().policeOnLoad) setTimeout(() => triggerPolice(true), 1400);
     }, 700);
   }
 }
@@ -585,6 +586,7 @@ function loadRoom() {
   setTimeout(() => {
     foxMsg(s.foxMessage || s.foxMsg);
     if (s.fileEdit) setTimeout(openEditor, 1000);
+    if (s.policeOnLoad) setTimeout(() => triggerPolice(true), 1400);
   }, 400);
 
   inp.focus();

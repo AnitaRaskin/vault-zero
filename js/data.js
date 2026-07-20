@@ -426,6 +426,7 @@ const ROOMS = [
       {
         foxMsg: "they're two blocks away. stash it. hide everything. NOW.",
         task: "Stash your current changes to hide them.",
+        policeOnLoad: true,
         accepted: ["git stash", "git stash push"],
         output: [
           ["Saved working directory and index state", "sys"],
