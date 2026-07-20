@@ -58,17 +58,17 @@ const ROOMS = [
       [
         "you need to see what files exist in the current directory.",
         "ls lists files — works anywhere, including inside a git repo.",
-        "ls stands for 'list' — it prints every file and directory in the current location."
+        "ls stands for 'list' — it prints every file and directory in the current location.\n\nrun: ls"
       ],
       [
         "every repo has a history of commits — saved snapshots with timestamps and messages.",
         "git log shows that history. --oneline makes it compact.",
-        "--oneline compresses each commit to one line: the short hash followed by the message. git log alone shows author, date, and the full message."
+        "--oneline compresses each commit to one line: the short hash followed by the message. git log alone shows author, date, and the full message.\n\nrun: git log --oneline"
       ],
       [
         "git status tells you whether anything has changed since the last commit.",
         "it's the most-used git command. two words.",
-        "git status shows which branch you're on, which files changed, and what's staged — always a safe first command."
+        "git status shows which branch you're on, which files changed, and what's staged — always a safe first command.\n\nrun: git status"
       ]
     ]
   },
@@ -188,27 +188,27 @@ const ROOMS = [
       [
         "the repo has more than just main. there's a command that lists ALL branches — local and remote.",
         "the command starts with 'git branch'. there's a flag that means 'all'.",
-        "the -a flag means 'all' — it shows local branches AND remote-tracking branches together. remote ones appear as remotes/origin/<name>."
+        "the -a flag means 'all' — it shows local branches AND remote-tracking branches together. remote ones appear as remotes/origin/<name>.\n\nrun: git branch -a"
       ],
       [
         "look at the branch names. one of them was created by someone on the inside.",
         "you switch branches with git checkout or git switch, followed by the branch name.",
-        "git checkout <name> switches to that branch. the full name is exactly what appeared in git branch -a — copy it precisely, including the prefix."
+        "git checkout <name> switches to that branch. the full name is exactly what appeared in git branch -a — copy it precisely, including the prefix.\n\nrun: git checkout fox/vault-schematics"
       ],
       [
         "you need to see the history of this branch — every commit that was made, in order.",
         "git log shows the commit history. --oneline makes it compact and readable.",
-        "git log --oneline gives one line per commit: short hash on the left, message on the right. look for the commit with the suspicious message."
+        "git log --oneline gives one line per commit: short hash on the left, message on the right. look for the commit with the suspicious message.\n\nrun: git log --oneline"
       ],
       [
         "you found the commit hash in the log. now you need to go TO that exact commit.",
         "git checkout works with commit hashes, not just branch names. use the 7-character hash.",
-        "a commit hash is its unique ID. git checkout works with hashes the same way it works with branch names. you'll enter 'detached HEAD' state — that's expected for read-only exploration."
+        "a commit hash is its unique ID. git checkout works with hashes the same way it works with branch names. you'll enter 'detached HEAD' state — that's expected for read-only exploration.\n\nrun: git checkout a3f9c12"
       ],
       [
         "you're at the right commit. the file is there — just read it.",
         "cat reads a file's contents. git show displays what a commit contains.",
-        "cat reads a file and prints it to the terminal. the filename is already in the directory listing — look at what ls showed you earlier."
+        "cat reads a file and prints it to the terminal. the filename is already in the directory listing — look at what ls showed you earlier.\n\nrun: cat vault.txt"
       ]
     ]
   },
@@ -290,17 +290,17 @@ const ROOMS = [
       [
         "there's a command to see what remote server this repo is connected to.",
         "it starts with 'git remote'. the -v flag gives you the full URLs.",
-        "git remote -v lists every remote connection with its full URL. -v stands for verbose. you'll see at least one entry: origin."
+        "git remote -v lists every remote connection with its full URL. -v stands for verbose. you'll see at least one entry: origin.\n\nrun: git remote -v"
       ],
       [
         "forking means creating a copy of the repo on the server under your own account — not downloading it yet.",
         "the GitHub CLI command for forking is a single command.",
-        "forking creates a server-side copy under your account — safe to write to, no risk to the original. the GitHub CLI command is two words: gh repo fork."
+        "forking creates a server-side copy under your account — safe to write to, no risk to the original. the GitHub CLI command is two words.\n\nrun: gh repo fork"
       ],
       [
         "cloning downloads the repo to your local machine. you want to clone YOUR fork, not the syndicate's.",
         "git clone <url> — use the URL of your fork: https://operative.vault/access-system.git",
-        "git clone <url> downloads a repo to your machine. clone YOUR fork — its URL points to your account, not the syndicate's server."
+        "git clone <url> downloads a repo to your machine. clone YOUR fork — its URL points to your account, not the syndicate's server.\n\nrun: git clone https://operative.vault/access-system.git"
       ]
     ]
   },
@@ -376,22 +376,22 @@ const ROOMS = [
       [
         "there's a command that tells you which branch you're on and what files have changed.",
         "it's one of the most-used git commands. just two words.",
-        "git status shows your current branch, any modified files, and whether anything is staged — always your first move."
+        "git status shows your current branch, any modified files, and whether anything is staged — always your first move.\n\nrun: git status"
       ],
       [
         "you need to create a new branch AND switch to it — both at once.",
         "git checkout -b <name> does both: create and switch. same with git switch -c.",
-        "git checkout -b <name> creates a new branch and switches to it in one command. git switch -c <name> does the same. the branch name goes right after the flag."
+        "git checkout -b <name> creates a new branch and switches to it in one command. git switch -c <name> does the same. the branch name goes right after the flag.\n\nrun: git checkout -b operative/entry-window"
       ],
       [
         "after editing the file, you need to tell git you want this change in the next commit.",
         "git add stages files. you can specify a filename or use . for all changes.",
-        "git add stages files for the next commit. you can name a file specifically (git add security-config.json) or use . to stage all changes at once."
+        "git add stages files for the next commit. you can name a file specifically or use . to stage all changes at once.\n\nrun: git add security-config.json"
       ],
       [
         "a commit is a saved snapshot with a message describing what you did.",
         "git commit -m \"...\" sets the message inline. make it readable.",
-        "git commit -m saves staged changes as a snapshot. the message goes in quotes after -m. it stays in the history permanently — make it readable for the crew."
+        "git commit -m saves staged changes as a snapshot. the message goes in quotes after -m. it stays in the history permanently — make it readable for the crew.\n\nrun: git commit -m \"set maintenance window to 02:00\""
       ]
     ]
   },
@@ -483,22 +483,22 @@ const ROOMS = [
       [
         "you need to see what's currently modified in your working directory.",
         "git status shows the full picture — modified files, staged files, untracked files.",
-        "git status always shows the current picture — which files are modified, staged, or untracked. read the full output."
+        "git status always shows the current picture — which files are modified, staged, or untracked. read the full output.\n\nrun: git status"
       ],
       [
         "git has a temporary hiding place for uncommitted changes — the stash.",
         "git stash saves your work and leaves the working tree completely clean.",
-        "git stash saves all uncommitted changes to a private stack and cleans the working tree. the work isn't gone — it's hidden, waiting for you."
+        "git stash saves all uncommitted changes to a private stack and cleans the working tree. the work isn't gone — it's hidden, waiting for you.\n\nrun: git stash"
       ],
       [
         "the stash keeps a list of everything you've hidden.",
         "git stash list shows every stash entry — with its index and the commit it was saved from.",
-        "git stash list shows every entry in the stash stack. entries are labelled stash@{0}, stash@{1}, etc. — 0 is always the most recent."
+        "git stash list shows every entry in the stash stack. entries are labelled stash@{0}, stash@{1}, etc. — 0 is always the most recent.\n\nrun: git stash list"
       ],
       [
         "you need to bring the stashed work back so you can continue.",
         "git stash pop restores the latest stash and removes it from the list.",
-        "git stash pop restores the most recent stash and removes it from the list. git stash apply also restores — but keeps the entry in the list for later."
+        "git stash pop restores the most recent stash and removes it from the list. git stash apply also restores — but keeps the entry in the list for later.\n\nrun: git stash pop"
       ]
     ]
   },
@@ -556,12 +556,12 @@ const ROOMS = [
       [
         "git has a way to show you how your local branch compares to the remote version.",
         "git status always shows if you're ahead or behind the remote.",
-        "git status shows whether your local branch is ahead of the remote — meaning you have commits the server hasn't seen yet."
+        "git status shows whether your local branch is ahead of the remote — meaning you have commits the server hasn't seen yet.\n\nrun: git status"
       ],
       [
         "pushing uploads your commits from local to remote so others can see them.",
         "git push origin <branchname> — or just git push if upstream is already set.",
-        "git push origin <branch> sends local commits to the remote server. if the branch doesn't exist there yet, this creates it. add -u to track it automatically going forward."
+        "git push origin <branch> sends local commits to the remote server. if the branch doesn't exist there yet, this creates it. add -u to track it automatically going forward.\n\nrun: git push origin operative/entry-window"
       ]
     ]
   },
@@ -631,17 +631,17 @@ const ROOMS = [
       [
         "you need to fetch and merge the remote changes in one step.",
         "git pull does both — fetch from origin and merge into your branch.",
-        "git pull = git fetch + git merge in one command. it downloads remote changes and immediately tries to merge them into your current branch."
+        "git pull = git fetch + git merge in one command. it downloads remote changes and immediately tries to merge them into your current branch.\n\nrun: git pull"
       ],
       [
         "the conflict is in entry-tokens.txt. open it to see the conflict markers.",
         "remove the <<<<<<, ======, >>>>>>> lines and keep the correct content. then: git add entry-tokens.txt",
-        "the editor shows the conflict markers. the <<<<<<< section is your version (HEAD), the >>>>>>> section is theirs (origin/main). remove all three marker lines and keep all three tokens in the file."
+        "the editor shows the conflict markers. the <<<<<<< section is your version (HEAD), the >>>>>>> section is theirs (origin/main). remove all three marker lines and keep all three tokens.\n\ntype: edit entry-tokens.txt"
       ],
       [
         "once the conflict is resolved and staged, you complete the merge with a commit.",
         "git commit -m \"...\" saves the resolution as a new commit.",
-        "after staging the resolved file, a plain git commit closes the merge. no special flags needed — just write a clear message explaining what you fixed."
+        "after staging the resolved file, a plain git commit closes the merge. no special flags needed — just write a clear message explaining what you fixed.\n\nrun: git commit -m \"resolve merge conflict in entry-tokens.txt\""
       ]
     ]
   },
@@ -724,17 +724,17 @@ const ROOMS = [
       [
         "before anything else, find out what git thinks is dirty — what's changed, staged, or untracked.",
         "there's a two-word command for this.",
-        "git status is always your first move — it shows modified files, staged files, and untracked files. read the full output before doing anything else."
+        "git status is always your first move — it shows modified files, staged files, and untracked files. read the full output before doing anything else.\n\nrun: git status"
       ],
       [
         "git records every commit with a timestamp. there's a way to list them all.",
         "git log --oneline gives a compact history. look for anything that doesn't belong.",
-        "git log --oneline gives the full history in compact form: hash + message. look for anything suspicious — commits that say 'temp', 'wip', or 'remove before push' are red flags."
+        "git log --oneline gives the full history in compact form: hash + message. look for anything suspicious — commits that say 'temp', 'wip', or 'remove before push' are red flags.\n\nrun: git log --oneline"
       ],
       [
         "you have the commit hash. you can see exactly what changed in that commit.",
         "git show <hash> displays the commit message and the full diff of what changed.",
-        "git show <hash> displays the full diff of a specific commit — exactly which lines were added (+) and removed (-). use the 7-character hash from the log output."
+        "git show <hash> displays the full diff of a specific commit — exactly which lines were added (+) and removed (-). use the 7-character hash from the log output.\n\nrun: git show e3c4b20"
       ]
     ]
   },
@@ -828,17 +828,17 @@ const ROOMS = [
       [
         "there are untracked files (not tracked by git at all). git clean handles these.",
         "git clean removes untracked files. -f forces the removal (required safety flag).",
-        "git clean removes untracked files from the working tree. -f forces the operation (required), -d extends it to directories too. this can't be undone."
+        "git clean removes untracked files from the working tree. -f forces the operation (required), -d extends it to directories too. this can't be undone.\n\nrun: git clean -fd"
       ],
       [
         "you want to throw away the current working-directory changes to one file and go back to what was last committed.",
         "git restore <filename> discards working directory changes for that file.",
-        "git restore <file> discards unstaged changes to that file, reverting it to the last committed state. target just the one file — don't use --hard which resets everything."
+        "git restore <file> discards unstaged changes to that file, reverting it to the last committed state. target just the one file — don't use --hard which resets everything.\n\nrun: git restore alarm-config.json"
       ],
       [
         "the commit is on a shared branch that others have already pulled. you can't erase it — you must officially undo it.",
         "git revert <hash> creates a new commit that reverses the changes from that commit.",
-        "git revert <hash> creates a new commit that undoes a specific commit's changes — safe for shared branches because it adds to history rather than rewriting it."
+        "git revert <hash> creates a new commit that undoes a specific commit's changes — safe for shared branches because it adds to history rather than rewriting it.\n\nrun: git revert e3c4b20"
       ]
     ]
   }

@@ -577,6 +577,15 @@ body.resizing-col    { user-select: none; }
   text-transform: uppercase;
   margin-bottom: 14px;
 }
+.hint-cmd {
+  display: inline-block;
+  color: var(--primary-dim);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  background: var(--bg);
+  border-left: 2px solid var(--primary);
+}
 .hint-txt {
   color: var(--text);
   font-size: 14px;
@@ -620,12 +629,30 @@ body.resizing-col    { user-select: none; }
   font-weight: 700;
 }
 .btn.primary:hover { background: var(--primary-dim); border-color: var(--primary-dim); }
-.btn.confirm-reveal {
+.btn.reveal-answer {
   border-color: var(--warn);
   color: var(--warn);
-  animation: blink 0.9s step-end infinite;
+  position: relative;
 }
-.btn.confirm-reveal:hover { border-color: #e8c98a; color: #e8c98a; }
+.btn.reveal-answer:hover { border-color: #e8c98a; color: #e8c98a; }
+.btn.reveal-answer::after {
+  content: 'are you sure you want that?';
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-top);
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.btn.reveal-answer:hover::after { opacity: 1; }
 
 /* ─── ROOM COMPLETE ───────────────────────────────────────── */
 #roomDone {
