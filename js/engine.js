@@ -6,6 +6,7 @@ const G = {
   roomStart: 0,
   missionStart: 0,
   fileEditDone: false,
+  clues: [],
   savedProgress: JSON.parse(localStorage.getItem('vz_progress') || '{}')
 };
 
@@ -362,8 +363,32 @@ function completeRoom() {
   G.savedProgress[`room${room().id}`] = { complete: true, hints: G.hintsUsed, time: t };
   localStorage.setItem('vz_progress', JSON.stringify(G.savedProgress));
 
+  // Collect clue fragment
+  const clue = room().clue;
+  if (clue && !G.clues.find(c => c.label === clue.label)) {
+    G.clues.push(clue);
+  }
+
   document.getElementById('doneStats').textContent = `Time: ${m}:${s}  ·  Hints used: ${G.hintsUsed}`;
   document.getElementById('doneMsg').textContent = `"${completionMsg}"`;
+
+  // Show clue fragment in done screen
+  const clueWrap = document.getElementById('clueFragment');
+  if (clue && clueWrap) {
+    document.getElementById('clueKey').textContent = clue.label;
+    const clueValEl = document.getElementById('clueVal');
+    clueValEl.textContent = '';
+    document.getElementById('clueCount').textContent =
+      `${G.clues.length} of ${ROOMS.length} fragments collected`;
+    clueWrap.style.display = '';
+    let i = 0;
+    function typeVal() {
+      if (i < clue.value.length) { clueValEl.textContent += clue.value[i++]; setTimeout(typeVal, 35); }
+    }
+    setTimeout(typeVal, 900);
+  } else if (clueWrap) {
+    clueWrap.style.display = 'none';
+  }
 
   setTimeout(() => document.getElementById('roomDone').classList.add('open'), 1200);
 }
@@ -372,6 +397,7 @@ function goNextRoom() {
   document.getElementById('roomDone').classList.remove('open');
   const next = G.roomIdx + 1;
   if (next >= ROOMS.length) {
+    buildEndScreen();
     document.getElementById('endScreen').classList.add('open');
     return;
   }
@@ -657,6 +683,27 @@ const BOOT_LINES = [
   { text: '> encrypted tunnel established. trace protection: active', cls: 'ok', pause: 320 },
   { text: '> incoming transmission — source: unknown // signal encrypted', cls: 'dim', pause: 200 },
 ];
+
+function buildEndScreen() {
+  const container = document.getElementById('assembledKey');
+  if (!container) return;
+  container.innerHTML = '';
+  G.clues.forEach((clue, i) => {
+    const row = document.createElement('div');
+    row.className = 'key-row';
+    row.innerHTML = `<span class="key-label">[${clue.label}]</span><span class="key-val"></span>`;
+    container.appendChild(row);
+    const valEl = row.querySelector('.key-val');
+    let ci = 0;
+    function typeChar() {
+      if (ci < clue.value.length) {
+        valEl.textContent += clue.value[ci++];
+        setTimeout(typeChar, 30);
+      }
+    }
+    setTimeout(typeChar, i * 220);
+  });
+}
 
 function runBootSequence() {
   const container = document.getElementById('bootTerminal');

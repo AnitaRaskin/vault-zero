@@ -151,6 +151,15 @@
       <div class="done-title">ROOM CLEARED</div>
       <div class="done-stats" id="doneStats"></div>
       <div class="done-msg" id="doneMsg"></div>
+      <div class="clue-fragment" id="clueFragment">
+        <div class="clue-fragment-label">▓ FRAGMENT ACQUIRED</div>
+        <div class="clue-fragment-val">
+          <span class="clue-key" id="clueKey"></span>
+          <span class="clue-sep"> → </span>
+          <span class="clue-val" id="clueVal"></span>
+        </div>
+        <div class="clue-count" id="clueCount"></div>
+      </div>
       <button class="btn primary" onclick="goNextRoom()">NEXT ROOM →</button>
     </div>
   </div>
@@ -192,6 +201,10 @@
   <div class="end-inner">
     <div class="tx-header">▓ TRANSMISSION ▓</div>
     <div class="end-logo">OPERATION COMPLETE</div>
+    <div class="assembled-key-wrap">
+      <div class="assembled-key-header">VAULT ZERO // ACCESS CREDENTIALS</div>
+      <div id="assembledKey"></div>
+    </div>
     <div class="tx-body">
       <strong>From: Fox</strong><br><br>
       "Vault Zero is open. The crew is in.<br><br>

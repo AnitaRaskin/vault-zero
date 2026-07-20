@@ -8,6 +8,7 @@ const ROOMS = [
     id: 0,
     name: 'THE EQUIPMENT',
     initialTree: 'r0_initial',
+    clue: { label: 'SECTOR', value: 'V0-CORE' },
     intro: "Before you breach anything, you need to know your tools. A repo is the mission folder — git tracks every change made inside it.",
     stages: [
       {
@@ -79,6 +80,7 @@ const ROOMS = [
   {
     id: 1,
     name: 'THE BLUEPRINT',
+    clue: { label: 'ENDPOINT', value: '/internal/v0' },
     intro: "A previous operative breached Vault Zero's system and buried the access credentials inside their own repo. Never merged. We know it's in here — find the branch, find the commit, read the file.",
     stages: [
       {
@@ -218,6 +220,7 @@ const ROOMS = [
   {
     id: 2,
     name: 'GET A COPY',
+    clue: { label: 'NODE', value: 'banking-core-relay' },
     intro: "The syndicate's server has the live vault access system. You can't touch the original — any write operation trips the alarm. You need your own working copy.",
     stages: [
       {
@@ -309,6 +312,7 @@ const ROOMS = [
   {
     id: 3,
     name: 'INTO POSITION',
+    clue: { label: 'WINDOW', value: '02:00 — 02:15' },
     intro: "You're inside the access system. You need to modify the security config — but not on main. Work on your own route. Save checkpoints as you go.",
     stages: [
       {
@@ -400,6 +404,7 @@ const ROOMS = [
     id: 4,
     name: 'HIDE THE EVIDENCE',
     initialTree: 'r_stash_dirty',
+    clue: { label: 'BYPASS', value: 'sweep_clean' },
     intro: "Scanner just picked up a police sweep. You're mid-change — files are open, work is half done. You can't commit yet. You need to hide everything, fast.",
     stages: [
       {
@@ -506,6 +511,7 @@ const ROOMS = [
     id: 5,
     name: 'SEND THE SIGNAL',
     initialTree: 'r4_ahead',
+    clue: { label: 'SIGNAL', value: 'branch_live' },
     intro: "Your modified config is ready locally. The rest of the crew needs it. Upload your branch to the shared server.",
     stages: [
       {
@@ -568,6 +574,7 @@ const ROOMS = [
     id: 6,
     name: 'THE CREW CONFLICT',
     initialTree: 'r_conflict_initial',
+    clue: { label: 'TOKEN', value: 'tok_override_9x77' },
     intro: "Two operatives edited the same file at the same time. The repo is in conflict. You need to resolve it — or the whole job falls apart.",
     stages: [
       {
@@ -647,6 +654,7 @@ const ROOMS = [
     id: 7,
     name: 'READ THE ROOM',
     initialTree: 'r5_dirty',
+    clue: { label: 'VECTOR', value: 'ids_threshold' },
     intro: "The IDS tripped at 01:47. Something changed that shouldn't have. Find what happened, when, and who did it — before their security team traces the intrusion back to us.",
     stages: [
       {
@@ -738,6 +746,7 @@ const ROOMS = [
   {
     id: 8,
     initialTree: 'r6_dirty',
+    clue: { label: 'STATUS', value: 'history_clean' },
     name: 'ERASE THE TRAIL',
     intro: "The 'temp fix' commit is in shared history. It needs to go — but logs are monitored. You can't rewrite shared history. Undo it officially. And clean up the local mess first.",
     stages: [
