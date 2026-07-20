@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/shared.css">
-<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="../../css/shared.css">
+<link rel="stylesheet" href="../../css/game.css">
 </head>
 <body>
 
@@ -209,12 +209,42 @@
 <!-- ═══ FILE EDITOR ═══════════════════════════════════════════ -->
 <div id="fileEditor">
   <div class="editor-box">
-    <div class="editor-title" id="editorTitle">EDIT FILE: security-config.json</div>
+    <div class="editor-title" id="editorTitle">EDIT FILE</div>
     <textarea id="fileContent"></textarea>
-    <div class="editor-hint" id="editorHint">change <code>"maintenance_window": null</code> → <code>"maintenance_window": "02:00"</code></div>
+    <div class="editor-hint" id="editorHint"></div>
     <div class="modal-btns">
       <button class="btn primary" onclick="saveFile()">SAVE FILE</button>
       <button class="btn" onclick="cancelFile()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONCEPT BRIEF ══════════════════════════════════════════ -->
+<div id="conceptModal">
+  <div class="concept-box">
+    <div class="concept-header">
+      <span class="concept-tag">▓ CONCEPT BRIEF ▓</span>
+      <span class="concept-title" id="conceptTitle"></span>
+    </div>
+    <div class="concept-body">
+      <div class="concept-bullets" id="conceptBullets"></div>
+      <pre class="concept-ascii" id="conceptAscii"></pre>
+      <button class="btn primary concept-btn" id="conceptBtn">[ GOT IT ]</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PRE-POLICE FOX POPUP ═══════════════════════════════════ -->
+<div id="policeWarnModal">
+  <div class="pwarn-box">
+    <div class="pwarn-header">
+      <span class="pwarn-flash">▓</span>
+      <span class="pwarn-title">INCOMING TRANSMISSION // FOX</span>
+      <span class="pwarn-flash">▓</span>
+    </div>
+    <div class="pwarn-body">
+      <div class="pwarn-msg" id="pwarnMsg"></div>
+      <button class="btn pwarn-btn" id="pwarnBtn">[ UNDERSTOOD — START CLOCK ]</button>
     </div>
   </div>
 </div>
@@ -316,12 +346,13 @@
   </div>
 </div>
 
-<!-- scripts load in dependency order: supabase cdn → data → renderer → supabase → engine -->
+<!-- scripts: config → data → renderer → supabase → engine -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/data.js"></script>
-<script src="js/renderer.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/engine.js"></script>
+<script src="./config.js"></script>
+<script src="./data.js"></script>
+<script src="../../js/renderer.js"></script>
+<script src="../../js/supabase.js"></script>
+<script src="../../js/engine.js"></script>
 
 </body>
 </html>

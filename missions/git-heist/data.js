@@ -9,66 +9,96 @@ const ROOMS = [
     name: 'THE EQUIPMENT',
     initialTree: 'r0_initial',
     clue: { label: 'SECTOR', value: 'V0-CORE' },
-    intro: "Before you breach anything, you need to know your tools. A repo is the mission folder — git tracks every change made inside it.",
+    intro: "You've breached the outer layer. You're inside the target's repository. Fox needs you to get oriented — you can't run a heist in a codebase you don't understand. Three commands. Get your bearings.",
     stages: [
       {
-        foxMsg: "before we start — know your environment. look around. what files are in this repo?",
-        task: "List the files in the repository.",
+        conceptBrief: {
+          title: "WHAT IS A GIT REPOSITORY",
+          bullets: [
+            "a git repository is a folder that git watches — every change ever made is tracked and stored permanently",
+            "nothing is ever truly lost: you can always go back to any previous version of any file",
+            "the REPO STATE panel on the right shows your repo's structure in real time — it updates as you work",
+            "each circle in the tree = one commit. the lines between them show the history chain. the label shows where you are right now"
+          ]
+        },
+        foxMsg: "first move — check what you're working with. we're starting with 'ls' — it's not a git command, it's a shell command. it talks to the operating system and lists what's in the current folder. you'll use it constantly alongside git. run it.",
+        task: "List all files in the repository.",
         accepted: ["ls", "ls -la", "ls -l", "ls -a"],
         output: [
           ["README.md", "sys"],
+          [".gitignore", "dim"],
           ["vault.txt", "sys"],
           ["access-routes.json", "sys"],
           ["", ""],
-          ["three files. git watches every change made to each of them.", "dim"],
+          ["four files. three are tracked by git.", "dim"],
+          ["the .gitignore tells git what to skip entirely — passwords, build", "dim"],
+          ["artifacts, temp files. those never show up in git status.", "dim"],
+          ["git acts like they don't exist.", "dim"],
         ],
         tree: "r0_initial",
         wrong: {}
       },
       {
-        foxMsg: "git keeps a full history of every change ever made — like a paper trail you can walk back through. check who made what, and when.",
+        conceptBrief: {
+          title: "COMMITS + HEAD",
+          bullets: [
+            "a commit is a permanent snapshot of your project at a specific moment in time",
+            "every commit has: a message (what changed), an author (who), a timestamp (when), and a short hash ID — its unique address in history",
+            "commits are linked in a chain — each one points to the one before it",
+            "HEAD is a pointer that always marks where you are right now in that chain"
+          ],
+          ascii: "  [a1b2c3] ──→ [d4e5f6] ──→ [g7h8i9]\n   'init'        'config'     'fix'   ← HEAD"
+        },
+        foxMsg: "git keeps a full record of every commit ever made. 'git log' shows you that history. '--oneline' makes it compact: one line per commit. read the trail.",
         task: "View the commit history of this repo.",
         accepted: ["git log --oneline", "git log"],
         output: [
           ["{{H7}} (HEAD -> main) initial repo setup", "cm"],
           ["", ""],
-          ["one commit. the repo is fresh. everything that happens next — you'll be able to trace.", "dim"],
+          ["one commit. this repo was just created.", "dim"],
+          ["HEAD means 'you are here' — your current position in history.", "dim"],
+          ["main is the branch you're on. we'll get to branches later.", "dim"],
+          ["", ""],
+          ["every action you take from here gets added to this log, permanently.", "dim"],
         ],
         tree: "r0_initial",
         wrong: {
-          "ls": [["you already checked the files. now check the history — who made changes, and when.", "dim"]]
+          "ls": [["you already checked the files. now check the history — who saved what, and when.", "dim"]]
         }
       },
       {
-        foxMsg: "now check the current state. is anything changed? anything waiting to be saved?",
+        foxMsg: "last one. this is the command you'll use more than any other — memorize it now. 'git status' tells you the exact state of the repo at this moment: what files have changed, what's ready to be saved, what git hasn't seen yet. always run it before you start. always run it when you're confused. it never changes anything — it only shows you what's there.",
         task: "Check whether any files have been modified.",
         accepted: ["git status"],
         output: [
           ["On branch main", "br"],
+          ["Your branch is up to date with 'origin/main'.", "dim"],
+          ["", ""],
           ["nothing to commit, working tree clean", "ok"],
           ["", ""],
-          ["clean. no changes. you know what you have.", "dim"],
+          ["clean. no changes. this is your baseline.", "dim"],
+          ["remember what 'clean' looks like — you'll want to come back to it.", "dim"],
         ],
         tree: "r0_initial",
         wrong: {},
-        completionMsg: "you know what a repo is, what's in it, and how to read its state. that's the foundation."
+        completionMsg: "ls to see files. git log to see history. git status to see the current state. three commands. that's the foundation — everything else builds on these."
       }
     ],
     hints: [
       [
-        "you need to see what files exist in the current directory.",
-        "ls lists files — works anywhere, including inside a git repo.",
-        "ls stands for 'list' — it prints every file and directory in the current location.\n\nrun: ls"
+        "you need to see what files exist in the current folder. this is a terminal command, not a git command.",
+        "ls lists everything in the current directory. it works on any unix-based system, including this terminal.",
+        "ls stands for 'list' — it prints every file and directory in the current location. it's a shell command, not git. you'll use it constantly to orient yourself before running any git commands.\n\nrun: ls"
       ],
       [
-        "every repo has a history of commits — saved snapshots with timestamps and messages.",
-        "git log shows that history. --oneline makes it compact.",
-        "--oneline compresses each commit to one line: the short hash followed by the message. git log alone shows author, date, and the full message.\n\nrun: git log --oneline"
+        "git keeps a complete record of every save ever made. there's a command that shows you the full history of commits.",
+        "git log shows the history. add --oneline to make it compact — one commit per line.",
+        "--oneline compresses each commit to one line: short hash on the left, message on the right. the full git log also shows the author name, full date, and full message.\n\nrun: git log --oneline"
       ],
       [
-        "git status tells you whether anything has changed since the last commit.",
-        "it's the most-used git command. two words.",
-        "git status shows which branch you're on, which files changed, and what's staged — always a safe first command.\n\nrun: git status"
+        "you need to check what the repo's current state is — what's changed, what's staged, what git is tracking.",
+        "git status is your compass. two words. always safe to run — it never modifies anything.",
+        "git status shows which branch you're on, which files have changed, and what's staged for the next save. run it before anything else and when you're lost — it's never wrong to check.\n\nrun: git status"
       ]
     ]
   },
@@ -84,6 +114,16 @@ const ROOMS = [
     intro: "A previous operative breached the target's banking system and buried the access credentials inside their own repo. Never merged. We know it's in here — find the branch, find the commit, read the file.",
     stages: [
       {
+        conceptBrief: {
+          title: "BRANCHES",
+          bullets: [
+            "a branch is a separate line of development — you can work without touching the main code",
+            "main is the default branch. every new branch splits off from some existing commit",
+            "HEAD follows you — it always points to the branch you're currently on",
+            "branches are cheap: they're just a pointer to a commit. creating one is instant"
+          ],
+          ascii: "  main:     [A] ──→ [B] ──→ [C]\n                        ↘\n  feature:              [D] ──→ [E]  ← HEAD"
+        },
         foxMsg: "the access map exists. someone on the inside hid it and never merged it. start by figuring out what branches are in this repo.",
         task: "Find ALL branches including remote ones.",
         accepted: ["git branch -a"],
@@ -106,6 +146,15 @@ const ROOMS = [
         }
       },
       {
+        conceptBrief: {
+          title: "GIT SWITCH vs GIT CHECKOUT",
+          bullets: [
+            "git switch <name> — modern command for changing to an existing branch",
+            "git switch -c <name> — creates a new branch AND switches to it in one step",
+            "git checkout <name> — the classic command; does the same for branches, plus works on commits and individual files",
+            "both commands work — this game accepts both. real teams today prefer git switch"
+          ]
+        },
         foxMsg: "one of those branches has what you need. the name should give it away.",
         task: "Switch to the branch that has the access credentials.",
         accepted: ["git checkout fox/vault-schematics", "git switch fox/vault-schematics",
@@ -345,8 +394,44 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "modify the config. the maintenance window — when their monitoring goes offline — needs to be set to 02:00. i've opened the file for you.",
-        task: "Edit security-config.json, then stage it with git add.",
+        conceptBrief: {
+          title: "HOW GIT TRACKS FILES",
+          bullets: [
+            "every file in a git repo is in one of four states:",
+            "UNTRACKED — git sees it exists but isn't watching it yet",
+            "MODIFIED — a tracked file that changed since the last commit",
+            "STAGED — selected for the next commit (sitting in the staging area)",
+            "COMMITTED — saved permanently in history",
+            "git add moves files into the staging area. git commit saves everything staged."
+          ],
+          ascii: "  UNTRACKED ──git add──▶ STAGED ──git commit──▶ COMMITTED\n  MODIFIED  ──git add──▶ STAGED"
+        },
+        foxMsg: "scanner alert — police unit picking up traffic on this node. forensic tools are running. you've got modified files sitting open everywhere. stage ALL of it in one command — fast. git add . catches every change at once.",
+        task: "Stage all current changes immediately — one command, full sweep.",
+        policeOnLoad: true,
+        accepted: ["git add ."],
+        output: [
+          ["Changes staged for commit:", "sys"],
+          ["    modified:   README.md", "ok"],
+          ["    modified:   access-routes.json", "ok"],
+          ["    modified:   vault.txt", "ok"],
+          ["", ""],
+          ["all changes staged. working tree looks clean to their scanners.", "ok"],
+          ["git add . — the dot means 'everything here'. fast when you need broad coverage.", "dim"],
+        ],
+        tree: "r3_staged",
+        wrong: {
+          "git add security-config.json": [
+            ["too slow — they're scanning right now. you've got multiple open files.", "warn"],
+            ["use git add . to stage everything at once — one command, full sweep.", "dim"]
+          ],
+          "git stash": [["stashing hides the work. we need to stage it, not hide it. git add .", "warn"]],
+          "git commit": [["nothing staged yet. git add . first — then commit.", "warn"]],
+        }
+      },
+      {
+        foxMsg: "police cleared. good. now be precise. the real mission: modify the maintenance window in security-config.json and commit ONLY that change. open the file, make the edit, then stage that specific file — not everything.",
+        task: "Edit security-config.json, then stage only that specific file.",
         fileEdit: true,
         accepted: ["git add security-config.json", "git add ."],
         output: [
@@ -368,8 +453,31 @@ const ROOMS = [
         tree: "r3_committed",
         wrong: {
           "git commit": [["add -m and a message in quotes: git commit -m \"your message\"", "warn"]]
+        }
+      },
+      {
+        foxMsg: "the commit exists locally — the crew doesn't have it yet. it lives only on your machine. push the branch to the shared server. that's how the change reaches everyone else.",
+        task: "Push your branch to the remote server.",
+        accepted: [
+          "git push origin operative/entry-window",
+          "git push -u origin operative/entry-window",
+          "git push"
+        ],
+        output: [
+          ["Enumerating objects: 5, done.", "dim"],
+          ["Counting objects: 100% (5/5), done.", "dim"],
+          ["Writing objects: 100% (3/3), 312 bytes, done.", "dim"],
+          ["", ""],
+          ["To https://operative.vault/access-system.git", "sys"],
+          [" * [new branch]      operative/entry-window -> operative/entry-window", "ok"],
+          ["", ""],
+          ["Branch 'operative/entry-window' set up to track 'origin/operative/entry-window'.", "dim"],
+        ],
+        tree: "r4_pushed",
+        wrong: {
+          "git push origin main": [["you're not on main. push your feature branch — operative/entry-window.", "warn"]]
         },
-        completionMsg: "good. that's a checkpoint. the repo remembers exactly what you did and when."
+        completionMsg: "commit saves it locally. push sends it to the crew. both steps, every time."
       }
     ],
     hints: [
@@ -384,14 +492,24 @@ const ROOMS = [
         "git checkout -b <name> creates a new branch and switches to it in one command. git switch -c <name> does the same. the branch name goes right after the flag.\n\nrun: git checkout -b operative/entry-window"
       ],
       [
-        "after editing the file, you need to tell git you want this change in the next commit.",
-        "git add stages files. you can specify a filename or use . for all changes.",
-        "git add stages files for the next commit. you can name a file specifically or use . to stage all changes at once.\n\nrun: git add security-config.json"
+        "you need to stage ALL changes in one shot — a single command that catches every modified file.",
+        "git add followed by a dot stages every change in the current directory at once.",
+        "git add . stages all modified and new files in one move. the dot means 'everything here' — fast when you need full coverage under pressure.\n\nrun: git add ."
+      ],
+      [
+        "after editing the file, you need to tell git you want this specific change in the next commit.",
+        "git add <filename> stages just that one file — surgical, not broad.",
+        "git add <file> stages exactly that file for the next commit. naming it explicitly means only that change is included — nothing else gets swept in.\n\nrun: git add security-config.json"
       ],
       [
         "a commit is a saved snapshot with a message describing what you did.",
         "git commit -m \"...\" sets the message inline. make it readable.",
-        "git commit -m saves staged changes as a snapshot. the message goes in quotes after -m. it stays in the history permanently — make it readable for the crew.\n\nrun: git commit -m \"set maintenance window to 02:00\""
+        "git commit -m saves staged changes as a snapshot. the message goes in quotes after -m. it stays in the history permanently — write it for the crew.\n\nrun: git commit -m \"set maintenance window to 02:00\""
+      ],
+      [
+        "the commit is only local right now. pushing uploads it to the remote server so the crew can see it.",
+        "git push origin <branchname> — or just git push if the upstream is already set.",
+        "git push origin <branch> uploads local commits to the remote. if the branch doesn't exist on the server yet, this creates it there. -u sets the upstream tracking so future pushes just need git push.\n\nrun: git push origin operative/entry-window"
       ]
     ]
   },
@@ -425,8 +543,10 @@ const ROOMS = [
       },
       {
         foxMsg: "they're two blocks away. stash it. hide everything. NOW.",
+        policePopupMsg: "scanner just lit up.\n\npolice unit detected — two blocks out, moving fast.\n\nyou have 30 seconds before they sweep this node.\n\nyour working tree CANNOT have open changes — they'll see everything.\n\nstash it. clean the tree. go.",
         task: "Stash your current changes to hide them.",
         policeOnLoad: true,
+        policeWarnModal: true,
         accepted: ["git stash", "git stash push"],
         output: [
           ["Saved working directory and index state", "sys"],
@@ -505,74 +625,11 @@ const ROOMS = [
   },
 
   // ──────────────────────────────────────────────────────
-  // ROOM 5: SEND THE SIGNAL
-  // git push, git push -u
-  // ──────────────────────────────────────────────────────
-  {
-    id: 5,
-    name: 'SEND THE SIGNAL',
-    initialTree: 'r4_ahead',
-    clue: { label: 'SIGNAL', value: 'branch_live' },
-    intro: "Your modified config is ready locally. The rest of the crew needs it. Upload your branch to the shared server.",
-    stages: [
-      {
-        foxMsg: "you've got the change locally. the crew doesn't have it yet. check what you have that hasn't been pushed.",
-        task: "Check the status — see that you're ahead of remote.",
-        accepted: ["git status"],
-        output: [
-          ["On branch operative/entry-window", "br"],
-          ["Your branch is 1 commit ahead of 'origin/operative/entry-window'.", "warn"],
-          ["", ""],
-          ["  (use \"git push\" to publish your local commits)", "dim"],
-        ],
-        tree: "r4_ahead",
-        wrong: {}
-      },
-      {
-        foxMsg: "send it. upload your branch to the crew server.",
-        task: "Push your branch to origin.",
-        accepted: [
-          "git push origin operative/entry-window",
-          "git push -u origin operative/entry-window",
-          "git push"
-        ],
-        output: [
-          ["Enumerating objects: 5, done.", "dim"],
-          ["Counting objects: 100% (5/5), done.", "dim"],
-          ["Writing objects: 100% (3/3), 312 bytes, done.", "dim"],
-          ["", ""],
-          ["To https://operative.vault/access-system.git", "sys"],
-          [" * [new branch]      operative/entry-window -> operative/entry-window", "ok"],
-          ["", ""],
-          ["Branch 'operative/entry-window' set up to track 'origin/operative/entry-window'.", "dim"],
-        ],
-        tree: "r4_pushed",
-        wrong: {
-          "git push origin main": [["you're not on main. push your feature branch.", "warn"]]
-        },
-        completionMsg: "the crew has it. your branch is on the server."
-      }
-    ],
-    hints: [
-      [
-        "git has a way to show you how your local branch compares to the remote version.",
-        "git status always shows if you're ahead or behind the remote.",
-        "git status shows whether your local branch is ahead of the remote — meaning you have commits the server hasn't seen yet.\n\nrun: git status"
-      ],
-      [
-        "pushing uploads your commits from local to remote so others can see them.",
-        "git push origin <branchname> — or just git push if upstream is already set.",
-        "git push origin <branch> sends local commits to the remote server. if the branch doesn't exist there yet, this creates it. add -u to track it automatically going forward.\n\nrun: git push origin operative/entry-window"
-      ]
-    ]
-  },
-
-  // ──────────────────────────────────────────────────────
-  // ROOM 6: THE CREW CONFLICT
+  // ROOM 5: THE CREW CONFLICT
   // git pull, resolve conflict, git add, git commit
   // ──────────────────────────────────────────────────────
   {
-    id: 6,
+    id: 5,
     name: 'THE CREW CONFLICT',
     initialTree: 'r_conflict_initial',
     clue: { label: 'TOKEN', value: 'tok_override_9x77' },
@@ -648,11 +705,11 @@ const ROOMS = [
   },
 
   // ──────────────────────────────────────────────────────
-  // ROOM 7: READ THE ROOM
+  // ROOM 6: READ THE ROOM
   // git status, git log --oneline, git show / git diff
   // ──────────────────────────────────────────────────────
   {
-    id: 7,
+    id: 6,
     name: 'READ THE ROOM',
     initialTree: 'r5_dirty',
     clue: { label: 'VECTOR', value: 'ids_threshold' },
@@ -741,11 +798,11 @@ const ROOMS = [
   },
 
   // ──────────────────────────────────────────────────────
-  // ROOM 8: ERASE THE TRAIL
+  // ROOM 7: ERASE THE TRAIL
   // git clean -fd, git restore, git revert, git reset
   // ──────────────────────────────────────────────────────
   {
-    id: 8,
+    id: 7,
     initialTree: 'r6_dirty',
     clue: { label: 'STATUS', value: 'history_clean' },
     name: 'ERASE THE TRAIL',

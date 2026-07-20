@@ -110,7 +110,9 @@ before(() => {
     win.document.head.appendChild(s);
   };
 
-  inject('js/data.js', `
+  inject('missions/git-heist/config.js', '');
+
+  inject('missions/git-heist/data.js', `
     window._ROOMS  = ROOMS;
     window._TREE   = TREE;
   `);
@@ -119,9 +121,9 @@ before(() => {
     window._G              = G;
     window._H              = H;
     window._cmdLog         = cmdLog;
-    window._CMD_QUIZ_POOL  = CMD_QUIZ_POOL;
-    window._STATIC_QUIZ    = STATIC_QUIZ;
-    window._CMD_DESC       = CMD_DESCRIPTIONS;
+    window._CMD_QUIZ_POOL  = GAME_CONFIG.cmdQuizPool;
+    window._STATIC_QUIZ    = GAME_CONFIG.staticQuiz;
+    window._CMD_DESC       = GAME_CONFIG.cmdDescriptions;
     // Getters for primitives that get re-assigned (let, not const)
     window._getQuizQs      = () => quizQuestions;
     window._getQuizIdx     = () => quizIdx;
