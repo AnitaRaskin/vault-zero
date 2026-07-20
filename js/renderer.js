@@ -126,6 +126,14 @@ function renderTree(stateKey) {
       const t = svgEl('text', { x: ex.x - 3, y: ex.y - 14, fill: '#68dbae', 'font-size': '8', 'font-family': 'JetBrains Mono, Courier New', 'text-anchor': 'middle' });
       t.textContent = 'revert↑';
       svg.appendChild(t);
+    } else if (ex.type === 'stash-indicator') {
+      const t = svgEl('text', { x: ex.x, y: ex.y, fill: '#c8a87a', 'font-size': '9', 'font-family': 'JetBrains Mono, Courier New' });
+      t.textContent = '◎ stash@{0}: WIP saved';
+      svg.appendChild(t);
+    } else if (ex.type === 'conflict-indicator') {
+      const t = svgEl('text', { x: ex.x, y: ex.y, fill: '#ffb4ab', 'font-size': '9', 'font-family': 'JetBrains Mono, Courier New' });
+      t.textContent = '✕ CONFLICT: entry-tokens.txt';
+      svg.appendChild(t);
     }
   });
 }

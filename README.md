@@ -22,12 +22,15 @@ You can only move forward by typing the correct Git command. No clicking through
 
 | Room | Name | Concepts |
 |------|------|----------|
-| 1 | The Access Map | `git branch -a`, `git checkout`, `git log`, `git show` |
+| 0 | The Equipment | `ls`, `git log`, `git status` — repo basics |
+| 1 | The Blueprint | `git branch -a`, `git checkout`, `git log`, `git show` |
 | 2 | Get a Copy | `git remote -v`, fork, `git clone` |
 | 3 | Into Position | `git status`, `git checkout -b`, `git add`, `git commit` |
-| 4 | Send the Signal | `git push`, upstream tracking |
-| 5 | Read the Room | `git log --oneline`, `git show`, `git diff` |
-| 6 | Erase the Trail | `git clean`, `git restore`, `git revert`, `git reset` |
+| 4 | Hide the Evidence | `git stash`, `git stash list`, `git stash pop` |
+| 5 | Send the Signal | `git push`, upstream tracking |
+| 6 | The Crew Conflict | `git pull`, merge conflict resolution, `git add`, `git commit` |
+| 7 | Read the Room | `git log --oneline`, `git show`, `git diff` |
+| 8 | Erase the Trail | `git clean`, `git restore`, `git revert`, `git reset` |
 
 ## How it works
 
@@ -35,11 +38,12 @@ You can only move forward by typing the correct Git command. No clicking through
 - **Fox's comms** — mission briefing, stage by stage
 - **Repo state panel** — live SVG diagram of branches, commits, and HEAD — updates as you work
 - **Hint system** — 3 levels per stage, no penalty, just tracking
+- **Command log** — `[cmd: log]` button tracks every command you've used; downloadable as a cheat sheet at the end
 - **Progress** saves to localStorage — pick up where you left off
 
 ## Curriculum
 
-Based on [Beginner Git Guide for Beginners](https://www.wix.engineering) by Maor Galapo (Wix Engineering). The 6 rooms cover the course's core sections in difficulty order, from reading a repo to safely undoing shared history.
+Based on the **[Beginner Git](./Beginner%20Git.pdf)** course (place the PDF in this folder to activate the link). The 6 rooms cover the course's core sections in difficulty order, from reading a repo to safely undoing shared history.
 
 ## Built with
 

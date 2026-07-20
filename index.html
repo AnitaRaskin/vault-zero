@@ -11,19 +11,26 @@
 </head>
 <body>
 
+<div class="scanline"></div>
+
 <!-- ═══ INTRO ════════════════════════════════════════════════ -->
 <div id="introScreen">
   <div class="transmission">
     <div class="tx-header">▓ ENCRYPTED TRANSMISSION ▓</div>
     <div class="vault-logo">VAULT ZERO</div>
     <div class="vault-sub">A GIT LEARNING ESCAPE ROOM</div>
-    <div class="tx-body">
+    <div class="boot-terminal" id="bootTerminal"></div>
+    <div class="tx-body tx-fade" id="txBody" style="opacity:0;transform:translateY(8px)">
       <strong>From: Fox</strong><br><br>
       "You want in on the Vault Zero job? Prove you can handle the tools first.<br><br>
       A previous crew breached Vault Zero's system and buried the access credentials inside their own repo. Never merged. Still in there.<br><br>
       Find it. I'll be watching."
     </div>
-    <button class="enter-btn" onclick="startGame()">[ ENTER THE REPO ]</button>
+    <div class="operative-input-row tx-fade" id="operativeRow" style="opacity:0;transform:translateY(8px)">
+      <label class="operative-input-label">operative_codename:</label>
+      <input type="text" id="operativeName" class="operative-input" placeholder="enter codename..." autocomplete="off" spellcheck="false" maxlength="20">
+    </div>
+    <button class="enter-btn tx-fade" id="enterBtn" style="opacity:0;pointer-events:none" onclick="startGame()">[ ENTER THE REPO ]</button>
   </div>
 </div>
 
@@ -39,20 +46,21 @@
     </div>
     <div id="roomInfo">target // vault zero online banking system</div>
     <div class="top-bar-right">
-      <span class="sec-status">security_layer_01: bypassed // layer_02: probing</span>
+      <span class="sec-status" id="secStatus">security_layer_01: bypassed // layer_02: probing</span>
       <div class="sec-dots">
         <span class="sec-dot active"></span>
         <span class="sec-dot probing"></span>
         <span class="sec-dot"></span>
         <span class="sec-dot"></span>
       </div>
+      <button class="hint-btn" onclick="openCheatSheet()">[cmd: log]</button>
       <button class="hint-btn" onclick="openHint()">[cmd: hint]</button>
     </div>
   </div>
   <div class="progress-bar">
     <div class="progress-fill" id="progressFill" style="width:0%"></div>
   </div>
-  <div class="panels">
+  <div class="panels" id="panels">
     <!-- Fox comms -->
     <div class="panel fox-panel">
       <div class="fox-header">
@@ -65,10 +73,11 @@
         <span class="fox-conn-status">connection: stable</span>
       </div>
     </div>
+    <div class="resize-handle" id="resizeLeft"></div>
     <!-- Terminal -->
     <div class="panel terminal-panel" onclick="document.getElementById('termInput').focus()">
       <div class="terminal-header">
-        <span class="operative-tag">operative@layer-01:~/vault-repo$</span>
+        <span class="operative-tag" id="operativeTag">operative@layer-01:~/vault-repo$</span>
         <div class="terminal-node-meta">
           <span>system_node: banking-core-relay</span>
           <span>tty1</span>
@@ -81,6 +90,7 @@
         <span class="cursor-blink"></span>
       </div>
     </div>
+    <div class="resize-handle" id="resizeRight"></div>
     <!-- Git tree -->
     <div class="panel tree-panel">
       <div class="panel-header">REPO STATE</div>
@@ -96,16 +106,36 @@
       </div>
     </div>
   </div>
+  <div id="footerBar">
+    <div class="footer-left">
+      <span>enc: active</span>
+      <span>signal: stable</span>
+      <span>node: banking-core-relay</span>
+    </div>
+    <div class="footer-right">
+      <span id="footerClock">00:00:00 utc</span>
+      <span class="footer-live"><span class="footer-live-dot"></span>live_feed</span>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ HINT MODAL ════════════════════════════════════════════ -->
 <div id="hintModal">
   <div class="hint-box">
-    <div class="hint-lvl" id="hintLvl">HINT 1 OF 3</div>
-    <div class="hint-txt" id="hintTxt"></div>
-    <div class="modal-btns">
-      <button class="btn" onclick="closeHint()">CLOSE</button>
-      <button class="btn primary" id="nextHintBtn" onclick="moreHint()">DEEPER HINT →</button>
+    <div class="hint-modal-header">
+      <span class="hint-modal-header-tag">[CMD: HINT]</span>
+      <span class="hint-modal-header-label">COGNITIVE_ASSISTANCE</span>
+    </div>
+    <div class="hint-body">
+      <div class="hint-lvl" id="hintLvl">HINT 1 OF 3</div>
+      <div class="hint-txt" id="hintTxt"></div>
+      <div class="hint-progress-wrap">
+        <div class="hint-progress-bar" id="hintProgressBar" style="width:33%"></div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn" onclick="closeHint()">CLOSE</button>
+        <button class="btn primary" id="nextHintBtn" onclick="moreHint()">DEEPER HINT →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -113,22 +143,46 @@
 <!-- ═══ ROOM COMPLETE ═════════════════════════════════════════ -->
 <div id="roomDone">
   <div class="done-box">
-    <div class="done-title">ROOM CLEARED</div>
-    <div class="done-stats" id="doneStats"></div>
-    <div class="done-msg" id="doneMsg"></div>
-    <button class="btn primary" onclick="goNextRoom()">NEXT ROOM →</button>
+    <div class="done-box-header">
+      <span class="done-box-header-tag">ACCESS GRANTED</span>
+      <span class="done-box-header-label">LAYER BREACHED</span>
+    </div>
+    <div class="done-body">
+      <div class="done-title">ROOM CLEARED</div>
+      <div class="done-stats" id="doneStats"></div>
+      <div class="done-msg" id="doneMsg"></div>
+      <button class="btn primary" onclick="goNextRoom()">NEXT ROOM →</button>
+    </div>
   </div>
 </div>
 
 <!-- ═══ FILE EDITOR ═══════════════════════════════════════════ -->
 <div id="fileEditor">
   <div class="editor-box">
-    <div class="editor-title">EDIT FILE: security-config.json</div>
+    <div class="editor-title" id="editorTitle">EDIT FILE: security-config.json</div>
     <textarea id="fileContent"></textarea>
-    <div class="editor-hint">change <code>"maintenance_window": null</code> → <code>"maintenance_window": "02:00"</code></div>
+    <div class="editor-hint" id="editorHint">change <code>"maintenance_window": null</code> → <code>"maintenance_window": "02:00"</code></div>
     <div class="modal-btns">
       <button class="btn primary" onclick="saveFile()">SAVE FILE</button>
       <button class="btn" onclick="cancelFile()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHEAT SHEET ════════════════════════════════════════════ -->
+<div id="cheatSheet">
+  <div class="cheat-box">
+    <div class="cheat-header">
+      <span class="cheat-header-tag">[CMD: LOG]</span>
+      <span class="cheat-header-label">COMMAND_RECORD</span>
+    </div>
+    <div class="cheat-body">
+      <div class="cheat-intro">commands used this run — each one you earned.</div>
+      <div id="cheatList"></div>
+      <div class="modal-btns" style="margin-top:20px">
+        <button class="btn" onclick="closeCheatSheet()">CLOSE</button>
+        <button class="btn primary" onclick="downloadCheatSheet()">DOWNLOAD ↓</button>
+      </div>
     </div>
   </div>
 </div>

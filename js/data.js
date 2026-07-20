@@ -1,6 +1,78 @@
 const ROOMS = [
 
   // ──────────────────────────────────────────────────────
+  // ROOM 0: THE EQUIPMENT
+  // ls, git log --oneline, git status
+  // ──────────────────────────────────────────────────────
+  {
+    id: 0,
+    name: 'THE EQUIPMENT',
+    initialTree: 'r0_initial',
+    intro: "Before you breach anything, you need to know your tools. A repo is the mission folder — git tracks every change made inside it.",
+    stages: [
+      {
+        foxMsg: "before we start — know your environment. look around. what files are in this repo?",
+        task: "List the files in the repository.",
+        accepted: ["ls", "ls -la", "ls -l", "ls -a"],
+        output: [
+          ["README.md", "sys"],
+          ["vault.txt", "sys"],
+          ["access-routes.json", "sys"],
+          ["", ""],
+          ["three files. git watches every change made to each of them.", "dim"],
+        ],
+        tree: "r0_initial",
+        wrong: {}
+      },
+      {
+        foxMsg: "git keeps a full history of every change ever made — like a paper trail you can walk back through. check who made what, and when.",
+        task: "View the commit history of this repo.",
+        accepted: ["git log --oneline", "git log"],
+        output: [
+          ["c1a8f33 (HEAD -> main) initial repo setup", "cm"],
+          ["", ""],
+          ["one commit. the repo is fresh. everything that happens next — you'll be able to trace.", "dim"],
+        ],
+        tree: "r0_initial",
+        wrong: {
+          "ls": [["you already checked the files. now check the history — who made changes, and when.", "dim"]]
+        }
+      },
+      {
+        foxMsg: "now check the current state. is anything changed? anything waiting to be saved?",
+        task: "Check whether any files have been modified.",
+        accepted: ["git status"],
+        output: [
+          ["On branch main", "br"],
+          ["nothing to commit, working tree clean", "ok"],
+          ["", ""],
+          ["clean. no changes. you know what you have.", "dim"],
+        ],
+        tree: "r0_initial",
+        wrong: {},
+        completionMsg: "you know what a repo is, what's in it, and how to read its state. that's the foundation."
+      }
+    ],
+    hints: [
+      [
+        "you need to see what files exist in the current directory.",
+        "ls lists files — works anywhere, including inside a git repo.",
+        "run: ls"
+      ],
+      [
+        "every repo has a history of commits — saved snapshots with timestamps and messages.",
+        "git log shows that history. --oneline makes it compact.",
+        "run: git log --oneline"
+      ],
+      [
+        "git status tells you whether anything has changed since the last commit.",
+        "it's the most-used git command. two words.",
+        "run: git status"
+      ]
+    ]
+  },
+
+  // ──────────────────────────────────────────────────────
   // ROOM 1: THE BLUEPRINT
   // git branch -a, checkout, log --oneline, cat / git show
   // ──────────────────────────────────────────────────────
@@ -321,12 +393,119 @@ const ROOMS = [
   },
 
   // ──────────────────────────────────────────────────────
-  // ROOM 4: SEND THE SIGNAL
-  // git push, git push -u
+  // ROOM 4: HIDE THE EVIDENCE
+  // git stash, git stash list, git stash pop
   // ──────────────────────────────────────────────────────
   {
     id: 4,
+    name: 'HIDE THE EVIDENCE',
+    initialTree: 'r_stash_dirty',
+    intro: "Scanner just picked up a police sweep. You're mid-change — files are open, work is half done. You can't commit yet. You need to hide everything, fast.",
+    stages: [
+      {
+        foxMsg: "police scanner just lit up. check what you have open right now.",
+        task: "Check the current state of the working directory.",
+        accepted: ["git status"],
+        output: [
+          ["On branch operative/entry-window", "br"],
+          ["", ""],
+          ["Changes not staged for commit:", "sys"],
+          ["    modified:   firewall-rules.json", "err"],
+          ["    modified:   entry-tokens.txt", "err"],
+          ["", ""],
+          ["⚠  open changes. if they sweep this — we're burned.", "warn"],
+        ],
+        tree: "r_stash_dirty",
+        wrong: {}
+      },
+      {
+        foxMsg: "they're two blocks away. stash it. hide everything. NOW.",
+        task: "Stash your current changes to hide them.",
+        accepted: ["git stash", "git stash push"],
+        output: [
+          ["Saved working directory and index state", "sys"],
+          ["  stash@{0}: WIP on operative/entry-window: f4a2b19 set maintenance window to 02:00", "dim"],
+          ["", ""],
+          ["working tree clean. nothing to see here.", "ok"],
+        ],
+        tree: "r_stash_clean",
+        wrong: {
+          "git add .": [
+            ["⚠  staging makes it MORE visible, not less.", "err"],
+            ["you need to HIDE the work. git stash saves it and cleans the working tree.", "warn"],
+          ],
+          "git add": [
+            ["⚠  staging is not hiding. use git stash to disappear the changes.", "warn"],
+          ],
+          "git commit": [["you can't commit half-done work under pressure. stash it first.", "warn"]],
+        }
+      },
+      {
+        foxMsg: "they passed. check what's in your stash — make sure nothing was lost.",
+        task: "List your stashed changes.",
+        accepted: ["git stash list"],
+        output: [
+          ["stash@{0}: WIP on operative/entry-window: f4a2b19 set maintenance window to 02:00", "sys"],
+          ["", ""],
+          ["your work is safe. hidden. waiting.", "dim"],
+        ],
+        tree: "r_stash_clean",
+        wrong: {
+          "git stash": [["it's already stashed. check the list — git stash list", "dim"]],
+        }
+      },
+      {
+        foxMsg: "coast is clear. retrieve your work and keep going.",
+        task: "Restore your stashed changes.",
+        flexStashPop: true,
+        accepted: ["git stash pop"],
+        output: [
+          ["On branch operative/entry-window", "br"],
+          ["Changes not staged for commit:", "sys"],
+          ["    modified:   firewall-rules.json", "ok"],
+          ["    modified:   entry-tokens.txt", "ok"],
+          ["", ""],
+          ["Dropped stash@{0}", "dim"],
+          ["", ""],
+          ["everything's back. like it never happened.", "ok"],
+        ],
+        tree: "r_stash_dirty",
+        wrong: {},
+        completionMsg: "stash when you need to disappear fast. pop when the coast is clear."
+      }
+    ],
+    hints: [
+      [
+        "you need to see what's currently modified in your working directory.",
+        "git status shows the full picture — modified files, staged files, untracked files.",
+        "run: git status"
+      ],
+      [
+        "git has a temporary hiding place for uncommitted changes — the stash.",
+        "git stash saves your work and leaves the working tree completely clean.",
+        "run: git stash"
+      ],
+      [
+        "the stash keeps a list of everything you've hidden.",
+        "git stash list shows every stash entry — with its index and the commit it was saved from.",
+        "run: git stash list"
+      ],
+      [
+        "you need to bring the stashed work back so you can continue.",
+        "git stash pop restores the latest stash and removes it from the list.",
+        "run: git stash pop"
+      ]
+    ]
+  },
+
+  // ──────────────────────────────────────────────────────
+  // ROOM 5: SEND THE SIGNAL
+  // git push, git push -u
+  // ──────────────────────────────────────────────────────
+  {
+    id: 5,
     name: 'SEND THE SIGNAL',
+    initialTree: 'r4_ahead',
     intro: "Your modified config is ready locally. The rest of the crew needs it. Upload your branch to the shared server.",
     stages: [
       {
@@ -382,12 +561,92 @@ const ROOMS = [
   },
 
   // ──────────────────────────────────────────────────────
-  // ROOM 5: READ THE ROOM
+  // ROOM 6: THE CREW CONFLICT
+  // git pull, resolve conflict, git add, git commit
+  // ──────────────────────────────────────────────────────
+  {
+    id: 6,
+    name: 'THE CREW CONFLICT',
+    initialTree: 'r_conflict_initial',
+    intro: "Two operatives edited the same file at the same time. The repo is in conflict. You need to resolve it — or the whole job falls apart.",
+    stages: [
+      {
+        foxMsg: "another operative pushed changes while you were working. pull their work down.",
+        task: "Pull the latest changes from origin.",
+        accepted: ["git pull", "git pull origin main"],
+        output: [
+          ["remote: Counting objects: 3, done.", "dim"],
+          ["Unpacking objects: 100% (3/3), done.", "dim"],
+          ["", ""],
+          ["Auto-merging entry-tokens.txt", "sys"],
+          ["CONFLICT (content): Merge conflict in entry-tokens.txt", "err"],
+          ["Automatic merge failed; fix conflicts and then commit the result.", "warn"],
+        ],
+        tree: "r_conflict_initial",
+        wrong: {
+          "git fetch": [
+            ["fetched. but the conflict is still there — you need to merge.", "dim"],
+            ["run: git pull to fetch AND merge in one step.", "dim"]
+          ]
+        }
+      },
+      {
+        foxMsg: "conflict in entry-tokens.txt. two operatives changed the same line. open the file — pick the correct version, remove the markers.",
+        task: "Resolve the merge conflict in entry-tokens.txt, then stage it.",
+        fileEdit: true,
+        fileName: "entry-tokens.txt",
+        fileEditType: "conflict",
+        accepted: ["git add entry-tokens.txt", "git add ."],
+        output: [
+          ["Changes staged for commit:", "sys"],
+          ["    modified:   entry-tokens.txt", "ok"],
+        ],
+        tree: "r_conflict_resolved",
+        wrong: {
+          "git commit": [["resolve the conflict first. edit entry-tokens.txt, remove the markers, then: git add entry-tokens.txt", "warn"]],
+          "git commit -m": [["resolve the conflict first. open the file, fix it, then stage it.", "warn"]],
+        }
+      },
+      {
+        foxMsg: "good. close the merge — save the resolution as a commit.",
+        task: "Commit the merge resolution.",
+        flexCommit: true,
+        accepted: ["git commit -m \"resolve merge conflict in entry-tokens.txt\""],
+        output: [],
+        tree: "r_conflict_merged",
+        wrong: {
+          "git commit": [["add -m and a message: git commit -m \"resolve merge conflict in entry-tokens.txt\"", "warn"]]
+        },
+        completionMsg: "conflicts happen when two people work at the same time. you resolve them, you merge, you move on."
+      }
+    ],
+    hints: [
+      [
+        "you need to fetch and merge the remote changes in one step.",
+        "git pull does both — fetch from origin and merge into your branch.",
+        "run: git pull"
+      ],
+      [
+        "the conflict is in entry-tokens.txt. open it to see the conflict markers.",
+        "remove the <<<<<<, ======, >>>>>>> lines and keep the correct content. then: git add entry-tokens.txt",
+        "type: edit entry-tokens.txt"
+      ],
+      [
+        "once the conflict is resolved and staged, you complete the merge with a commit.",
+        "git commit -m \"...\" saves the resolution as a new commit.",
+        "run: git commit -m \"resolve merge conflict in entry-tokens.txt\""
+      ]
+    ]
+  },
+
+  // ──────────────────────────────────────────────────────
+  // ROOM 7: READ THE ROOM
   // git status, git log --oneline, git show / git diff
   // ──────────────────────────────────────────────────────
   {
-    id: 5,
+    id: 7,
     name: 'READ THE ROOM',
+    initialTree: 'r5_dirty',
     intro: "The IDS tripped at 01:47. Something changed that shouldn't have. Find what happened, when, and who did it — before their security team traces the intrusion back to us.",
     stages: [
       {
@@ -473,11 +732,12 @@ const ROOMS = [
   },
 
   // ──────────────────────────────────────────────────────
-  // ROOM 6: ERASE THE TRAIL
+  // ROOM 8: ERASE THE TRAIL
   // git clean -fd, git restore, git revert, git reset
   // ──────────────────────────────────────────────────────
   {
-    id: 6,
+    id: 8,
+    initialTree: 'r6_dirty',
     name: 'ERASE THE TRAIL',
     intro: "The 'temp fix' commit is in shared history. It needs to go — but logs are monitored. You can't rewrite shared history. Undo it officially. And clean up the local mess first.",
     stages: [
@@ -711,6 +971,55 @@ const TREE = {
     ],
     HEAD: { type: "branch", ref: "main", ci: 5, branchY: 80 },
     extras: [{ type: "revert-label", x: 205, y: 80 }]
+  },
+
+  // Room 0: THE EQUIPMENT
+  r0_initial: {
+    branches: [
+      { name: "main", y: 80, color: "#1D9E75", commits: [{x:40}, {x:90}] }
+    ],
+    HEAD: { type: "branch", ref: "main", ci: 1, branchY: 80 }
+  },
+
+  // Room 4: HIDE THE EVIDENCE
+  r_stash_dirty: {
+    branches: [
+      { name: "operative/entry-window", y: 80, color: "#7eb8d4", commits: [{x:40}, {x:90}, {x:140}] }
+    ],
+    HEAD: { type: "branch", ref: "operative/entry-window", ci: 2, branchY: 80 },
+    extras: [{ type: "dirty-indicator", x: 10, y: 200 }]
+  },
+  r_stash_clean: {
+    branches: [
+      { name: "operative/entry-window", y: 80, color: "#7eb8d4", commits: [{x:40}, {x:90}, {x:140}] }
+    ],
+    HEAD: { type: "branch", ref: "operative/entry-window", ci: 2, branchY: 80 },
+    extras: [{ type: "stash-indicator", x: 10, y: 200 }]
+  },
+
+  // Room 6: THE CREW CONFLICT
+  r_conflict_initial: {
+    branches: [
+      { name: "main",         y: 60,  color: "#1D9E75",   commits: [{x:40}, {x:85}, {x:130}] },
+      { name: "origin/main",  y: 130, color: "#1D9E7566", commits: [{x:40}, {x:85}, {x:130}, {x:175}], dashed: true }
+    ],
+    HEAD: { type: "branch", ref: "main", ci: 2, branchY: 60 },
+    extras: [{ type: "conflict-indicator", x: 10, y: 220 }]
+  },
+  r_conflict_resolved: {
+    branches: [
+      { name: "main",         y: 60,  color: "#1D9E75",   commits: [{x:40}, {x:85}, {x:130}] },
+      { name: "origin/main",  y: 130, color: "#1D9E7566", commits: [{x:40}, {x:85}, {x:130}, {x:175}], dashed: true }
+    ],
+    HEAD: { type: "branch", ref: "main", ci: 2, branchY: 60 },
+    extras: [{ type: "staged-indicator", x: 10, y: 220 }]
+  },
+  r_conflict_merged: {
+    branches: [
+      { name: "main",         y: 65,  color: "#1D9E75",   commits: [{x:35}, {x:75}, {x:115}, {x:160}] },
+      { name: "origin/main",  y: 130, color: "#1D9E7566", commits: [{x:35}, {x:75}, {x:115}, {x:160}], dashed: true }
+    ],
+    HEAD: { type: "branch", ref: "main", ci: 3, branchY: 65 }
   }
 };
 
