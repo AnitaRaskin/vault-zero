@@ -99,6 +99,25 @@ body {
 .boot-line.err   { color: var(--err); }
 .boot-line.hl    { color: var(--primary); }
 
+.boot-skip-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+.boot-skip-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 10px;
+  letter-spacing: 2px;
+  cursor: pointer !important;
+  padding: 2px 0;
+  transition: color 0.15s;
+}
+.boot-skip-btn:hover { color: var(--primary); }
+
 .tx-fade { transition: opacity 0.55s ease, transform 0.55s ease; }
 
 /* ─── OPERATIVE NAME INPUT ────────────────────────────────── */

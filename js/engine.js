@@ -675,13 +675,13 @@ function updateSecurityDots() {
 }
 
 const BOOT_LINES = [
-  { text: '> initializing secure tunnel to vault_zero_banking_system...', cls: 'dim', pause: 450 },
-  { text: '> handshake 0x4f22 — success', cls: 'ok', pause: 380 },
-  { text: '> bypassing firewall node layer_01...', cls: 'dim', pause: 550 },
-  { text: '> LAYER_01: ACCESS BYPASSED', cls: 'ok', pause: 320 },
-  { text: '> WARNING: intrusion_detection_system active on layer_02', cls: 'warn', pause: 420 },
-  { text: '> encrypted tunnel established. trace protection: active', cls: 'ok', pause: 320 },
-  { text: '> incoming transmission — source: unknown // signal encrypted', cls: 'dim', pause: 200 },
+  { text: '> initializing secure tunnel to vault_zero_banking_system...', cls: 'dim', pause: 180 },
+  { text: '> handshake 0x4f22 — success', cls: 'ok', pause: 140 },
+  { text: '> bypassing firewall node layer_01...', cls: 'dim', pause: 200 },
+  { text: '> LAYER_01: ACCESS BYPASSED', cls: 'ok', pause: 120 },
+  { text: '> WARNING: intrusion_detection_system active on layer_02', cls: 'warn', pause: 160 },
+  { text: '> encrypted tunnel established. trace protection: active', cls: 'ok', pause: 120 },
+  { text: '> incoming transmission — source: unknown // signal encrypted', cls: 'dim', pause: 80 },
 ];
 
 function buildEndScreen() {
@@ -766,9 +766,9 @@ function runBootSequence() {
       if (skipped) return;
       if (ci < txt.length) {
         el.textContent += txt[ci++];
-        setTimeout(typeChar, 14);
+        setTimeout(typeChar, 6);
       } else {
-        setTimeout(nextLine, line.pause || 300);
+        setTimeout(nextLine, line.pause || 120);
       }
     }
     typeChar();
@@ -777,6 +777,8 @@ function runBootSequence() {
   nextLine();
   document.addEventListener('keydown', skip, { once: true });
   container.addEventListener('click', skip, { once: true });
+  const skipBtn = document.getElementById('bootSkipBtn');
+  if (skipBtn) skipBtn.addEventListener('click', skip, { once: true });
 }
 
 runBootSequence();
