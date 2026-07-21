@@ -1306,5 +1306,8 @@ function startGame() {
   G.userId = user.userId;
   G.isAuthenticated = true;
   const nameEl = document.getElementById('operativeName');
-  if (nameEl && user.codename) nameEl.value = user.codename;
+  if (nameEl && user.codename) {
+    nameEl.value    = user.codename;
+    nameEl.readOnly = true;
+  }
 })();

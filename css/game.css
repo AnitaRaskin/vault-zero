@@ -113,6 +113,7 @@ body {
   cursor: text !important;
 }
 .operative-input::placeholder { color: var(--text-muted); }
+.operative-input[readonly] { opacity: 0.6; cursor: default !important; }
 
 .tx-header {
   color: var(--primary);
