@@ -43,7 +43,7 @@ Before stages that introduce a new idea, a **Concept Brief** modal appears — a
 ### Core mechanics
 - **Terminal panel** — type Git commands, get real-looking output
 - **Fox's comms** — mission briefing from your encrypted crew contact, stage by stage (typewriter style)
-- **Repo state panel** — live SVG diagram of branches, commits, and HEAD — updates as you work
+- **Repo state panel** — live SVG tree with LIVE badge, HEAD pulse ring, hover tooltips on each commit, and a status bar showing current branch and state — updates as you work
 - **Hint system** — 3 levels per stage (nudge → method → explanation). Level 3 requires a two-click confirm and costs the most points
 - **Live score** — +10 per stage, deductions for hints and wrong answers
 
@@ -61,7 +61,7 @@ Room 3 also teaches the difference between `git add .` (broad, fast — under po
 ### Other mechanics
 - **Command log** — `[cmd: log]` button records every command used this run; downloadable as a cheat sheet
 - **Per-room clue fragments** — each room reveals a piece of the access credentials, typewriter-revealed and assembled on the final screen
-- **Fox verification quiz** — 4 questions after the last room; 2 drawn from commands you actually used, 2 static questions on Git concepts. Timed per question
+- **Fox verification quiz** — 4 questions after the last room; 2 drawn from commands you actually used, 2 static questions on Git concepts. Timed per question, with a NEXT QUESTION button between each
 - **Leaderboard** — finish and save your score (Supabase backend)
 - **Enter key on room-done modal** — after clearing a room, press Enter to move to the next without reaching for the mouse
 - **Progress** saves to `localStorage` — pick up where you left off
