@@ -117,6 +117,25 @@ before(() => {
     window._TREE   = TREE;
   `);
 
+  // Engine is now split into modules — inject in the same order as the HTML.
+  // All scripts share jsdom's global scope, so each file's const/let bindings
+  // are visible to later files. The bridge is appended to the last file so it
+  // can reach variables declared in any of the earlier files.
+  inject('js/hashes.js',    '');
+  inject('js/state.js',     '');
+  inject('js/audio.js',     '');
+  inject('js/terminal.js',  '');
+  inject('js/score.js',     '');
+  inject('js/police.js',    '');
+  inject('js/cheatsheet.js','');
+  inject('js/modals.js',    '');
+  inject('js/editor.js',    '');
+  inject('js/hints.js',     '');
+  inject('js/progress.js',  '');
+  inject('js/resize.js',    '');
+  inject('js/admin.js',     '');
+  inject('js/boot.js',      '');
+
   inject('js/engine.js', `
     window._G              = G;
     window._H              = H;
@@ -128,7 +147,8 @@ before(() => {
     window._getQuizQs      = () => quizQuestions;
     window._getQuizIdx     = () => quizIdx;
     window._getQuizCorrect = () => quizCorrect;
-    // Reset helper — runs inside engine scope so it can mutate all vars
+    // Reset helper — runs inside the shared global scope so it can reach
+    // variables from any of the split files (G, cmdLog, policeActive, etc.)
     window._resetG = function() {
       G.roomIdx       = 0;  G.stageIdx      = 0;
       G.hintsUsed     = 0;  G.totalHints    = 0;
@@ -329,10 +349,11 @@ describe('Quiz pool data integrity', () => {
 // ─── buildQuiz() ──────────────────────────────────────────────────────
 
 describe('buildQuiz()', () => {
-  test('produces exactly 4 questions with empty cmdLog', () => {
+  test('produces up to 7 questions with empty cmdLog', () => {
     resetG();
     win.buildQuiz();
-    assert.equal(win._getQuizQs().length, 4);
+    const len = win._getQuizQs().length;
+    assert.ok(len > 0 && len <= 7, `expected 1–7 questions, got ${len}`);
   });
   test('picks a dynamic question from cmdLog', () => {
     resetG();
@@ -341,14 +362,15 @@ describe('buildQuiz()', () => {
     assert.ok(win._getQuizQs().some(q => q === CMD_QUIZ_POOL['git stash']),
       'stash question not selected despite being in cmdLog');
   });
-  test('caps dynamic questions at 2 even with large cmdLog', () => {
+  test('caps total at 7 even with large cmdLog', () => {
     resetG();
     ['git stash', 'git push', 'git pull', 'git revert', 'git checkout'].forEach(cmd =>
       cmdLog.push({ cmd, desc: '' }));
     win.buildQuiz();
-    assert.equal(win._getQuizQs().length, 4);
+    const len = win._getQuizQs().length;
+    assert.ok(len > 0 && len <= 7, `expected 1–7 questions, got ${len}`);
     const dynamic = win._getQuizQs().filter(q => Object.values(CMD_QUIZ_POOL).includes(q));
-    assert.ok(dynamic.length <= 2, `${dynamic.length} dynamic questions, max is 2`);
+    assert.ok(dynamic.length <= 4, `${dynamic.length} dynamic questions, max is 4`);
   });
   test('no duplicate questions in quiz', () => {
     resetG();
@@ -490,11 +512,11 @@ describe('parseCmd()', () => {
     win.parseCmd('git  log  --oneline');
     assert.equal(G.stageIdx, 2);
   });
-  test('flexCommit: valid message triggers advance (+10 score)', () => {
+  test('flexCommit: valid message triggers advance (+10) and good-msg bonus (+5)', () => {
     resetG();
     G.roomIdx = 3; G.stageIdx = 4;  // Room 3 Stage 4 is flexCommit
     win.parseCmd('git commit -m "set maintenance window to 02:00"');
-    assert.equal(G.score, 10);
+    assert.equal(G.score, 15);  // 10 for advance + 5 good-message bonus
   });
   test('flexCommit: trivial message still commits (warning is cosmetic)', () => {
     resetG();

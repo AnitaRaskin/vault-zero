@@ -552,12 +552,26 @@
 })();
 </script>
 
-<!-- scripts: config → data → renderer → supabase → engine -->
+<!-- scripts: mission data → shared engine modules (load order matters) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./config.js"></script>
 <script src="./data.js"></script>
 <script src="../../js/renderer.js"></script>
 <script src="../../js/supabase.js"></script>
+<script src="../../js/hashes.js"></script>
+<script src="../../js/state.js"></script>
+<script src="../../js/audio.js"></script>
+<script src="../../js/terminal.js"></script>
+<script src="../../js/score.js"></script>
+<script src="../../js/police.js"></script>
+<script src="../../js/cheatsheet.js"></script>
+<script src="../../js/modals.js"></script>
+<script src="../../js/editor.js"></script>
+<script src="../../js/hints.js"></script>
+<script src="../../js/progress.js"></script>
+<script src="../../js/resize.js"></script>
+<script src="../../js/admin.js"></script>
+<script src="../../js/boot.js"></script>
 <script src="../../js/engine.js"></script>
 
 </body>

@@ -52,7 +52,21 @@ vault-zero/
 │   ├── hub.css                  — hub landing page styles
 │   └── game.css                 — game styles (terminal, panels, modals, police mechanic)
 ├── js/
-│   ├── engine.js                — game loop, command parsing, scoring, quiz, police, boot, persistence
+│   ├── hashes.js                — session commit hash generation (H[1]–H[8]) + interp()
+│   ├── state.js                 — G state object, room() / stage() accessors
+│   ├── audio.js                 — AudioContext, footstep and police voice playback
+│   ├── terminal.js              — DOM refs, tprint / tcmd / foxMsg / flashTerminal
+│   ├── score.js                 — addScore, showScoreDelta
+│   ├── police.js                — police mechanic: countWrong, triggerPolice, clearPolice, UI
+│   ├── cheatsheet.js            — command log, openCheatSheet, downloadCheatSheet
+│   ├── modals.js                — concept brief and police-warn modals
+│   ├── editor.js                — file editor: openEditor, saveFile, cancelFile
+│   ├── hints.js                 — hint system: openHint, moreHint, closeHint
+│   ├── progress.js              — header progress bar, branch badge, security dots
+│   ├── resize.js                — drag-to-resize split panel (terminal / git tree)
+│   ├── admin.js                 — admin room-jump panel (//jump, Ctrl+Shift+J)
+│   ├── boot.js                  — typewriter boot sequence animation
+│   ├── engine.js                — core game loop: parseCmd, advance, quiz, tour, persistence
 │   ├── renderer.js              — SVG git tree renderer
 │   └── supabase.js              — score saving + leaderboard
 ├── missions/
