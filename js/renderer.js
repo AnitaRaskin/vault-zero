@@ -62,32 +62,44 @@ function renderTree(stateKey) {
   }
 
   // ── Canvas & normalization ────────────────────────────────────────────
-  // Use the actual rendered SVG size so content fills the panel exactly.
-  const CW = svg.clientWidth  || 200;
-  const CH = svg.clientHeight || 300;
-  const PAD_X = 48, PAD_Y = 28; // padding so labels have room
+  // Use actual rendered SVG size for the viewBox.
+  const CW = svg.clientWidth  || 220;
+  const CH = svg.clientHeight || 320;
+  svg.setAttribute('viewBox', `0 0 ${CW} ${CH}`);
 
   const branches = state.branches || [];
   const h        = state.HEAD;
 
-  // Collect all raw lane (branch.y) and depth (commit.x) values
-  const allLanes  = branches.map(b => b.y);
-  const allDepths = branches.flatMap(b => b.commits.map(c => c.x));
+  // Quantize: assign a discrete row to each unique depth value, and a
+  // discrete column to each unique lane value. This means commit spacing
+  // is always fixed (ROW_H px) regardless of raw data coordinate spread.
+  const ROW_H = 68, COL_W = 68;
+  const PAD_X = 76, PAD_Y = 36; // room for HEAD chip (left) and labels (top)
 
-  const minLane = allLanes.length  ? Math.min(...allLanes)  : 80;
-  const maxLane = allLanes.length  ? Math.max(...allLanes)  : 80;
-  const minDepth = allDepths.length ? Math.min(...allDepths) : 35;
-  const maxDepth = allDepths.length ? Math.max(...allDepths) : 185;
+  const uniqueDepths = [...new Set(branches.flatMap(b => b.commits.map(c => c.x)))].sort((a,b)=>a-b);
+  const uniqueLanes  = [...new Set(branches.map(b => b.y))].sort((a,b)=>a-b);
+  const depthRow = Object.fromEntries(uniqueDepths.map((d,i)=>[d,i]));
+  const laneCol  = Object.fromEntries(uniqueLanes.map((l,i) =>[l,i]));
 
-  // Normalize lane → canvas x, depth → canvas y
-  const laneSpread  = maxLane  - minLane  || 1;
-  const depthSpread = maxDepth - minDepth || 1;
+  const numRows = Math.max(uniqueDepths.length, 1);
+  const numCols = Math.max(uniqueLanes.length,  1);
 
-  function nx(lane)  { return PAD_X + (lane  - minLane)  / laneSpread  * (CW - PAD_X * 2); }
-  function ny(depth) { return PAD_Y + (depth - minDepth) / depthSpread * (CH - PAD_Y * 2); }
+  // Natural content size — capped to panel, never stretched beyond it
+  const contentH = Math.min((numRows - 1) * ROW_H, CH - PAD_Y * 2);
+  const contentW = Math.min((numCols - 1) * COL_W, CW - PAD_X * 2);
 
-  // Set fixed viewBox — content always fills this space
-  svg.setAttribute('viewBox', `0 0 ${CW} ${CH}`);
+  // Center content in the panel
+  const offsetY = (CH - contentH) / 2;
+  const offsetX = (CW - contentW) / 2;
+
+  function nx(lane) {
+    const col = laneCol[lane] ?? 0;
+    return offsetX + (numCols === 1 ? 0 : col / (numCols - 1) * contentW);
+  }
+  function ny(depth) {
+    const row = depthRow[depth] ?? 0;
+    return offsetY + (numRows === 1 ? 0 : row / (numRows - 1) * contentH);
+  }
 
   // ── Defs ──────────────────────────────────────────────────────────────
   const defs = svgEl('defs', {});
@@ -211,7 +223,7 @@ function renderTree(stateKey) {
   // ── HEAD indicator ────────────────────────────────────────────────────
   if (h) {
     if (h.type === 'detached') {
-      // h.cx was commit depth, h.cy was branch lane — transpose + normalize
+      // h.cx = commit depth → ny, h.cy = branch lane → nx
       const dcx = nx(h.cy);
       const dcy = ny(h.cx);
       svg.appendChild(svgEl('circle', {
@@ -236,16 +248,18 @@ function renderTree(stateKey) {
       const hcy   = ny(headCommit.x);
       const color = headBranch.color;
 
-      // Dashed stem to left
+      // Chip goes left normally; flip right if too close to left edge
+      const chipW = 36, chipH = 14, stemLen = 20, gap = 9;
+      const goRight = hcx < PAD_X + 10;
+      const dir     = goRight ? 1 : -1;
+
       svg.appendChild(svgEl('line', {
-        x1: hcx - 9, y1: hcy, x2: hcx - 20, y2: hcy,
+        x1: hcx + dir * gap, y1: hcy, x2: hcx + dir * (gap + stemLen), y2: hcy,
         stroke: color, 'stroke-width': '1',
         'stroke-dasharray': '2,2', opacity: '0.5'
       }));
 
-      // HEAD chip
-      const chipW = 36, chipH = 14;
-      const chipX = hcx - 20 - chipW;
+      const chipX = goRight ? hcx + gap + stemLen : hcx - gap - stemLen - chipW;
       const chipY = hcy - 7;
       svg.appendChild(svgEl('rect', {
         x: chipX, y: chipY, width: chipW, height: chipH, rx: '3',
