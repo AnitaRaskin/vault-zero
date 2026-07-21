@@ -71,14 +71,3 @@ Uses Node's native test runner (`node:test`). The only dev dependency is `jsdom`
 
 Vanilla JS + Supabase for the leaderboard. No build step, no framework, no bundler.
 
-## Supabase setup
-
-The leaderboard requires a `scores` table with RLS enabled:
-
-```sql
-ALTER TABLE scores ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "anyone can insert" ON scores FOR INSERT WITH CHECK (true);
-CREATE POLICY "anyone can read"   ON scores FOR SELECT USING (true);
-```
-
-Without this, score saves fail silently (shown as a red note in-game and logged to the console).
