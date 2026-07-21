@@ -1146,17 +1146,16 @@ let _tourStep = 0;
 
 function startTour() {
   _tourStep = 0;
-  const overlay = document.getElementById('tourOverlay');
-  overlay.style.display = 'block';
-  // Place without transition on first step
-  const sp = document.getElementById('tourSpotlight');
-  const tt = document.getElementById('tourTooltip');
-  sp.style.transition = 'none';
-  tt.style.transition = 'none';
+  document.getElementById('tourOverlay').style.display = 'block';
+  // Disable transitions for instant first placement
+  ['tourDimTop','tourDimBottom','tourDimLeft','tourDimRight','tourSpotlight','tourTooltip'].forEach(id => {
+    document.getElementById(id).style.transition = 'none';
+  });
   showTourStep(0);
   requestAnimationFrame(() => {
-    sp.style.transition = '';
-    tt.style.transition = '';
+    ['tourDimTop','tourDimBottom','tourDimLeft','tourDimRight','tourSpotlight','tourTooltip'].forEach(id => {
+      document.getElementById(id).style.transition = '';
+    });
   });
   document.addEventListener('keydown', _tourKeyHandler);
 }
@@ -1183,22 +1182,37 @@ function showTourStep(i) {
   const vw   = window.innerWidth;
   const vh   = window.innerHeight;
 
-  const sp = document.getElementById('tourSpotlight');
-  sp.style.left   = (rect.left   - PAD) + 'px';
-  sp.style.top    = (rect.top    - PAD) + 'px';
-  sp.style.width  = (rect.width  + PAD * 2) + 'px';
-  sp.style.height = (rect.height + PAD * 2) + 'px';
+  // Four dark rects surrounding the spotlight hole
+  const l = rect.left - PAD, t = rect.top - PAD;
+  const r = rect.right + PAD, b = rect.bottom + PAD;
+  function setDim(id, left, top, width, height) {
+    const st = document.getElementById(id).style;
+    st.left = left + 'px'; st.top = top + 'px';
+    st.width = width + 'px'; st.height = height + 'px';
+  }
+  setDim('tourDimTop',    0, 0,   vw,     t);
+  setDim('tourDimBottom', 0, b,   vw,     vh - b);
+  setDim('tourDimLeft',   0, t,   l,      b - t);
+  setDim('tourDimRight',  r, t,   vw - r, b - t);
 
+  // Spotlight border around the element
+  const sp = document.getElementById('tourSpotlight');
+  sp.style.left   = l + 'px';
+  sp.style.top    = t + 'px';
+  sp.style.width  = (r - l) + 'px';
+  sp.style.height = (b - t) + 'px';
+
+  // Tooltip position
   let tl, ttop;
   if (step.pos === 'right') {
-    tl   = rect.right + GAP;
-    ttop = Math.max(16, Math.min(rect.top, vh - TH - 16));
+    tl   = r + GAP;
+    ttop = Math.max(16, Math.min(t, vh - TH - 16));
   } else if (step.pos === 'left') {
-    tl   = rect.left - GAP - TW;
-    ttop = Math.max(16, Math.min(rect.top, vh - TH - 16));
+    tl   = l - GAP - TW;
+    ttop = Math.max(16, Math.min(t, vh - TH - 16));
   } else { // bottom
-    tl   = Math.max(16, Math.min(rect.left - PAD, vw - TW - 16));
-    ttop = rect.bottom + GAP;
+    tl   = Math.max(16, Math.min(l, vw - TW - 16));
+    ttop = b + GAP;
   }
 
   const tt = document.getElementById('tourTooltip');
