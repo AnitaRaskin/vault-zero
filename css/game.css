@@ -1,7 +1,9 @@
 /* ─── GAME-SPECIFIC KEYFRAMES ─────────────────────────────── */
-@keyframes slideIn  { to { opacity: 1; transform: translateY(0); } }
-@keyframes dotPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
-@keyframes errFlash { 0%, 100% { background: var(--bg); } 35% { background: rgba(255,180,171,0.07); } }
+@keyframes slideIn    { to { opacity: 1; transform: translateY(0); } }
+@keyframes dotPulse   { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+@keyframes errFlash   { 0%, 100% { background: var(--bg); } 35% { background: rgba(255,180,171,0.07); } }
+@keyframes headPulse  { 0%, 100% { opacity: 0; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.25); } }
+@keyframes liveDot    { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
 .cursor-blink {
   display: inline-block;
@@ -453,53 +455,120 @@ body.resizing-col    { user-select: none; }
 }
 
 /* ─── GIT TREE ────────────────────────────────────────────── */
-.tree-panel { background: var(--bg); }
-#gitTree {
-  flex: 1;
-  width: 100%;
-  min-height: 0;
+/* ─── TREE PANEL ──────────────────────────────────────────── */
+.tree-panel {
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
 }
 
-.tree-meta {
-  padding: 12px 16px;
+.tree-panel-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tree-live-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--primary);
+  opacity: 0.7;
+}
+.tree-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: liveDot 1.8s step-end infinite;
+}
+
+.tree-svg-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#gitTree {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ─── HEAD PULSE RING ─────────────────────────────────────── */
+.head-pulse-ring {
+  animation: headPulse 2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ─── COMMIT HOVER TOOLTIP ────────────────────────────────── */
+.tree-tooltip {
+  display: none;
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 7px 11px;
+  pointer-events: none;
+  z-index: 20;
+  max-width: 180px;
+  animation: fadeUp 0.12s ease;
+}
+.tree-tooltip .tt-main {
+  display: block;
+  font-size: 10px;
+  color: var(--primary);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.tree-tooltip .tt-sub {
+  display: block;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* ─── TREE STATUS BAR ─────────────────────────────────────── */
+.tree-status-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 14px;
   border-top: 1px solid var(--border);
+  background: var(--surface);
   flex-shrink: 0;
 }
-.tree-meta-title {
-  font-size: 9px;
+.tree-stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.tree-stat-key {
+  font-size: 8px;
+  font-family: var(--font);
   color: var(--text-muted);
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: 10px;
+  width: 40px;
+  flex-shrink: 0;
 }
-.tree-meta-env-label {
-  font-size: 9px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-.tree-meta-chip {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 4px 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.tree-meta-chip-val {
+.tree-stat-val {
+  font-size: 10px;
+  font-family: var(--font);
   color: var(--primary);
-  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
-.tree-meta-chip-right {
-  font-size: 9px;
-  color: var(--text-muted);
-}
-.tree-meta-info {
-  font-size: 9px;
-  color: var(--text-muted);
-  opacity: 0.5;
-  line-height: 1.8;
-}
+
+/* Status value colour variants */
+.ts-clean  { color: var(--primary); }
+.ts-ok     { color: #68dbae; }
+.ts-warn   { color: #c8a87a; }
+.ts-err    { color: #ffb4ab; }
+.ts-amber  { color: #c8a87a; }
 
 /* ─── HINT MODAL ──────────────────────────────────────────── */
 #hintModal {
@@ -691,6 +760,127 @@ body.resizing-col    { user-select: none; }
   line-height: 1.8;
 }
 
+/* ─── CONCEPT BRIEF MODAL ─────────────────────────────────── */
+#conceptModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(13,15,14,0.94);
+  z-index: 155;
+  align-items: center;
+  justify-content: center;
+}
+#conceptModal.open { display: flex; }
+.concept-box {
+  background: var(--surface);
+  border: 1px solid var(--primary);
+  max-width: 540px;
+  width: 90%;
+  overflow: hidden;
+}
+.concept-header {
+  background: var(--primary);
+  color: #0d0f0e;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.concept-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  opacity: 0.7;
+}
+.concept-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+.concept-body { padding: 26px 32px 28px; }
+.concept-bullet {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 2;
+  padding-left: 16px;
+  position: relative;
+  margin-bottom: 2px;
+}
+.concept-bullet::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--primary);
+}
+.concept-ascii {
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg);
+  border-left: 2px solid var(--primary);
+  padding: 10px 16px;
+  margin: 18px 0 22px;
+  line-height: 1.8;
+  white-space: pre;
+  overflow-x: auto;
+}
+.concept-btn {
+  width: 100%;
+  padding: 10px;
+  letter-spacing: 2px;
+  font-size: 10px;
+  margin-top: 6px;
+}
+
+/* ─── PRE-POLICE FOX POPUP ────────────────────────────────── */
+#policeWarnModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(13,15,14,0.94);
+  z-index: 160;
+  align-items: center;
+  justify-content: center;
+}
+#policeWarnModal.open { display: flex; }
+.pwarn-box {
+  background: var(--surface);
+  border: 1px solid var(--warn);
+  max-width: 480px;
+  width: 90%;
+  overflow: hidden;
+}
+.pwarn-header {
+  background: var(--warn);
+  color: #0d0f0e;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+.pwarn-body { padding: 28px 32px 28px; }
+.pwarn-msg {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 2;
+  margin-bottom: 28px;
+  white-space: pre-line;
+  border-left: 2px solid var(--warn);
+  padding-left: 14px;
+}
+.pwarn-btn {
+  border-color: var(--warn);
+  color: var(--warn);
+  width: 100%;
+  padding: 10px;
+  letter-spacing: 2px;
+  font-size: 10px;
+}
+.pwarn-btn:hover { border-color: #e8c98a; color: #e8c98a; }
+
 /* ─── FILE EDITOR OVERLAY ─────────────────────────────────── */
 #fileEditor {
   display: none;
@@ -755,17 +945,81 @@ body.resizing-col    { user-select: none; }
 }
 #endScreen.open { display: flex; }
 .end-inner {
-  max-width: 600px;
+  max-width: 640px;
   width: 90%;
   text-align: center;
 }
 .end-logo {
-  font-size: 32px;
+  font-size: 38px;
   font-weight: 700;
   color: var(--primary);
-  letter-spacing: 10px;
+  letter-spacing: 14px;
   text-transform: uppercase;
-  margin: 20px 0;
+  margin: 8px 0 4px;
+  text-shadow: 0 0 30px rgba(29,158,117,0.5);
+}
+.end-crew-tag {
+  font-size: 9px;
+  color: var(--primary);
+  letter-spacing: 5px;
+  font-weight: 700;
+  margin-bottom: 22px;
+  opacity: 0.75;
+  animation: blink 2s step-end infinite;
+}
+
+/* ─── END SCREEN FOX HERO ─────────────────────────────────── */
+.end-fox-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 18px 0 6px;
+}
+.end-fox-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(29,158,117,0.22) 0%, transparent 70%);
+  pointer-events: none;
+  animation: foxPulse 2.4s ease-in-out infinite;
+}
+@keyframes foxPulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -60%) scale(1); }
+  50%       { opacity: 1;   transform: translate(-50%, -60%) scale(1.12); }
+}
+.fox-avatar-xl {
+  width: 130px;
+  height: 130px;
+  filter: drop-shadow(0 0 18px rgba(29,158,117,0.55));
+  position: relative;
+  z-index: 1;
+}
+.end-fox-tag {
+  font-size: 9px;
+  color: var(--primary);
+  letter-spacing: 4px;
+  font-weight: 700;
+}
+.end-fox-status {
+  font-size: 8px;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+.end-fox-msg-body { text-align: left; }
+.end-fox-speech-label {
+  font-size: 8px;
+  color: var(--primary);
+  letter-spacing: 3px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  opacity: 0.7;
 }
 
 /* ─── CLUE FRAGMENT (room done) ──────────────────────────── */
@@ -1362,6 +1616,14 @@ body.resizing-col    { user-select: none; }
 }
 .quiz-feedback.show-ok  { display: block; border-color: var(--ok);  }
 .quiz-feedback.show-err { display: block; border-color: var(--err); }
+
+.quiz-next-btn {
+  margin-top: 14px;
+  width: 100%;
+  font-size: 11px;
+  letter-spacing: 3px;
+  animation: fadeUp 0.2s ease;
+}
 
 .quiz-result-score {
   font-size: 26px;

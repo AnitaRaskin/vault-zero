@@ -406,7 +406,7 @@ const ROOMS = [
           ],
           ascii: "  UNTRACKED ──git add──▶ STAGED ──git commit──▶ COMMITTED\n  MODIFIED  ──git add──▶ STAGED"
         },
-        foxMsg: "scanner alert — police unit picking up traffic on this node. forensic tools are running. you've got modified files sitting open everywhere. stage ALL of it in one command — fast. git add . catches every change at once.",
+        foxMsg: "scanner alert — police unit picking up traffic on this node. forensic tools are running. you've got modified files sitting open everywhere. stage ALL of it in one command — fast.",
         task: "Stage all current changes immediately — one command, full sweep.",
         policeOnLoad: true,
         accepted: ["git add ."],
@@ -543,7 +543,7 @@ const ROOMS = [
       },
       {
         foxMsg: "they're two blocks away. stash it. hide everything. NOW.",
-        policePopupMsg: "scanner just lit up.\n\npolice unit detected — two blocks out, moving fast.\n\nyou have 30 seconds before they sweep this node.\n\nyour working tree CANNOT have open changes — they'll see everything.\n\nstash it. clean the tree. go.",
+        policePopupMsg: "scanner just lit up.\n\npolice unit detected — two blocks out, moving fast.\n\nyou have 30 seconds before they sweep this node.\n\nyour working tree CANNOT have open changes — they'll see everything.\n\nhide it. clean the tree. go.",
         task: "Stash your current changes to hide them.",
         policeOnLoad: true,
         policeWarnModal: true,

@@ -456,11 +456,29 @@ function parseCmd(raw) {
 
 function updateActiveBranch(treeKey) {
   const el = document.getElementById('activeBranch');
-  if (!el) return;
-  const label = GAME_CONFIG.activeBranchLabel
-    ? GAME_CONFIG.activeBranchLabel(treeKey)
-    : 'local/main';
-  el.textContent = label;
+  if (el) {
+    const label = GAME_CONFIG.activeBranchLabel
+      ? GAME_CONFIG.activeBranchLabel(treeKey)
+      : 'local/main';
+    el.textContent = label;
+  }
+  const statusEl = document.getElementById('treeStatus');
+  if (statusEl) {
+    const { text, cls } = _treeStatus(treeKey);
+    statusEl.textContent = text;
+    statusEl.className   = 'tree-stat-val ' + cls;
+  }
+}
+
+function _treeStatus(key) {
+  if (!key) return { text: 'clean', cls: 'ts-clean' };
+  if (key.includes('conflict'))    return { text: '✕ conflict', cls: 'ts-err' };
+  if (key.includes('dirty'))       return { text: '⚠ dirty',   cls: 'ts-warn' };
+  if (key.includes('staged'))      return { text: '● staged',  cls: 'ts-ok' };
+  if (key.includes('stash_clean')) return { text: '◎ stashed', cls: 'ts-amber' };
+  if (key.includes('reverted'))    return { text: '↩ reverted',cls: 'ts-ok' };
+  if (key.includes('pushed') || key.includes('cloned')) return { text: '↑ synced', cls: 'ts-ok' };
+  return { text: 'clean', cls: 'ts-clean' };
 }
 
 function loadNextStageUI() {
@@ -571,7 +589,7 @@ function loadRoom() {
   tprint([
     ['', ''],
     [`  ╔══════════════════════════════════════╗`, 'dim'],
-    [`  ║  ROOM ${r.id}: ${r.name.padEnd(32)}║`, 'hl'],
+    [`  ║  ROOM ${r.id}: ${r.name.padEnd(28)}║`, 'hl'],
     [`  ╚══════════════════════════════════════╝`, 'dim'],
     ['', ''],
     [r.intro, 'sys'],
@@ -868,11 +886,11 @@ function buildQuiz() {
         break;
       }
     }
-    if (picked.length >= 2) break;
+    if (picked.length >= 4) break;
   }
   const shuffled = statics.slice().sort(() => 0.5 - Math.random());
-  for (const q of shuffled) { if (picked.length >= 4) break; picked.push(q); }
-  quizQuestions = picked.slice(0, 4);
+  for (const q of shuffled) { if (picked.length >= 7) break; picked.push(q); }
+  quizQuestions = picked.slice(0, 7);
   quizIdx       = 0;
   quizCorrect   = 0;
 
@@ -945,7 +963,18 @@ function answerQuiz(chosen) {
   fb.textContent = prefix + q.explain;
   fb.className   = 'quiz-feedback ' + (correct ? 'show-ok' : 'show-err');
   quizIdx++;
-  setTimeout(() => { if (quizIdx < quizQuestions.length) showQuizQuestion(quizIdx); else showQuizResult(); }, 2600);
+  const nextBtn = document.getElementById('quizNextBtn');
+  if (nextBtn) {
+    nextBtn.textContent = quizIdx < quizQuestions.length ? 'NEXT QUESTION →' : 'SEE RESULTS →';
+    nextBtn.style.display = '';
+  }
+}
+
+function nextQuizStep() {
+  const nextBtn = document.getElementById('quizNextBtn');
+  if (nextBtn) nextBtn.style.display = 'none';
+  if (quizIdx < quizQuestions.length) showQuizQuestion(quizIdx);
+  else showQuizResult();
 }
 
 function showQuizResult() {

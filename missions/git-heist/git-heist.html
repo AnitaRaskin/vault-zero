@@ -134,16 +134,23 @@
     <div class="resize-handle" id="resizeRight"></div>
     <!-- Git tree -->
     <div class="panel tree-panel">
-      <div class="panel-header">REPO STATE</div>
-      <svg id="gitTree" viewBox="0 0 240 360" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="tree-meta">
-        <div class="tree-meta-title">network_topology // recursive_scan</div>
-        <div class="tree-meta-env-label">active_env</div>
-        <div class="tree-meta-chip">
-          <span class="tree-meta-chip-val" id="activeBranch">local/main</span>
-          <span class="tree-meta-chip-right">secure_link</span>
+      <div class="panel-header tree-panel-hdr">
+        REPO STATE
+        <span class="tree-live-badge"><span class="tree-live-dot"></span>LIVE</span>
+      </div>
+      <div class="tree-svg-wrap">
+        <svg id="gitTree" viewBox="0 0 240 300" preserveAspectRatio="xMinYMin meet"></svg>
+        <div id="treeTooltip" class="tree-tooltip"></div>
+      </div>
+      <div class="tree-status-bar">
+        <div class="tree-stat-row">
+          <span class="tree-stat-key">branch</span>
+          <span class="tree-stat-val" id="activeBranch">main</span>
         </div>
-        <div class="tree-meta-info">integrity: verified<br>auth_level: operative_01<br>encryption: aes-256</div>
+        <div class="tree-stat-row">
+          <span class="tree-stat-key">status</span>
+          <span class="tree-stat-val ts-clean" id="treeStatus">clean</span>
+        </div>
       </div>
     </div>
   </div>
@@ -308,6 +315,7 @@
       <div class="quiz-q" id="quizQ"></div>
       <div class="quiz-opts" id="quizOpts"></div>
       <div class="quiz-feedback" id="quizFeedback"></div>
+      <button class="btn primary quiz-next-btn" id="quizNextBtn" onclick="nextQuizStep()" style="display:none">NEXT QUESTION →</button>
     </div>
 
     <div id="quizResult" style="display:none">
@@ -320,14 +328,35 @@
 <!-- ═══ END SCREEN ════════════════════════════════════════════ -->
 <div id="endScreen">
   <div class="end-inner">
-    <div class="tx-header">▓ TRANSMISSION ▓</div>
-    <div class="end-logo">OPERATION COMPLETE</div>
+    <div class="tx-header">▓ TRANSMISSION COMPLETE ▓</div>
+    <div class="end-fox-hero">
+      <div class="end-fox-glow"></div>
+      <svg class="fox-avatar-xl" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="47" fill="none" stroke="#1D9E75" stroke-width="1.5" opacity="0.6"/>
+        <circle cx="50" cy="54" r="34" fill="#131514"/>
+        <polygon points="19,47 28,10 44,43" fill="#131514" stroke="#1D9E75" stroke-width="1.5" stroke-linejoin="round"/>
+        <polygon points="56,43 72,10 81,47" fill="#131514" stroke="#1D9E75" stroke-width="1.5" stroke-linejoin="round"/>
+        <polygon points="23,45 29,17 41,42" fill="rgba(200,168,122,0.28)"/>
+        <polygon points="59,42 71,17 77,45" fill="rgba(200,168,122,0.28)"/>
+        <circle cx="50" cy="54" r="34" fill="none" stroke="#1D9E75" stroke-width="2"/>
+        <rect x="21" y="49" width="58" height="17" rx="5" fill="#0d0f0e" stroke="#1D9E75" stroke-width="1.5"/>
+        <ellipse cx="36" cy="57.5" rx="8" ry="5.5" fill="#1D9E75" opacity="0.22"/><ellipse cx="36" cy="57.5" rx="5" ry="3.5" fill="#1D9E75" opacity="0.45"/><circle cx="36" cy="57.5" r="2.5" fill="#68dbae"/>
+        <ellipse cx="64" cy="57.5" rx="8" ry="5.5" fill="#1D9E75" opacity="0.22"/><ellipse cx="64" cy="57.5" rx="5" ry="3.5" fill="#1D9E75" opacity="0.45"/><circle cx="64" cy="57.5" r="2.5" fill="#68dbae"/>
+        <rect x="44" y="55" width="12" height="2" rx="1" fill="#0d0f0e"/>
+        <ellipse cx="50" cy="76" rx="7" ry="4" fill="rgba(200,168,122,0.18)" stroke="#1D9E75" stroke-width="0.8" opacity="0.8"/>
+        <polygon points="47,75 50,79 53,75" fill="rgba(200,168,122,0.4)"/>
+      </svg>
+      <div class="end-fox-tag">// FOX</div>
+      <div class="end-fox-status">connection: secure // operative: confirmed</div>
+    </div>
+    <div class="end-logo">YOU'RE IN.</div>
+    <div class="end-crew-tag">▓ WELCOME TO THE CREW ▓</div>
     <div class="assembled-key-wrap">
       <div class="assembled-key-header">GIT HEIST // ACCESS CREDENTIALS</div>
       <div id="assembledKey"></div>
     </div>
-    <div class="tx-body">
-      <strong>From: Fox</strong><br><br>
+    <div class="tx-body end-fox-msg-body">
+      <div class="end-fox-speech-label">[ fox // final transmission ]</div>
       "The heist is done. The crew is in.<br><br>
       You handled the repo. You handled the history. You handled the mess.<br><br>
       That's all git ever is — knowing where you are, where you've been, and how to undo what went wrong.<br><br>
