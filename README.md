@@ -1,6 +1,6 @@
-# Git Heist // Vault Zero
+# Vault Zero — A Learning Escape Room
 
-A browser-based escape room platform for teaching developer tools and workflows. No install, no setup — open `index.html` to pick a mission.
+Currently one mission: **Git Heist** — a browser-based escape room for learning Git. No install, no setup. Players type real commands into an in-browser terminal and can only move forward by getting them right.
 
 Players type real commands into an in-browser terminal. Each mission wraps a cluster of developer commands inside a heist/thriller narrative. You can only move forward by typing the correct command. No multiple choice. No slides. Real commands, real output, real feedback.
 
@@ -8,7 +8,9 @@ Designed for junior engineers, bootcamp students, and anyone who learns better b
 
 ## Play
 
-Open `index.html` to access the mission hub, or host it from any static server — no build step, no dependencies.
+**Live:** [https://anitaraskin.github.io/git-heist/](https://anitaraskin.github.io/git-heist/)
+
+Or clone and open `index.html` locally — no build step, no dependencies.
 
 ## Missions
 
