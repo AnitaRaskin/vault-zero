@@ -40,7 +40,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
 // ─── Auth ────────────────────────────────────────────────────
 
 function _toEmail(codename) {
-  return `${codename.toLowerCase().replace(/[^a-z0-9_-]/g, '')}@vault-zero.game`;
+  return `${codename.toLowerCase().replace(/[^a-z0-9_-]/g, '')}@vault-zero.dev`;
 }
 
 async function authSignUp(codename, password) {
