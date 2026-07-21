@@ -600,8 +600,14 @@ function loadRoom() {
   updateProgress();
   renderTree(r.initialTree || ('r' + r.id + '_initial'));
   setTimeout(() => {
-    if (s.conceptBrief) showConceptBrief(s.conceptBrief, loadNextStageUI);
-    else                 loadNextStageUI();
+    if (_tourPending && s.conceptBrief) {
+      _deferredBrief = s.conceptBrief;
+      loadNextStageUI();
+    } else if (s.conceptBrief) {
+      showConceptBrief(s.conceptBrief, loadNextStageUI);
+    } else {
+      loadNextStageUI();
+    }
   }, 400);
   inp.focus();
 }
@@ -1143,6 +1149,8 @@ const TOUR_STEPS = [
 ];
 
 let _tourStep = 0;
+let _tourPending  = false;
+let _deferredBrief = null;
 
 function startTour() {
   _tourStep = 0;
@@ -1236,8 +1244,14 @@ function nextTourStep() {
 
 function skipTour() {
   localStorage.setItem('vz_tour_done', '1');
+  _tourPending = false;
   document.getElementById('tourOverlay').style.display = 'none';
   document.removeEventListener('keydown', _tourKeyHandler);
+  if (_deferredBrief) {
+    const brief = _deferredBrief;
+    _deferredBrief = null;
+    showConceptBrief(brief, () => inp.focus());
+  }
 }
 
 initResizable();
@@ -1259,6 +1273,7 @@ function startGame() {
   G.missionStart = Date.now();
   G.roomStart    = Date.now();
   startFooterClock();
+  if (!localStorage.getItem('vz_tour_done')) _tourPending = true;
   loadRoom();
-  if (!localStorage.getItem('vz_tour_done')) setTimeout(startTour, 600);
+  if (_tourPending) setTimeout(startTour, 600);
 }
