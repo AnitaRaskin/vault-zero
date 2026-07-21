@@ -1,5 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
-// SVG TREE RENDERER  v2
+// SVG TREE RENDERER  v3  — vertical layout
+// Data convention (unchanged): branch.y = lane position, commit.x = depth.
+// Rendering convention: branch.y → display cx (column), commit.x → display cy (row).
 // ═══════════════════════════════════════════════════════════════════════
 
 const NS = "http://www.w3.org/2000/svg";
@@ -62,12 +64,12 @@ function renderTree(stateKey) {
   // ── Defs ──────────────────────────────────────────────────────────────
   const defs = svgEl('defs', {});
 
-  // Arrowhead
-  const mk = svgEl('marker', { id: 'arr', markerWidth: '7', markerHeight: '5', refX: '3', refY: '2.5', orient: 'auto' });
-  mk.appendChild(svgEl('polygon', { points: '0 0,7 2.5,0 5', fill: '#3d4943' }));
+  // Arrowhead (pointing down)
+  const mk = svgEl('marker', { id: 'arr', markerWidth: '5', markerHeight: '7', refX: '2.5', refY: '6', orient: 'auto' });
+  mk.appendChild(svgEl('polygon', { points: '0 0,5 0,2.5 6', fill: '#3d4943' }));
   defs.appendChild(mk);
 
-  // HEAD glow filter
+  // HEAD glow
   const flt = svgEl('filter', { id: 'head-glow', x: '-60%', y: '-60%', width: '220%', height: '220%' });
   const blr = svgEl('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '2.8', result: 'blur' });
   const mrg = svgEl('feMerge', {});
@@ -94,19 +96,27 @@ function renderTree(stateKey) {
     }
   }
 
-  // ── Branch connectors (vertical lines at shared x) ────────────────────
+  // ── Coordinate helpers ────────────────────────────────────────────────
+  // bx(branch)  = branch.y  → horizontal column
+  // cy(commit)  = commit.x  → vertical row (depth)
+  const bx = b => b.y;
+  const cy = c => c.x;
+
+  // ── Horizontal connectors — branch forks ─────────────────────────────
   branches.forEach((branch, bi) => {
     if (branch.commits.length === 0) return;
-    const firstX = branch.commits[0].x;
+    const forkY = cy(branch.commits[0]);   // depth where this branch starts
+    const thisBx = bx(branch);
     for (let oi = 0; oi < bi; oi++) {
       const other = branches[oi];
-      if (other.commits.some(c => c.x === firstX)) {
+      if (other.commits.some(c => cy(c) === forkY)) {
+        const otherBx = bx(other);
         svg.appendChild(svgEl('line', {
-          x1: firstX, y1: other.y + 6,
-          x2: firstX, y2: branch.y - 6,
-          stroke: branch.dashed ? '#2a3830' : branch.color,
+          x1: Math.min(thisBx, otherBx), y1: forkY,
+          x2: Math.max(thisBx, otherBx), y2: forkY,
+          stroke: branch.color,
           'stroke-width': '1',
-          'stroke-dasharray': '3,2',
+          'stroke-dasharray': branch.dashed ? '3,2' : 'none',
           opacity: branch.dashed ? '0.2' : '0.4'
         }));
         break;
@@ -114,49 +124,52 @@ function renderTree(stateKey) {
     }
   });
 
-  // ── Branches: lines + commits ─────────────────────────────────────────
+  // ── Vertical branch lines + commit circles ────────────────────────────
   branches.forEach(branch => {
-    const cs      = branch.commits;
+    const branchX  = bx(branch);
+    const cs       = branch.commits;
     const isActive = branch === headBranch;
     const color    = branch.color;
 
-    // Horizontal line segments
-    for (let i = 0; i < cs.length - 1; i++) {
+    // Vertical spine
+    if (cs.length >= 2) {
+      const ys = cs.map(cy);
       svg.appendChild(svgEl('line', {
-        x1: cs[i].x,   y1: branch.y,
-        x2: cs[i+1].x, y2: branch.y,
+        x1: branchX, y1: Math.min(...ys),
+        x2: branchX, y2: Math.max(...ys),
         stroke: color,
-        'stroke-width':   branch.dashed ? '1'  : '1.5',
+        'stroke-width':     branch.dashed ? '1'   : '1.5',
         'stroke-dasharray': branch.dashed ? '5,4' : 'none',
         opacity: branch.dashed ? '0.3' : '0.8'
       }));
     }
 
-    // Commit circles
+    // Commits
     cs.forEach((c, ci) => {
       const isHead = isActive && ci === headCI;
-      const tip    = `${branch.name} | commit ${ci + 1} / ${cs.length}`;
-      const g      = svgEl('g', { 'data-tip': tip });
+      const commitY = cy(c);
+      const tip = `${branch.name} | commit ${ci + 1} / ${cs.length}`;
+      const g   = svgEl('g', { 'data-tip': tip });
 
-      // Invisible hit area (easier hover)
+      // Hit area
       g.appendChild(svgEl('circle', {
-        cx: c.x, cy: branch.y, r: '11',
+        cx: branchX, cy: commitY, r: '11',
         fill: 'transparent', stroke: 'none'
       }));
 
-      // Outer pulse ring – HEAD only
+      // Pulse ring (HEAD)
       if (isHead) {
         g.appendChild(svgEl('circle', {
-          cx: c.x, cy: branch.y, r: '13',
+          cx: branchX, cy: commitY, r: '13',
           fill: 'none', stroke: color,
           'stroke-width': '1', opacity: '0',
           class: 'head-pulse-ring'
         }));
       }
 
-      // Main commit circle
+      // Commit circle
       g.appendChild(svgEl('circle', {
-        cx: c.x, cy: branch.y,
+        cx: branchX, cy: commitY,
         r: isHead ? '7' : '5.5',
         fill: '#0a0c0b',
         stroke: color,
@@ -165,10 +178,10 @@ function renderTree(stateKey) {
         ...(isHead ? { filter: 'url(#head-glow)' } : {})
       }));
 
-      // Inner dot – HEAD only
+      // Inner dot (HEAD)
       if (isHead) {
         g.appendChild(svgEl('circle', {
-          cx: c.x, cy: branch.y, r: '2.5',
+          cx: branchX, cy: commitY, r: '2.5',
           fill: color, opacity: '0.9'
         }));
       }
@@ -176,27 +189,26 @@ function renderTree(stateKey) {
       svg.appendChild(g);
     });
 
-    // Branch label chip
+    // Branch label chip — appears to the right of the topmost commit
     if (cs.length === 0) return;
-    const last   = cs[cs.length - 1];
-    const lx     = last.x + 11;
+    const topC   = cs.reduce((a, b) => cy(a) < cy(b) ? a : b);
+    const labelX = branchX + 12;
+    const labelY = cy(topC);
     const chipW  = Math.max(branch.name.length * 5.3 + 14, 32);
-    const chipY  = branch.y - 8;
-    const chipG  = svgEl('g', {
+
+    const chipG = svgEl('g', {
       'data-tip': `${branch.name}${isActive ? ' | current' : ''}`
     });
-
     chipG.appendChild(svgEl('rect', {
-      x: lx - 2, y: chipY, width: chipW, height: 14, rx: '2',
-      fill: isActive ? color : 'transparent',
-      opacity: isActive ? '0.13' : '0',
-      stroke: isActive ? color : 'none',
+      x: labelX - 2, y: labelY - 7, width: chipW, height: 14, rx: '2',
+      fill:           isActive ? color : 'transparent',
+      opacity:        isActive ? '0.13' : '0',
+      stroke:         isActive ? color : 'none',
       'stroke-width': '0.5',
       'stroke-opacity': isActive ? '0.4' : '0'
     }));
-
     const lbl = svgEl('text', {
-      x: lx + 3, y: branch.y + 4,
+      x: labelX + 3, y: labelY + 4,
       fill: color,
       'font-size':   isActive ? '8' : '7.5',
       'font-family': 'JetBrains Mono, Courier New',
@@ -211,49 +223,53 @@ function renderTree(stateKey) {
   // ── HEAD indicator ────────────────────────────────────────────────────
   if (h) {
     if (h.type === 'detached') {
-      const { cx, cy } = h;
+      // h.cx was commit-depth (x in horizontal) → display cy
+      // h.cy was branch-lane (y in horizontal) → display cx
+      const dcx = h.cy;   // branch lane → display x
+      const dcy = h.cx;   // commit depth → display y
       svg.appendChild(svgEl('circle', {
-        cx, cy, r: '13',
+        cx: dcx, cy: dcy, r: '13',
         fill: 'none', stroke: '#ffb4ab',
         'stroke-width': '1', opacity: '0',
         class: 'head-pulse-ring'
       }));
       svg.appendChild(svgEl('polygon', {
-        points: `${cx},${cy-8} ${cx+6},${cy} ${cx},${cy+8} ${cx-6},${cy}`,
+        points: `${dcx},${dcy-8} ${dcx+6},${dcy} ${dcx},${dcy+8} ${dcx-6},${dcy}`,
         fill: 'rgba(255,180,171,0.12)', stroke: '#ffb4ab', 'stroke-width': '1.5'
       }));
       const dt = svgEl('text', {
-        x: cx, y: cy - 18,
+        x: dcx + 12, y: dcy + 4,
         fill: '#ffb4ab', 'font-size': '8',
         'font-family': 'JetBrains Mono, Courier New',
-        'text-anchor': 'middle', 'font-weight': '700'
+        'font-weight': '700'
       });
       dt.textContent = '◈ HEAD (detached)';
       svg.appendChild(dt);
 
     } else if (headBranch && headCommit) {
-      const cx    = headCommit.x;
-      const cy    = headBranch.y;
+      const hcx   = bx(headBranch);
+      const hcy   = cy(headCommit);
       const color = headBranch.color;
 
-      // Dashed stem
+      // Short dashed stem going left from the commit circle
       svg.appendChild(svgEl('line', {
-        x1: cx, y1: cy - 22, x2: cx, y2: cy - 10,
+        x1: hcx - 9,  y1: hcy,
+        x2: hcx - 20, y2: hcy,
         stroke: color, 'stroke-width': '1',
-        'stroke-dasharray': '2,2', opacity: '0.45'
+        'stroke-dasharray': '2,2', opacity: '0.5'
       }));
 
-      // HEAD chip
+      // HEAD chip to the left of the stem
       const chipW = 36, chipH = 14;
-      const chipX = cx - chipW / 2;
-      const chipY = cy - 37;
+      const chipX = hcx - 20 - chipW;
+      const chipY = hcy - 7;
       svg.appendChild(svgEl('rect', {
         x: chipX, y: chipY, width: chipW, height: chipH, rx: '3',
         fill: color, opacity: '0.18',
         stroke: color, 'stroke-width': '0.5', 'stroke-opacity': '0.5'
       }));
       const ht = svgEl('text', {
-        x: cx, y: chipY + 9.5,
+        x: chipX + chipW / 2, y: chipY + 9.5,
         fill: color, 'font-size': '8.5',
         'font-family': 'JetBrains Mono, Courier New',
         'text-anchor': 'middle', 'font-weight': '700'
@@ -267,14 +283,17 @@ function renderTree(stateKey) {
   (state.extras || []).forEach(ex => {
 
     if (ex.type === 'remote-box') {
-      const g = svgEl('g', { 'data-tip': ex.label });
+      // Transpose: ex.x was horizontal depth → display y, ex.y was lane → display x
+      const rx = ex.y;
+      const ry = ex.x;
+      const g  = svgEl('g', { 'data-tip': ex.label });
       g.appendChild(svgEl('rect', {
-        x: ex.x, y: ex.y, width: '96', height: '22', rx: '3',
+        x: rx, y: ry, width: '96', height: '22', rx: '3',
         fill: ex.color, opacity: '0.07',
         stroke: ex.color, 'stroke-width': '1', 'stroke-opacity': '0.45'
       }));
       const t = svgEl('text', {
-        x: ex.x + 7, y: ex.y + 14,
+        x: rx + 7, y: ry + 14,
         fill: ex.color, 'font-size': '7.5',
         'font-family': 'JetBrains Mono, Courier New', opacity: '0.8'
       });
@@ -285,8 +304,10 @@ function renderTree(stateKey) {
     }
 
     if (ex.type === 'arrow') {
+      // Transpose arrow endpoints
       svg.appendChild(svgEl('line', {
-        x1: ex.x1, y1: ex.y1, x2: ex.x2, y2: ex.y2,
+        x1: ex.y1, y1: ex.x1,
+        x2: ex.y2, y2: ex.x2,
         stroke: '#3d4943', 'stroke-width': '1',
         'stroke-dasharray': '3,3', 'marker-end': 'url(#arr)'
       }));
@@ -294,18 +315,19 @@ function renderTree(stateKey) {
     }
 
     if (ex.type === 'revert-label') {
+      // Transpose: ex.x (depth) → y, ex.y (lane) → x
       const t = svgEl('text', {
-        x: ex.x - 3, y: ex.y - 14,
+        x: ex.y + 12, y: ex.x,
         fill: '#68dbae', 'font-size': '8',
         'font-family': 'JetBrains Mono, Courier New',
-        'text-anchor': 'middle', 'font-weight': '700'
+        'font-weight': '700'
       });
       t.textContent = '↩ revert';
       svg.appendChild(t);
       return;
     }
 
-    // Status pill indicators
+    // Status pills — placed to the right of the rightmost branch
     const PILLS = {
       'staged-indicator':   { icon: '●', text: 'changes staged',        color: '#68dbae' },
       'dirty-indicator':    { icon: '⚠', text: 'working tree dirty',    color: '#ffb4ab' },
@@ -315,16 +337,27 @@ function renderTree(stateKey) {
     const pill = PILLS[ex.type];
     if (!pill) return;
 
+    // Find the rightmost branch x and the lowest commit y to anchor below tree
+    const maxBx = branches.length
+      ? Math.max(...branches.map(b => bx(b)))
+      : 80;
+    const maxCy = branches.length
+      ? Math.max(...branches.flatMap(b => b.commits.map(cy)))
+      : 120;
+
+    const pillX = maxBx + 18;
+    const pillY = maxCy - 8;
     const pillW = pill.text.length * 5.4 + 28;
-    const g     = svgEl('g', { 'data-tip': pill.text });
+
+    const g = svgEl('g', { 'data-tip': pill.text });
     g.appendChild(svgEl('rect', {
-      x: ex.x, y: ex.y - 10,
+      x: pillX, y: pillY,
       width: pillW, height: 17, rx: '3',
       fill: pill.color, opacity: '0.09',
       stroke: pill.color, 'stroke-width': '0.5', 'stroke-opacity': '0.5'
     }));
     const t = svgEl('text', {
-      x: ex.x + 7, y: ex.y + 3,
+      x: pillX + 7, y: pillY + 12,
       fill: pill.color, 'font-size': '8.5',
       'font-family': 'JetBrains Mono, Courier New', opacity: '0.9'
     });
@@ -333,18 +366,16 @@ function renderTree(stateKey) {
     svg.appendChild(g);
   });
 
-  // ── Auto-fit viewBox to actual rendered content ────────────────────────
-  // getBBox() measures the real bounding box of everything drawn, so long
-  // branch labels and tall trees are never clipped regardless of the data.
+  // ── Auto-fit viewBox ──────────────────────────────────────────────────
   try {
     const box = svg.getBBox();
     if (box.width > 0 && box.height > 0) {
-      const px = 14, py = 16;
+      const px = 16, py = 14;
       svg.setAttribute('viewBox',
         `${box.x - px} ${box.y - py} ${box.width + px * 2} ${box.height + py * 2}`
       );
     }
   } catch (e) {
-    // getBBox unavailable (hidden element, etc.) — keep default viewBox
+    // getBBox unavailable (hidden element) — keep default viewBox
   }
 }
