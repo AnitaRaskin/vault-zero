@@ -1,4 +1,4 @@
-# Vault Zero
+# Git Heist // Vault Zero
 
 A browser-based escape room platform for teaching developer tools and workflows. No install, no setup — open `index.html` to pick a mission.
 
@@ -31,10 +31,13 @@ A previous crew left access credentials buried in a target's git repository — 
 - **Fox's comms** — your encrypted crew contact, briefing you stage by stage (typewriter style)
 - **Repo state panel** — a live diagram that updates as you work (SVG git tree for git missions; adaptable to any domain)
 - **Concept briefs** — modal cards explaining the mental model before each new concept appears
-- **Hint system** — 3 levels per stage: nudge → method → full answer. The first hint is free; deeper hints cost points
-- **Live score** — +10 per stage, deductions for hints and wrong answers, +5 bonus for a well-written commit message
+- **Hint system** — 3 levels per stage: nudge → method → full answer. Deeper hints cost score points
+- **Near-miss feedback** — incomplete commands (e.g. `git add` with no target, `git commit` with no `-m`, common typos) show a targeted error explaining exactly what's missing, instead of the generic "not recognized" fallback
+- **Progress persistence** — game state is saved to localStorage after each room completes. Coming back later shows a resume prompt; players can pick up where they left off or start fresh
+- **Live score** — +10 per stage, deductions for hints and wrong answers
 - **Police mechanic** — wrong commands or destructive operations trigger a 30-second countdown with audio. Complete the stage to evade; fail and lose points
 - **Fox verification quiz** — timed quiz at the end, based on commands you actually used during the mission
+- **First-run tour** — interactive spotlight walkthrough of the UI panels, shown once on a player's first fresh run (skipped on resume)
 - **Command log** — every command you type is recorded; downloadable as a reference sheet at the end
 - **Leaderboard** — save your score via Supabase
 
@@ -54,7 +57,7 @@ vault-zero/
 │   ├── hub.css                  — hub landing page styles
 │   └── game.css                 — game styles (terminal, panels, modals, police mechanic)
 ├── js/
-│   ├── engine.js                — game loop, command parsing, scoring, quiz, police, boot
+│   ├── engine.js                — game loop, command parsing, scoring, quiz, police, boot, persistence
 │   ├── renderer.js              — SVG git tree renderer
 │   └── supabase.js              — score saving + leaderboard
 ├── missions/
