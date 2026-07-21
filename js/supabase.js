@@ -123,7 +123,13 @@ async function authSignInWithGoogle() {
     provider: 'google',
     options: { redirectTo: window.location.href.split('?')[0].split('#')[0] }
   });
-  return error ? { error: error.message } : {};
+  if (error) {
+    const msg = error.message.toLowerCase().includes('not enabled') || error.message.includes('validation_failed')
+      ? 'Google login not configured yet — use codename + password'
+      : error.message;
+    return { error: msg };
+  }
+  return {};
 }
 
 async function ensureProfile(user) {
