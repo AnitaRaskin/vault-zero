@@ -4,6 +4,8 @@
 // and knows nothing about git, the heist story, or these specific rooms.
 // ═══════════════════════════════════════════════════════════════════════
 
+window.HANDLER_NAME = 'fox';
+
 // ─── defaultStatus helper (local to this config) ─────────────────────
 
 function _gitDefaultStatus(stage) {

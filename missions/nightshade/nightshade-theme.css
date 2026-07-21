@@ -1,0 +1,52 @@
+/* ─── OPERATION NIGHTSHADE — FORENSIC CYBER-OPS THEME ─────── */
+:root {
+  --bg:              #0a0e14;
+  --surface-0:       #10141a;
+  --surface-1:       #181c22;
+  --surface-2:       #1c2026;
+  --surface-3:       #262a31;
+  --border:          rgba(0,219,231,0.08);
+  --border-hi:       #3a494b;
+  --primary:         #00dbe7;
+  --secondary:       #ffb300;
+  --amber:           #ffb300;
+  --text:            #dfe2eb;
+  --text-dim:        #b9cacb;
+  --text-muted:      #849495;
+  --text-faint:      #3a494b;
+  --ok:              #00dbe7;
+  --err:             #ff3e3e;
+  --warn:            #ffb300;
+  --font-display:    'Sora', sans-serif;
+  --font-body:       'Sora', sans-serif;
+  --font-mono:       'JetBrains Mono', 'Courier New', monospace;
+  --surface:         #1c2026;
+  --surface-hi:      #262a31;
+  --surface-top:     #31353c;
+  --border-solid:    #3a494b;
+  --border-dim:      #3a494b;
+  --primary-dim:     #004f54;
+  --text-muted-old:  #849495;
+  --font:            'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* cyan scanline for the cyber-ops room */
+.scanline {
+  background: linear-gradient(to bottom, transparent, rgba(0,219,231,0.1), transparent);
+}
+
+/* cyan terminal prompt */
+.fp-cmd { color: var(--primary); }
+.fp-cursor { background: var(--primary); }
+.hub-cursor { background: var(--primary); }
+
+/* amber briefing borders */
+.boot-terminal { border-left-color: var(--secondary); }
+
+/* intro grid — horizontal data-stream lines */
+#introScreen {
+  background:
+    linear-gradient(to right, rgba(0,219,231,0.04) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(to bottom, rgba(0,219,231,0.04) 1px, transparent 1px) 0 0 / 40px 40px,
+    var(--bg);
+}

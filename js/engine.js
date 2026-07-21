@@ -318,7 +318,7 @@ function showPoliceWarnModal(msg, callback) {
   if (!modal) { callback(); return; }
   msgEl.textContent = '';
   modal.classList.add('open');
-  const fullText = `[fox] > ${msg}`;
+  const fullText = `[${window.HANDLER_NAME || 'fox'}] > ${msg}`;
   let i = 0;
   function next() { if (i < fullText.length) { msgEl.textContent += fullText[i++]; setTimeout(next, 18); } }
   next();
@@ -375,7 +375,7 @@ function foxMsg(text, type) {
   row.appendChild(ts);
   row.appendChild(msg);
   wrap.appendChild(row);
-  const fullText = `[fox] > ${interp(text)}`;
+  const fullText = `[${window.HANDLER_NAME || 'fox'}] > ${interp(text)}`;
   let i = 0;
   function next() {
     if (i < fullText.length) { msg.textContent += fullText[i++]; wrap.scrollTop = wrap.scrollHeight; setTimeout(next, 16); }

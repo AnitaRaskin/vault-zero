@@ -1,7 +1,9 @@
 // ═══════════════════════════════════════════════════════════════════════
 // OPERATION: NIGHTSHADE — MISSION CONFIG
-// British intelligence theme. CONTROL is the handler. ATLAS is the repo.
+// British intelligence theme. LION is the handler. ATLAS is the repo.
 // ═══════════════════════════════════════════════════════════════════════
+
+window.HANDLER_NAME = 'lion';
 
 function _nsDefaultStatus(stage) {
   const t = (stage && stage.tree) || '';

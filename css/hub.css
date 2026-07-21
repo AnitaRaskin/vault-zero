@@ -1,3 +1,45 @@
+/* ─── COLD WAR CLASSIFIED THEME ──────────────────────────── */
+:root {
+  --bg:              #0f0c07;
+  --surface-0:       #1a1610;
+  --surface-1:       #211c14;
+  --surface-2:       #28221a;
+  --surface-3:       #312b20;
+  --border:          rgba(212,201,168,0.07);
+  --border-hi:       #3a3226;
+  --primary:         #c84a28;
+  --secondary:       #c8a040;
+  --amber:           #b08230;
+  --text:            #d4c9a8;
+  --text-dim:        #bab09a;
+  --text-muted:      #877d6a;
+  --text-faint:      #4a4234;
+  --ok:              #6b8c3c;
+  --err:             #c84a28;
+  --warn:            #c8a040;
+  --font-display:    'Special Elite', 'Courier New', serif;
+  --font-body:       'Special Elite', 'Courier New', serif;
+  --font-mono:       'Courier Prime', 'Courier New', monospace;
+  --surface:         #28221a;
+  --surface-hi:      #312b20;
+  --surface-top:     #3a3226;
+  --border-solid:    #4a4234;
+  --border-dim:      #4a4234;
+  --primary-dim:     #9e3a20;
+  --text-muted-old:  #877d6a;
+  --font:            'Courier Prime', 'Courier New', monospace;
+}
+
+/* paper grain overlay instead of scanline */
+.scanline {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: none;
+  opacity: 0.04;
+}
+
 /* ─── BODY ────────────────────────────────────────────────── */
 body {
   background: var(--bg);
@@ -10,8 +52,7 @@ body {
 .hub-bg {
   position: fixed; inset: 0;
   background:
-    radial-gradient(ellipse 90% 55% at 50% 0%, rgba(104,219,174,0.055) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 35% at 92% 85%, rgba(159,202,255,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 55%, rgba(0,0,0,0.45) 100%),
     var(--bg);
   pointer-events: none;
   z-index: 0;
@@ -387,7 +428,7 @@ body {
 }
 .mission-card--active:hover .mission-cta {
   background: var(--card-accent, var(--primary));
-  color: #003827;
+  color: #0a0a0a;
 }
 .mission-cta--locked {
   color: var(--text-faint);

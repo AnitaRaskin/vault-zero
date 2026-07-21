@@ -27,7 +27,7 @@ const ROOMS = [
             "git diff --staged shows what's staged vs the last commit — exactly what would be committed right now"
           ]
         },
-        foxMsg: "CONTROL: \"NIGHTSHADE's session is still open. Run git status — tell me what's in this repo right now.\"",
+        foxMsg: "LION: \"NIGHTSHADE's session is still open. Run git status — tell me what's in this repo right now.\"",
         task: 'Check the full state of the repository.',
         accepted: ['git status'],
         output: [
@@ -48,7 +48,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"Check what's actually in the staging area — not the working directory. You need to see exactly what the next commit would contain.\"",
+        foxMsg: "LION: \"Check what's actually in the staging area — not the working directory. You need to see exactly what the next commit would contain.\"",
         task: 'Inspect what is currently staged for commit.',
         accepted: ['git diff --staged', 'git diff --cached'],
         output: [
@@ -90,7 +90,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "CONTROL: \"Remove trigger.sh from staging. Don't touch the working directory — just unstage it.\"",
+        foxMsg: "LION: \"Remove trigger.sh from staging. Don't touch the working directory — just unstage it.\"",
         task: 'Unstage trigger.sh without modifying the working directory.',
         accepted: ['git restore --staged trigger.sh', 'git reset HEAD trigger.sh', 'git reset trigger.sh'],
         output: [
@@ -113,7 +113,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "CONTROL: \"Staging area is clean. Commit the legitimate change and seal this layer.\"",
+        foxMsg: "LION: \"Staging area is clean. Commit the legitimate change and seal this layer.\"",
         task: 'Commit the staged changes with a meaningful message.',
         flexCommit: true,
         tree: 'n0_committed',
@@ -167,7 +167,7 @@ const ROOMS = [
           ],
           ascii: '  normal:    HEAD → main → [commit]\n  detached:  HEAD → [commit]  (no branch label)'
         },
-        foxMsg: "CONTROL: \"Read the log. All branches. Find where NIGHTSHADE planted the cardinal trigger.\"",
+        foxMsg: "LION: \"Read the log. All branches. Find where NIGHTSHADE planted the cardinal trigger.\"",
         task: 'View the full commit history including all branches.',
         accepted: ['git log --oneline --all', 'git log --all --oneline', 'git log --oneline', 'git log'],
         output: [
@@ -183,7 +183,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"That commit. Go there. When you see the detached HEAD warning — read it. Then proceed.\"",
+        foxMsg: "LION: \"That commit. Go there. When you see the detached HEAD warning — read it. Then proceed.\"",
         task: 'Checkout the commit where the cardinal trigger was planted.',
         accepted: ['git checkout {{H2}}'],
         output: [
@@ -207,7 +207,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "CONTROL: \"Create a branch here before you move. Without a branch label, this position vanishes the second you leave.\"",
+        foxMsg: "LION: \"Create a branch here before you move. Without a branch label, this position vanishes the second you leave.\"",
         task: 'Create a branch at the current detached HEAD position to preserve it.',
         accepted: [
           'git switch -c forensics/cardinal-evidence',
@@ -235,7 +235,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "CONTROL: \"Evidence branch created. Return to main. The next threat is waiting there.\"",
+        foxMsg: "LION: \"Evidence branch created. Return to main. The next threat is waiting there.\"",
         task: 'Return to the main branch.',
         accepted: ['git switch main', 'git checkout main'],
         output: [
@@ -296,7 +296,7 @@ const ROOMS = [
             'step 3: git commit — seal the merge. skipping either step leaves the merge unfinished'
           ]
         },
-        foxMsg: "CONTROL: \"Run git status. Find the conflicted file.\"",
+        foxMsg: "LION: \"Run git status. Find the conflicted file.\"",
         task: 'Check which files are in a conflicted state.',
         accepted: ['git status'],
         output: [
@@ -315,7 +315,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"Open assets.enc. Two versions separated by markers. HEAD is ours. The other side is NIGHTSHADE's. Keep ours. Delete everything else.\"",
+        foxMsg: "LION: \"Open assets.enc. Two versions separated by markers. HEAD is ours. The other side is NIGHTSHADE's. Keep ours. Delete everything else.\"",
         task: "Resolve the conflict in assets.enc — keep the HEAD version, remove NIGHTSHADE's export configuration.",
         fileEdit: true,
         fileName: 'assets.enc',
@@ -324,19 +324,19 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"File resolved. Stage it — that's how you tell git the conflict is handled.\"",
+        foxMsg: "LION: \"File resolved. Stage it — that's how you tell git the conflict is handled.\"",
         task: 'Stage the resolved file to mark the conflict as resolved.',
         accepted: ['git add assets.enc', 'git add .'],
         output: [
           ['assets.enc staged — conflict marked as resolved.', 'ok'],
           ['', ''],
-          ["CONTROL: \"one step left. commit it. seal the merge.\"", 'sys'],
+          ["LION: \"one step left. commit it. seal the merge.\"", 'sys'],
         ],
         tree: 'n2_staged',
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"Commit. The merge doesn't exist until the commit does.\"",
+        foxMsg: "LION: \"Commit. The merge doesn't exist until the commit does.\"",
         task: 'Complete the merge with a commit.',
         accepted: [
           'git commit',
@@ -352,7 +352,7 @@ const ROOMS = [
           ['assets.enc: EXPORT_ENABLED: false. EXFIL_TARGET: none.', 'ok'],
           ["NIGHTSHADE's export configuration removed from the asset registry.", 'dim'],
           ['', ''],
-          ["CONTROL: \"Clean. The history was tampered with next. Reflog will show you what they hid.\"", 'sys'],
+          ["LION: \"Clean. The history was tampered with next. Reflog will show you what they hid.\"", 'sys'],
         ],
         tree: 'n2_merged',
         wrong: {},
@@ -404,7 +404,7 @@ const ROOMS = [
             'orphaned commits survive in the repository for ~90 days. cherry-pick brings a single specific commit to your current branch'
           ]
         },
-        foxMsg: "CONTROL: \"Run git log. Tell me what's there — and what's obviously missing.\"",
+        foxMsg: "LION: \"Run git log. Tell me what's there — and what's obviously missing.\"",
         task: 'Check the current commit history.',
         accepted: ['git log --oneline', 'git log'],
         output: [
@@ -421,7 +421,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"Run git reflog. Every position HEAD has ever been. The orphaned commits are still in there.\"",
+        foxMsg: "LION: \"Run git reflog. Every position HEAD has ever been. The orphaned commits are still in there.\"",
         task: 'Find the orphaned commits using git reflog.',
         accepted: ['git reflog', 'git reflog show', 'git log -g'],
         output: [
@@ -451,7 +451,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "CONTROL: \"Cherry-pick that hash. Bring the shutdown commit to the current branch.\"",
+        foxMsg: "LION: \"Cherry-pick that hash. Bring the shutdown commit to the current branch.\"",
         task: 'Restore the orphaned shutdown commit using cherry-pick.',
         accepted: ['git cherry-pick {{H5}}'],
         output: [
@@ -471,7 +471,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "CONTROL: \"Confirm the recovery. Log it.\"",
+        foxMsg: "LION: \"Confirm the recovery. Log it.\"",
         task: 'Verify the shutdown commit is back in the history.',
         accepted: ['git log --oneline', 'git log'],
         output: [
@@ -534,7 +534,7 @@ const ROOMS = [
             'always fetch + inspect before merging: you decide what happens to your branch, not the network'
           ]
         },
-        foxMsg: "CONTROL: \"Check your local state first. Then we deal with the remote.\"",
+        foxMsg: "LION: \"Check your local state first. Then we deal with the remote.\"",
         task: 'Verify the current local commit history.',
         accepted: ['git log --oneline', 'git log'],
         output: [
@@ -551,7 +551,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"Fetch. Download the remote state. Do not pull — that merges automatically.\"",
+        foxMsg: "LION: \"Fetch. Download the remote state. Do not pull — that merges automatically.\"",
         task: 'Download the remote state without merging anything.',
         accepted: ['git fetch origin', 'git fetch', 'git fetch --all'],
         output: [
@@ -574,7 +574,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "CONTROL: \"Look at what came in. Read the commits on that remote branch.\"",
+        foxMsg: "LION: \"Look at what came in. Read the commits on that remote branch.\"",
         task: 'Inspect the commits on the remote nightshade/transmit branch.',
         accepted: [
           'git log origin/nightshade/transmit --oneline',
@@ -595,7 +595,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"Look at what's actually in that branch versus your local main.\"",
+        foxMsg: "LION: \"Look at what's actually in that branch versus your local main.\"",
         task: 'Compare your local main with the remote nightshade/transmit branch.',
         accepted: [
           'git diff main origin/nightshade/transmit',
@@ -621,7 +621,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"Delete the remote branch. Before midnight.\"",
+        foxMsg: "LION: \"Delete the remote branch. Before midnight.\"",
         task: 'Delete the nightshade/transmit branch from the remote repository.',
         accepted: [
           'git push origin --delete nightshade/transmit',
@@ -635,7 +635,7 @@ const ROOMS = [
           ['the pipeline has nothing to merge at midnight.', 'dim'],
           ['the transmission script is dead.', 'sys'],
           ['', ''],
-          ["CONTROL: \"One layer left. NIGHTSHADE's stash. That's where it ends.\"", 'sys'],
+          ["LION: \"One layer left. NIGHTSHADE's stash. That's where it ends.\"", 'sys'],
         ],
         tree: 'n4_deleted',
         wrong: {
@@ -701,7 +701,7 @@ const ROOMS = [
             'git stash show -p stash@{N} lets you inspect any stash before applying — always do this first'
           ]
         },
-        foxMsg: "CONTROL: \"Read the stash list. Three entries. Tell me what's there before you touch anything.\"",
+        foxMsg: "LION: \"Read the stash list. Three entries. Tell me what's there before you touch anything.\"",
         task: 'List all stashed entries on this machine.',
         accepted: ['git stash list'],
         output: [
@@ -718,7 +718,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"Read stash@{0} first. That's NIGHTSHADE's newest drop. Don't apply it — read it.\"",
+        foxMsg: "LION: \"Read stash@{0} first. That's NIGHTSHADE's newest drop. Don't apply it — read it.\"",
         task: 'Inspect the contents of stash@{0} without applying it.',
         accepted: ['git stash show -p stash@{0}', 'git stash show stash@{0} -p', 'git stash show -p'],
         output: [
@@ -751,7 +751,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "CONTROL: \"Now stash@{1}. Read it.\"",
+        foxMsg: "LION: \"Now stash@{1}. Read it.\"",
         task: 'Inspect the contents of stash@{1} without applying it.',
         accepted: ['git stash show -p stash@{1}', 'git stash show stash@{1} -p'],
         output: [
@@ -778,7 +778,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "CONTROL: \"Apply stash@{1}. Not pop — apply. Keep the stash in the list until you've cleaned up deliberately.\"",
+        foxMsg: "LION: \"Apply stash@{1}. Not pop — apply. Keep the stash in the list until you've cleaned up deliberately.\"",
         task: 'Apply stash@{1} without removing it from the stack.',
         accepted: ['git stash apply stash@{1}'],
         output: [
@@ -791,7 +791,7 @@ const ROOMS = [
           ['the transmission script checks this flag on execution.', 'dim'],
           ['it will abort.', 'ok'],
           ['', ''],
-          ["CONTROL: \"Drop the decoy. Destroy stash@{0}.\"", 'sys'],
+          ["LION: \"Drop the decoy. Destroy stash@{0}.\"", 'sys'],
         ],
         tree: 'n5_applied',
         wrong: {
@@ -808,7 +808,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "CONTROL: \"Destroy the decoy. stash@{0}. Drop it.\"",
+        foxMsg: "LION: \"Destroy the decoy. stash@{0}. Drop it.\"",
         task: "Drop stash@{0} to destroy NIGHTSHADE's contingency payload.",
         accepted: ['git stash drop stash@{0}', 'git stash drop'],
         output: [
