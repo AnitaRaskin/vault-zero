@@ -259,6 +259,10 @@
   function closeAuthModal() {
     document.getElementById('authOverlay').classList.remove('open');
     document.getElementById('hubAuthError').textContent = '';
+    document.getElementById('hubCodename').value = '';
+    document.getElementById('hubPassword').value = '';
+    document.getElementById('hubConfirm').value = '';
+    setHubAuthMode('login');
   }
   function setHubAuthMode(mode) {
     hubAuthMode = mode;
