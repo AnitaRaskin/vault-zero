@@ -23,7 +23,26 @@ A previous crew left access credentials buried in a target's git repository — 
 
 ---
 
-*More missions coming. See `docs/MISSION_BUILDER.md` to build your own.*
+### MISSION_002 — OPERATION: NIGHTSHADE
+*Status: Active · Difficulty: Medium–Hard · ~75 min*
+
+A rogue operative codenamed NIGHTSHADE has infiltrated GCHQ's classified ATLAS repository — staging malicious changes alongside legitimate ones, rewriting history, injecting a merge conflict, and planting a dead man switch that will auto-exfiltrate asset data if not neutralised in time. Your handler, LION, guides you through six rooms to contain, trace, and erase the intrusion before the countdown triggers.
+
+**Rooms:**
+1. **CONTAINMENT** — Read the staging area before committing. Identify and unstage NIGHTSHADE's injected file without touching the legitimate change.
+2. **DEAD RECKONING** — Navigate detached HEAD state. Check out an orphaned commit, inspect historical evidence, and name it with a branch before you lose it.
+3. **CONFLICTED LOYALTIES** — Resolve a merge conflict in a classified asset registry. Keep GCHQ's version, discard NIGHTSHADE's exfiltration config.
+4. **THE GREAT ERASURE** — NIGHTSHADE wiped three commits with `git reset --hard`. Use `git reflog` to find the orphaned hash and `git cherry-pick` to recover it.
+5. **INCOMING SIGNAL** — Intercept and inspect incoming remote changes before merging. Use `git fetch`, inspect with `git diff`, then selectively delete the threat branch from the remote.
+6. **THE DEAD DROP** — Three stashes from different operatives. Inspect each with `git stash show -p` to find the shutdown key, apply it without popping, then drop the rest cleanly.
+
+**Commands taught:** `git diff --staged`, `git restore --staged`, `git checkout` (detached HEAD), `git switch -c`, `git reflog`, `git cherry-pick`, `git fetch`, `git push origin --delete`, `git stash list`, `git stash show -p`, `git stash apply`, `git stash drop`, `git merge` (conflict resolution), and more — across 6 rooms.
+
+→ [https://anitaraskin.github.io/git-heist/missions/nightshade/nightshade.html](https://anitaraskin.github.io/git-heist/missions/nightshade/nightshade.html)
+
+---
+
+*See `docs/MISSION_BUILDER.md` to build your own.*
 
 ## Building a new mission
 
