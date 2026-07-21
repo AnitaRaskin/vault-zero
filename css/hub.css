@@ -320,7 +320,7 @@ body {
   letter-spacing: 0.2em; text-transform: uppercase;
   background: var(--card-accent, var(--primary));
   color: #000; padding: 10px 22px;
-  transition: filter 0.15s; cursor: crosshair !important;
+  transition: filter 0.15s; cursor: pointer;
 }
 .gic-card:hover .gic-deploy { filter: brightness(1.15); }
 

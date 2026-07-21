@@ -74,9 +74,10 @@ async function authSignOut() {
 
 // ─── Score / leaderboard ─────────────────────────────────────
 
-async function saveScore({ codename, totalTime, roomsCompleted, hintsUsed, finalScore, commandsUsed, userId }) {
+async function saveScore({ codename, mission, totalTime, roomsCompleted, hintsUsed, finalScore, commandsUsed, userId }) {
   const payload = {
     codename,
+    mission:         mission || 'fox',
     total_time:      totalTime,
     rooms_completed: roomsCompleted,
     hints_used:      hintsUsed,
@@ -92,10 +93,12 @@ async function saveScore({ codename, totalTime, roomsCompleted, hintsUsed, final
   return !error;
 }
 
-async function getLeaderboard() {
+async function getLeaderboard(mission) {
+  const missionKey = mission || 'fox';
   const { data } = await sb
     .from('scores')
     .select('codename, final_score, rooms_completed, total_time, user_id')
+    .eq('mission', missionKey)
     .order('rooms_completed', { ascending: false })
     .order('final_score',     { ascending: false })
     .order('total_time',      { ascending: true })

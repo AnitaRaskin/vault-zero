@@ -170,6 +170,35 @@ let footstepId        = null;
 let voiceTriggered    = false;
 let audioCtx          = null;
 
+// ─── British voice (Nightshade / LION only) ──────────────────────────
+let _britishVoice = null;
+function _loadBritishVoice() {
+  if (!window.speechSynthesis) return;
+  const voices = window.speechSynthesis.getVoices();
+  _britishVoice = voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('male'))
+               || voices.find(v => v.lang === 'en-GB')
+               || voices.find(v => v.lang.startsWith('en-GB'))
+               || null;
+}
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = _loadBritishVoice;
+  _loadBritishVoice();
+}
+function speakLion(text) {
+  if (window.HANDLER_NAME !== 'lion') return;
+  if (!window.speechSynthesis) return;
+  try {
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    if (_britishVoice) utt.voice = _britishVoice;
+    utt.lang   = 'en-GB';
+    utt.rate   = 0.88;
+    utt.pitch  = 0.95;
+    utt.volume = 0.8;
+    window.speechSynthesis.speak(utt);
+  } catch(e) {}
+}
+
 function getAudioCtx() {
   if (!audioCtx) {
     try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
@@ -178,34 +207,50 @@ function getAudioCtx() {
   return audioCtx;
 }
 
-function playFootstep() {
+function playUrgentTick() {
   const ctx = getAudioCtx();
   if (!ctx) return;
+  // Mission-specific urgent sound: footsteps for fox, data-pulse for lion
+  const isLion = (window.HANDLER_NAME === 'lion');
   try {
-    const sr  = ctx.sampleRate;
     const now = ctx.currentTime;
-    const tbuf = ctx.createBuffer(1, Math.floor(sr * 0.08), sr);
-    const td   = tbuf.getChannelData(0);
-    for (let i = 0; i < td.length; i++) td[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.018));
-    const tsrc = ctx.createBufferSource();
-    tsrc.buffer = tbuf;
-    const tlpf = ctx.createBiquadFilter();
-    tlpf.type = 'lowpass'; tlpf.frequency.value = 160; tlpf.Q.value = 0.5;
-    const tg = ctx.createGain();
-    tg.gain.setValueAtTime(0.6, now);
-    tsrc.connect(tlpf); tlpf.connect(tg); tg.connect(ctx.destination);
-    tsrc.start(now);
-    const cbuf = ctx.createBuffer(1, Math.floor(sr * 0.012), sr);
-    const cd   = cbuf.getChannelData(0);
-    for (let i = 0; i < cd.length; i++) cd[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.002));
-    const csrc = ctx.createBufferSource();
-    csrc.buffer = cbuf;
-    const chpf = ctx.createBiquadFilter();
-    chpf.type = 'highpass'; chpf.frequency.value = 1500;
-    const cg = ctx.createGain();
-    cg.gain.setValueAtTime(0.2, now + 0.008);
-    csrc.connect(chpf); chpf.connect(cg); cg.connect(ctx.destination);
-    csrc.start(now + 0.008);
+    if (isLion) {
+      // Short electronic ping — data being transmitted
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1800, now);
+      osc.frequency.exponentialRampToValueAtTime(900, now + 0.12);
+      g.gain.setValueAtTime(0.18, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.13);
+    } else {
+      // Footstep sound for fox/heist
+      const sr    = ctx.sampleRate;
+      const tbuf  = ctx.createBuffer(1, Math.floor(sr * 0.08), sr);
+      const td    = tbuf.getChannelData(0);
+      for (let i = 0; i < td.length; i++) td[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.018));
+      const tsrc  = ctx.createBufferSource();
+      tsrc.buffer = tbuf;
+      const tlpf  = ctx.createBiquadFilter();
+      tlpf.type = 'lowpass'; tlpf.frequency.value = 160; tlpf.Q.value = 0.5;
+      const tg = ctx.createGain();
+      tg.gain.setValueAtTime(0.6, now);
+      tsrc.connect(tlpf); tlpf.connect(tg); tg.connect(ctx.destination);
+      tsrc.start(now);
+      const cbuf  = ctx.createBuffer(1, Math.floor(sr * 0.012), sr);
+      const cd    = cbuf.getChannelData(0);
+      for (let i = 0; i < cd.length; i++) cd[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.002));
+      const csrc  = ctx.createBufferSource();
+      csrc.buffer = cbuf;
+      const chpf  = ctx.createBiquadFilter();
+      chpf.type = 'highpass'; chpf.frequency.value = 1500;
+      const cg = ctx.createGain();
+      cg.gain.setValueAtTime(0.2, now + 0.008);
+      csrc.connect(chpf); chpf.connect(cg); cg.connect(ctx.destination);
+      csrc.start(now + 0.008);
+    }
   } catch(e) {}
 }
 
@@ -231,6 +276,7 @@ function triggerPolice(skipMsg) {
   document.querySelector('.terminal-panel').classList.add('police-active');
   document.querySelector('.terminal-panel').classList.remove('police-urgent');
   document.getElementById('policeVignette').classList.remove('active');
+  if (window.nsLeakTimer) window.nsLeakTimer.setUrgent(POLICE_SECONDS);
   updatePoliceUI();
   policeIntervalId = setInterval(() => {
     policeSecondsLeft--;
@@ -245,6 +291,7 @@ function clearPolice(silent) {
   clearInterval(policeIntervalId);
   policeIntervalId = null;
   stopPoliceAudio();
+  if (window.nsLeakTimer) window.nsLeakTimer.restore();
   const alertEl = document.getElementById('policeAlert');
   alertEl.classList.remove('active', 'urgent-mode');
   document.getElementById('policeVignette').classList.remove('active');
@@ -254,6 +301,7 @@ function clearPolice(silent) {
 
 function policeRaid() {
   clearPolice(true);
+  if (window.nsLeakTimer) window.nsLeakTimer.triggerLeak();
   addScore(-10);
   setTimeout(() => foxMsg("too slow. they logged the attempt. we took a hit.", 'sys'), 100);
 }
@@ -274,14 +322,15 @@ function updatePoliceUI() {
   vigEl.classList.toggle('active', urgent);
   termEl.classList.toggle('police-urgent', urgent);
   if (urgent && !footstepId) {
-    footstepId = setInterval(() => { if (policeActive) playFootstep(); }, 550);
+    footstepId = setInterval(() => { if (policeActive) playUrgentTick(); }, 550);
   }
   if (s === 6 && !voiceTriggered) {
     voiceTriggered = true;
+    const isLion = (window.HANDLER_NAME === 'lion');
     try {
       if (window.speechSynthesis) {
-        const utt  = new SpeechSynthesisUtterance("who's there?");
-        utt.volume = 0.85; utt.rate = 0.75; utt.pitch = 0.6;
+        const utt  = new SpeechSynthesisUtterance(isLion ? "transmission initiated" : "who's there?");
+        utt.volume = 0.85; utt.rate = isLion ? 0.9 : 0.75; utt.pitch = isLion ? 0.8 : 0.6;
         window.speechSynthesis.speak(utt);
       }
     } catch(e) {}
@@ -380,6 +429,7 @@ function foxMsg(text, type) {
   row.appendChild(msg);
   wrap.appendChild(row);
   const fullText = `[${window.HANDLER_NAME || 'fox'}] > ${interp(text)}`;
+  if (type !== 'sys') speakLion(interp(text));
   let i = 0;
   function next() {
     if (i < fullText.length) { msg.textContent += fullText[i++]; wrap.scrollTop = wrap.scrollHeight; setTimeout(next, 16); }
@@ -1083,9 +1133,16 @@ function showQuizResult() {
   const total = quizQuestions.length;
   const pct   = quizCorrect / total;
   let verdict;
-  if      (pct === 1)   verdict = '"Perfect. Identity confirmed. You didn\'t just get lucky — you know this. The vault is yours."';
-  else if (pct >= 0.5)  verdict = '"Close enough. You know the tools that matter. The vault is open."';
-  else                  verdict = '"Shaky. But you made it this far. The vault opens. Study up."';
+  const qv = GAME_CONFIG.quizVerdicts;
+  if (qv) {
+    if      (pct === 1)  verdict = qv[0];
+    else if (pct >= 0.5) verdict = qv[1];
+    else                 verdict = qv[2];
+  } else {
+    if      (pct === 1)   verdict = '"Perfect. Identity confirmed. You didn\'t just get lucky — you know this. The vault is yours."';
+    else if (pct >= 0.5)  verdict = '"Close enough. You know the tools that matter. The vault is open."';
+    else                  verdict = '"Shaky. But you made it this far. The vault opens. Study up."';
+  }
   const speech = document.getElementById('quizFoxSpeech');
   speech.textContent = '';
   let ci = 0;
@@ -1112,6 +1169,7 @@ async function submitScore() {
   const totalTime = Math.floor((Date.now() - G.missionStart) / 1000);
   const saved = await saveScore({
     codename:       G.codename,
+    mission:        window.HANDLER_NAME || 'fox',
     totalTime,
     roomsCompleted: G.clues.length,
     hintsUsed:      G.totalHints,
@@ -1122,7 +1180,7 @@ async function submitScore() {
   if (saved) {
     btn.style.display = 'none';
     document.getElementById('scoreSaved').style.display = '';
-    const board = await getLeaderboard();
+    const board = await getLeaderboard(window.HANDLER_NAME || 'fox');
     renderLeaderboard(board);
   } else {
     btn.textContent = '[ SAVE FAILED — CHECK CONSOLE ]';
@@ -1408,7 +1466,11 @@ function _launchGame(codename, elapsed, showTour) {
   G.missionStart = Date.now() - elapsed;
   G.roomStart    = Date.now();
   startFooterClock();
-  if (showTour) _tourPending = true;
+  if (showTour) {
+    G.roomIdx  = 0;
+    G.stageIdx = 0;
+    _tourPending = true;
+  }
   loadRoom();
 }
 

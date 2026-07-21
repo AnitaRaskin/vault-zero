@@ -271,7 +271,7 @@
     </div>
     <div class="pwarn-body">
       <div class="pwarn-msg" id="pwarnMsg"></div>
-      <button class="btn pwarn-btn" id="pwarnBtn">[ UNDERSTOOD — START CLOCK ]</button>
+      <button class="btn pwarn-btn" id="pwarnBtn">[ UNDERSTOOD — FIXING IT ]</button>
     </div>
   </div>
 </div>
@@ -488,11 +488,20 @@
 (function () {
   const CYCLE = 5 * 60; // 5-minute leak cycle
   let remaining = Math.floor(Math.random() * CYCLE) + 30; // random start: 30s–5min
+  let savedRemaining = null; // saved when police urgency overrides timer
   let interval = null;
 
   function fmt(s) {
     const m = Math.floor(s / 60), sec = s % 60;
     return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+  }
+
+  function updateDisplay() {
+    const el = document.getElementById('leakTime');
+    if (!el) return;
+    el.textContent = fmt(remaining);
+    if (remaining <= 60) el.classList.add('leak-urgent');
+    else el.classList.remove('leak-urgent');
   }
 
   function triggerLeak() {
@@ -507,24 +516,37 @@
       }, 5000);
     }
     remaining = CYCLE;
+    savedRemaining = null;
   }
 
   function tick() {
-    const el = document.getElementById('leakTime');
-    if (!el) return;
     if (remaining <= 0) {
       triggerLeak();
     } else {
       remaining--;
-      el.textContent = fmt(remaining);
-      if (remaining <= 60) el.classList.add('leak-urgent');
-      else el.classList.remove('leak-urgent');
+      updateDisplay();
     }
   }
 
+  // Engine hook: called when 3 wrong answers trigger the leak warning
+  window.nsLeakTimer = {
+    setUrgent: function (secs) {
+      if (savedRemaining === null) savedRemaining = remaining;
+      remaining = secs;
+      updateDisplay();
+    },
+    restore: function () {
+      if (savedRemaining !== null) {
+        remaining = savedRemaining;
+        savedRemaining = null;
+        updateDisplay();
+      }
+    },
+    triggerLeak: triggerLeak
+  };
+
   document.addEventListener('DOMContentLoaded', function () {
-    const el = document.getElementById('leakTime');
-    if (el) el.textContent = fmt(remaining);
+    updateDisplay();
     interval = setInterval(tick, 1000);
   });
 })();

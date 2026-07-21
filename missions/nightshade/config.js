@@ -113,12 +113,19 @@ const GAME_CONFIG = {
     'git log          — always works',
   ],
 
+  // ── Quiz verdicts ────────────────────────────────────────────────────
+  quizVerdicts: [
+    '"Clean sweep. The pipeline is dead. Every name on that list — protected. NIGHTSHADE\'s machine is dismantled. They won\'t publish."',
+    '"Close. The pipeline is down. Most of the registry is safe. The names weren\'t published tonight. Know the gaps."',
+    '"Shaky on the theory. But the layers are gone — the machine stopped. The names are safe. Study what you missed."',
+  ],
+
   // ── Police (repurposed as "NIGHTSHADE ALERT" for this mission) ──────
   policeRiskyCmds: ['git reset --hard', 'git push --force', 'git push -f', 'git stash pop'],
   policeWarnings: [
-    "dead man switch ping detected. they're monitoring the repo. complete this step immediately.",
-    "NIGHTSHADE's contingency triggered. 30 seconds before auto-transmit. finish the step.",
-    "signal anomaly on the atlas node. 30 seconds. move.",
+    "3 errors logged. the dead man switch is watching. fix this now — or the next 5 names publish in 30 seconds.",
+    "NIGHTSHADE's contingency is live. one more failure and 5 identities go to the mirror. 30 seconds.",
+    "atlas node flagged your mistakes. 30 seconds before auto-publish. fix it.",
   ],
 
   // ── Security layer display (repurposed as mission progress) ─────────
