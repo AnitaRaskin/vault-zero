@@ -189,8 +189,13 @@ const GAME_CONFIG = {
           [' 1 file changed, 1 insertion(+), 1 deletion(-)', 'sys'],
           ['', '']
         ];
-        if (!msg || msg.length < 5 || /^(wip|fix|test|asdf|temp|x+|update)$/i.test(msg)) {
+        const isBadMsg = !msg || msg.length < 5 || /^(wip|fix|test|asdf|temp|x+|update|commit|change|stuff|done|ok|a)$/i.test(msg);
+        if (isBadMsg) {
           output.push(["commit messages are for the crew. make them readable.", "warn"]);
+          output.push(['', '']);
+        } else if (msg.length >= 10 && /\w+ \w+/.test(msg)) {
+          addScore(5);
+          output.push(["good commit message — the crew can read this. +5 pts", "ok"]);
           output.push(['', '']);
         }
         tprint(output);

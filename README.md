@@ -1,76 +1,48 @@
-# Vault Zero — Git Escape Rooms
+# Vault Zero
 
-A browser-based Git learning game. No install, no setup — open `index.html` to pick a mission.
+A browser-based escape room platform for teaching developer tools and workflows. No install, no setup — open `index.html` to pick a mission.
 
-Designed for people who are new to Git: junior engineers, bootcamp students, anyone who's heard of Git but never really understood it. You can only move forward by typing the correct Git command. No clicking through slides. No multiple choice. Real commands, real output, real feedback.
+Players type real commands into an in-browser terminal. Each mission wraps a cluster of developer commands inside a heist/thriller narrative. You can only move forward by typing the correct command. No multiple choice. No slides. Real commands, real output, real feedback.
 
-## Play it
+Designed for junior engineers, bootcamp students, and anyone who learns better by doing than by reading.
 
-**[→ Open the hub](https://anitaraskin.github.io/git-heist)** *(enable GitHub Pages to activate this link)*
+## Play
 
-Or clone and open locally:
-```bash
-git clone https://github.com/AnitaRaskin/git-heist.git
-open git-heist/index.html
-```
+Open `index.html` to access the mission hub, or host it from any static server — no build step, no dependencies.
 
-## What it is
+## Missions
 
-A hub of cyber heist escape rooms, each teaching a cluster of Git concepts. You're a hacker. Fox — your encrypted crew contact — guides you through each mission stage by stage.
+### MISSION_001 — GIT HEIST
+*Status: Active · Difficulty: Easy–Medium · ~60 min*
 
-### GIT_HEIST (`missions/git-heist/git-heist.html`)
+A previous crew left access credentials buried in a target's git repository — never merged, still in there. Navigate branches, resolve conflicts, stash evidence, and extract the data before the police close in.
 
-A previous crew left access credentials buried in a repo — never merged, still in there. Navigate branches, resolve conflicts, stash evidence, and extract the data before the police close in.
+**Commands taught:** `git log`, `git status`, `git branch`, `git checkout`, `git stash`, `git pull`, `git add`, `git commit`, `git push`, `git revert`, and more — across 8 rooms.
 
-## The rooms
+→ `missions/git-heist/git-heist.html`
 
-| Room | Name | Concepts taught |
-|------|------|-----------------|
-| 0 | The Equipment | `ls`, `git log`, `git status` — repo basics, commits, HEAD, `.gitignore` |
-| 1 | The Blueprint | `git branch -a`, `git switch`, `git checkout`, `git log`, `git show` — branches |
-| 2 | Get a Copy | `git remote -v`, fork, `git clone` |
-| 3 | Into Position | `git checkout -b`, `git add .`, `git add <file>`, `git commit`, `git push` — staging area, file states |
-| 4 | Hide the Evidence | `git stash`, `git stash list`, `git stash pop` — police sweep mechanic |
-| 5 | The Crew Conflict | `git pull`, merge conflict resolution, `git add`, `git commit` |
-| 6 | Read the Room | `git log --oneline`, `git show`, `git diff` |
-| 7 | Erase the Trail | `git clean`, `git restore`, `git revert` |
+---
 
-## How it works
+*More missions coming. See `docs/MISSION_BUILDER.md` to build your own.*
 
-### Concept briefs
-Before stages that introduce a new idea, a **Concept Brief** modal appears — a quick card covering the Git concept about to be used. Currently taught: what a git repository is, what commits and HEAD are, `.gitignore`, branches, `git switch` vs `git checkout`, and the four file states (untracked / modified / staged / committed) + the staging area. Close the card to begin the stage.
+## Platform mechanics
 
-### Core mechanics
-- **Terminal panel** — type Git commands, get real-looking output
-- **Fox's comms** — mission briefing from your encrypted crew contact, stage by stage (typewriter style)
-- **Repo state panel** — live SVG tree with LIVE badge, HEAD pulse ring, hover tooltips on each commit, and a status bar showing current branch and state — updates as you work
-- **Hint system** — 3 levels per stage (nudge → method → explanation). Level 3 requires a two-click confirm and costs the most points
-- **Live score** — +10 per stage, deductions for hints and wrong answers
+- **Terminal panel** — type commands, get real-looking output
+- **Fox's comms** — your encrypted crew contact, briefing you stage by stage (typewriter style)
+- **Repo state panel** — a live diagram that updates as you work (SVG git tree for git missions; adaptable to any domain)
+- **Concept briefs** — modal cards explaining the mental model before each new concept appears
+- **Hint system** — 3 levels per stage: nudge → method → full answer. The first hint is free; deeper hints cost points
+- **Live score** — +10 per stage, deductions for hints and wrong answers, +5 bonus for a well-written commit message
+- **Police mechanic** — wrong commands or destructive operations trigger a 30-second countdown with audio. Complete the stage to evade; fail and lose points
+- **Fox verification quiz** — timed quiz at the end, based on commands you actually used during the mission
+- **Command log** — every command you type is recorded; downloadable as a reference sheet at the end
+- **Leaderboard** — save your score via Supabase
 
-### Police Are Coming
-3 wrong answers or a destructive command (`git reset --hard`, `git push --force`) triggers a 30-second countdown:
-- Red border pulses on the terminal panel
-- At 10 seconds: screen vignette, synthesised footsteps
-- At 6 seconds: browser text-to-speech says *"who's there?"*
-- Complete the step in time to evade; fail and lose 10 points
+## Building a new mission
 
-In the stash room (Room 4), police arrival is preceded by a **Fox popup** — a dramatic full-screen warning from Fox. The 30-second clock only starts once you dismiss it.
+See [`docs/MISSION_BUILDER.md`](docs/MISSION_BUILDER.md) for a complete step-by-step guide, including a mission brief template designed for AI-assisted generation.
 
-Room 3 also teaches the difference between `git add .` (broad, fast — under police pressure) and `git add <file>` (surgical, precise — when only one change should be committed).
-
-### Other mechanics
-- **Command log** — `[cmd: log]` button records every command used this run; downloadable as a cheat sheet
-- **Per-room clue fragments** — each room reveals a piece of the access credentials, typewriter-revealed and assembled on the final screen
-- **Fox verification quiz** — 4 questions after the last room; 2 drawn from commands you actually used, 2 static questions on Git concepts. Timed per question, with a NEXT QUESTION button between each
-- **Leaderboard** — finish and save your score (Supabase backend)
-- **Enter key on room-done modal** — after clearing a room, press Enter to move to the next without reaching for the mouse
-- **Progress** saves to `localStorage` — pick up where you left off
-
-## Architecture
-
-The engine is fully game-agnostic. All mission-specific content (commands, quiz questions, file content, police flavour text, boot sequence) lives in the mission's own `config.js` and `data.js`. Adding a new mission requires no changes to the engine.
-
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the complete architecture reference, including the `GAME_CONFIG` plugin interface, ROOMS/TREE data schemas, the game loop sequence, and test patterns.
+The engine is fully game-agnostic. All mission-specific content (commands, rooms, quiz questions, file content, police flavour text, boot sequence) lives in the mission's own `config.js` and `data.js`. **Adding a new mission requires no changes to the shared engine.**
 
 ## File structure
 
@@ -86,17 +58,17 @@ vault-zero/
 │   ├── renderer.js              — SVG git tree renderer
 │   └── supabase.js              — score saving + leaderboard
 ├── missions/
-│   └── git-heist/
-│       ├── git-heist.html       — mission page shell
+│   └── git-heist/               — Mission 001: GIT HEIST
+│       ├── git-heist.html       — mission page shell (all modals and panel scaffolding)
 │       ├── config.js            — GAME_CONFIG: all mission-specific logic and content
 │       └── data.js              — ROOMS array and TREE object
 ├── docs/
-│   ├── ARCHITECTURE.md          — full system reference for developers
-│   ├── MISSION_BUILDER.md       — step-by-step guide to adding a new mission
-│   ├── DATA_SCHEMA.md           — ROOMS/TREE field reference
-│   └── ROOM_DESIGN.md           — room and stage design notes
+│   ├── ARCHITECTURE.md          — full system reference: engine internals, plugin interface, test patterns
+│   ├── MISSION_BUILDER.md       — step-by-step guide to building a new mission (includes AI brief template)
+│   ├── DATA_SCHEMA.md           — complete field reference for ROOMS, TREE, and GAME_CONFIG
+│   └── ROOM_DESIGN.md           — room and stage design principles: narrative, hints, Fox voice
 └── tests/
-    ├── engine.test.js           — engine unit tests (56 tests)
+    ├── engine.test.js           — engine unit tests
     └── hub.test.js              — hub page DOM tests
 ```
 
@@ -106,9 +78,9 @@ vault-zero/
 npm test
 ```
 
-Uses Node's native test runner (`node:test`). The only dev dependency is `jsdom`. Tests cover: command parsing, scoring, hint system, quiz assembly, file editor validation, ROOMS data integrity, and hub page DOM structure.
+Uses Node's native test runner (`node:test`). The only dev dependency is `jsdom`. Tests cover command parsing, scoring, hint system, quiz assembly, file editor validation, ROOMS data integrity, and hub page DOM structure.
 
-## Built with
+## Tech stack
 
 Vanilla JS + Supabase for the leaderboard. No build step, no framework, no bundler.
 
@@ -122,4 +94,4 @@ CREATE POLICY "anyone can insert" ON scores FOR INSERT WITH CHECK (true);
 CREATE POLICY "anyone can read"   ON scores FOR SELECT USING (true);
 ```
 
-Without this, score saves fail silently (shown as a red note in-game).
+Without this, score saves fail silently (shown as a red note in-game and logged to the console).

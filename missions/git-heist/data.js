@@ -131,7 +131,7 @@ const ROOMS = [
           ["* main", "br"],
           ["  remotes/origin/main", "dim"],
           ["  remotes/origin/security-audit-2019", "dim"],
-          ["  remotes/origin/fox/vault-schematics", "hl"],
+          ["  remotes/origin/vault-schematics", "hl"],
         ],
         tree: "r1_branches",
         wrong: {
@@ -157,11 +157,11 @@ const ROOMS = [
         },
         foxMsg: "one of those branches has what you need. the name should give it away.",
         task: "Switch to the branch that has the access credentials.",
-        accepted: ["git checkout fox/vault-schematics", "git switch fox/vault-schematics",
-                   "git checkout origin/fox/vault-schematics"],
+        accepted: ["git checkout vault-schematics", "git switch vault-schematics",
+                   "git checkout origin/vault-schematics"],
         output: [
-          ["Branch 'fox/vault-schematics' set up to track 'origin/fox/vault-schematics'.", "sys"],
-          ["Switched to a new branch 'fox/vault-schematics'", "ok"],
+          ["Branch 'vault-schematics' set up to track 'origin/vault-schematics'.", "sys"],
+          ["Switched to a new branch 'vault-schematics'", "ok"],
         ],
         tree: "r1_on_fox",
         wrong: {
@@ -178,7 +178,7 @@ const ROOMS = [
         task: "View the commit log on this branch.",
         accepted: ["git log --oneline", "git log", "git log --all", "git log --oneline --all"],
         output: [
-          ["{{H1}} (HEAD -> fox/vault-schematics) hide the access map — do not merge", "cm"],
+          ["{{H1}} (HEAD -> vault-schematics) hide the access map — do not merge", "cm"],
           ["{{H2}} update access routes", "sys"],
           ["{{H7}} initial repo setup", "dim"],
         ],
@@ -203,8 +203,18 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "you're there. read it.",
-        task: "Read the contents of vault.txt.",
+        foxMsg: "you're at the commit. see what's here.",
+        task: "List the files in this commit.",
+        accepted: ["ls"],
+        output: [
+          ["README.md  access-routes.json  vault.txt", "sys"]
+        ],
+        tree: "r1_detached",
+        wrong: {}
+      },
+      {
+        foxMsg: "there it is. read it.",
+        task: "Read the vault file.",
         accepted: ["cat vault.txt", "git show HEAD:vault.txt", "git show"],
         output: [
           ["", ""],
@@ -226,9 +236,7 @@ const ROOMS = [
           ["monitoring goes dark at 02:00. fifteen minutes.", "ok"],
         ],
         tree: "r1_detached",
-        wrong: {
-          "ls": [["README.md  access-routes.json  vault.txt", "sys"]]
-        },
+        wrong: {},
         completionMsg: "good. you know how to read a repo. now we can talk about the real job."
       }
     ],
@@ -242,7 +250,7 @@ const ROOMS = [
       [
         "look at the branch names. one of them was created by someone on the inside.",
         "you switch branches with git checkout or git switch, followed by the branch name.",
-        "git checkout <name> switches to that branch. the full name is exactly what appeared in git branch -a — copy it precisely, including the prefix.\n\nrun: git checkout fox/vault-schematics"
+        "git checkout <name> switches to that branch. the full name is exactly what appeared in git branch -a — copy it precisely.\n\nrun: git checkout vault-schematics"
       ],
       [
         "you need to see the history of this branch — every commit that was made, in order.",
@@ -255,9 +263,14 @@ const ROOMS = [
         "a commit hash is its unique ID. git checkout works with hashes the same way it works with branch names. you'll enter 'detached HEAD' state — that's expected for read-only exploration.\n\nrun: git checkout {{H1}}"
       ],
       [
-        "you're at the right commit. the file is there — just read it.",
+        "you're at the commit. what files are here?",
+        "ls shows the contents of the current directory.",
+        "run: ls"
+      ],
+      [
+        "you found the file. now read it.",
         "cat reads a file's contents. git show displays what a commit contains.",
-        "cat reads a file and prints it to the terminal. the filename is already in the directory listing — look at what ls showed you earlier.\n\nrun: cat vault.txt"
+        "cat reads a file and prints it to the terminal.\n\nrun: cat vault.txt"
       ]
     ]
   },
@@ -273,6 +286,15 @@ const ROOMS = [
     intro: "The syndicate's server has the live vault access system. You can't touch the original — any write operation trips the alarm. You need your own working copy.",
     stages: [
       {
+        conceptBrief: {
+          title: "WHAT IS A REMOTE",
+          bullets: [
+            "a remote is a copy of your repository stored on another server — like GitHub",
+            "your local repo and the remote are separate: changes don't sync automatically",
+            "git uses a short name for each remote — 'origin' is the default name for where you cloned from",
+            "git remote -v shows you the server URL for fetching (downloading) and pushing (uploading)"
+          ]
+        },
         foxMsg: "the access system is on their server. you touch the original, we're burned. first — check where this repo came from.",
         task: "Inspect the remote connections for this repo.",
         accepted: ["git remote -v", "git remote"],
@@ -292,6 +314,15 @@ const ROOMS = [
         }
       },
       {
+        conceptBrief: {
+          title: "FORK vs CLONE",
+          bullets: [
+            "fork — creates a server-side copy of someone else's repo under your own account (e.g. GitHub)",
+            "clone — downloads a repo from a server to your local machine",
+            "the typical workflow: fork first (you now own a copy on the server), then clone it locally",
+            "forking is a GitHub/GitLab feature — not a core git command — used so you can push without touching the original"
+          ]
+        },
         foxMsg: "fork it first. create a version that belongs to you — on your own account on the server. no writes to theirs.",
         task: "Fork the repository to your own account.",
         accepted: ["gh repo fork", "fork"],
@@ -406,9 +437,11 @@ const ROOMS = [
           ],
           ascii: "  UNTRACKED ──git add──▶ STAGED ──git commit──▶ COMMITTED\n  MODIFIED  ──git add──▶ STAGED"
         },
-        foxMsg: "scanner alert — police unit picking up traffic on this node. forensic tools are running. you've got modified files sitting open everywhere. stage ALL of it in one command — fast.",
+        foxMsg: "scanner picked up activity on this node. files are open. stage everything now — git add . covers it all at once.",
         task: "Stage all current changes immediately — one command, full sweep.",
         policeOnLoad: true,
+        policeWarnModal: true,
+        policePopupMsg: "scanner picked up activity on this node.\n\nthis is standard git workflow — you have modified files open and need to stage them before moving on.\n\nuse git add . to stage everything at once. one command, covers all files.\n\nthe 30-second clock starts when you close this. no pressure — git add . is the only command you need.",
         accepted: ["git add ."],
         output: [
           ["Changes staged for commit:", "sys"],
@@ -733,6 +766,15 @@ const ROOMS = [
         wrong: {}
       },
       {
+        conceptBrief: {
+          title: "GIT STATUS vs GIT LOG",
+          bullets: [
+            "git status — answers 'what is happening RIGHT NOW?' — shows modified, staged, and untracked files in your working directory",
+            "git log — answers 'what happened in the PAST?' — shows the full commit history: who saved what, when, and with what message",
+            "you just used git status to see the PRESENT state (dirty files, untracked scripts)",
+            "now use git log to investigate the PAST — find which commit introduced the problem"
+          ]
+        },
         foxMsg: "when did this happen? walk back through the history.",
         task: "Find the suspicious commit in the log.",
         accepted: ["git log --oneline", "git log", "git log --all --oneline", "git log --oneline --all"],
@@ -850,6 +892,22 @@ const ROOMS = [
         }
       },
       {
+        foxMsg: "before you undo it — confirm the hash. check the log and find the bad commit.",
+        task: "View the commit log to find the hash of the commit to undo.",
+        accepted: ["git log --oneline", "git log", "git log --all --oneline", "git log --oneline --all"],
+        output: [
+          ["{{H5}} (HEAD -> main) merge alarm bypass — URGENT", "cm"],
+          ["{{H4}} temp fix — remove before push", "err"],
+          ["{{H6}} update monitoring cycle config", "sys"],
+          ["{{H1}} set maintenance window to 02:00", "sys"],
+          ["{{H7}} initial repo setup", "dim"],
+          ["", ""],
+          ["there it is. {{H4}} — 'temp fix — remove before push'. that's the one to undo.", "warn"],
+        ],
+        tree: "r6_partial",
+        wrong: {}
+      },
+      {
         foxMsg: "that bad commit is on the shared branch. you can't rewrite history — the server logs every push. undo it officially.",
         task: "Safely undo commit {{H4}} without rewriting shared history.",
         accepted: ["git revert {{H4}}", "git revert {{H4}} --no-edit"],
@@ -894,6 +952,11 @@ const ROOMS = [
         "git restore <file> discards unstaged changes to that file, reverting it to the last committed state. target just the one file — don't use --hard which resets everything.\n\nrun: git restore alarm-config.json"
       ],
       [
+        "you need to look up the hash of the commit you want to undo. check the history.",
+        "git log --oneline shows all commits with short hashes — look for the suspicious one.",
+        "git log --oneline gives one line per commit: hash on the left, message on the right. find 'temp fix — remove before push' — its hash is what you need.\n\nrun: git log --oneline"
+      ],
+      [
         "the commit is on a shared branch that others have already pulled. you can't erase it — you must officially undo it.",
         "git revert <hash> creates a new commit that reverses the changes from that commit.",
         "git revert <hash> creates a new commit that undoes a specific commit's changes — safe for shared branches because it adds to history rather than rewriting it.\n\nrun: git revert {{H4}}"
@@ -922,7 +985,7 @@ const TREE = {
     branches: [
       { name: "main",                   y: 50,  color: "#1D9E75", commits: [{x:40}, {x:85}] },
       { name: "security-audit-2019",    y: 130, color: "#3d4943", commits: [{x:40}, {x:85}, {x:130}] },
-      { name: "fox/vault-schematics",   y: 210, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
+      { name: "vault-schematics",   y: 210, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
     ],
     HEAD: { type: "branch", ref: "main", ci: 1 },
     headBranchY: 50
@@ -930,14 +993,14 @@ const TREE = {
   r1_on_fox: {
     branches: [
       { name: "main",                 y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}] },
-      { name: "fox/vault-schematics", y: 160, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
+      { name: "vault-schematics", y: 160, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
     ],
-    HEAD: { type: "branch", ref: "fox/vault-schematics", ci: 3, branchY: 160 }
+    HEAD: { type: "branch", ref: "vault-schematics", ci: 3, branchY: 160 }
   },
   r1_detached: {
     branches: [
       { name: "main",                 y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}] },
-      { name: "fox/vault-schematics", y: 160, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
+      { name: "vault-schematics", y: 160, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
     ],
     HEAD: { type: "detached", cx: 130, cy: 160 }
   },

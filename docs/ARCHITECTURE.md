@@ -283,7 +283,7 @@ staticQuiz: [
 ],
 ```
 
-After all rooms are complete, `buildQuiz()` assembles 4 questions: up to 2 from `cmdQuizPool` (chosen based on commands the player actually used — matched against `cmdLog`), filled to 4 with shuffled `staticQuiz` entries. All `cmdQuizPool` keys must exist as keys in `cmdDescriptions`.
+After all rooms are complete, `buildQuiz()` assembles up to 7 questions: up to 4 from `cmdQuizPool` (chosen based on commands the player actually used — matched against `cmdLog`), filled to 7 total with shuffled `staticQuiz` entries. All `cmdQuizPool` keys must exist as keys in `cmdDescriptions`.
 
 ---
 
@@ -395,19 +395,20 @@ goNextRoom()  [triggered by Enter on roomDone modal]
 
 ### Hint system
 
-Hints are stored on the room, not the stage. `room().hints[G.stageIdx]` gives the 3-level array for the current stage. Opening the hint costs 1 point. Advancing to hint 2 costs 5 more. Advancing to hint 3 (the answer) costs 15 more and adds 3 to `G.totalHints`. Hint level resets to 0 when the stage advances.
+Hints are stored on the room, not the stage. `room().hints[G.stageIdx]` gives the 3-level array for the current stage. Opening the hint (level 1) is free. Advancing to hint 2 costs 5 points. Advancing to hint 3 (the answer) costs 15 more and adds 3 to `G.totalHints`. Hint level resets to 0 when the stage advances.
 
 ### Scoring
 
 | Event | Points |
 |---|---|
 | Stage completed | +10 |
-| Hint opened (first level) | -1 |
+| Hint opened (first level) | 0 (free) |
 | Hint level 2 | -5 |
 | Hint level 3 (answer) | -15 |
 | 2nd+ wrong command in a stage | -1 per |
 | Police raid (countdown reaches 0) | -10 |
 | Correct quiz answer | +5 |
+| Good commit message (10+ chars, descriptive) | +5 |
 | Score floor | 0 (never negative) |
 
 ---

@@ -306,11 +306,15 @@
 
     <div class="quiz-fox-speech" id="quizFoxSpeech"></div>
 
+    <div id="quizStartWrap" style="display:none; text-align:center; margin-bottom:24px;">
+      <button class="btn primary" style="font-size:11px;letter-spacing:3px;padding:12px 32px;" onclick="startQuiz()">[ START VERIFICATION ]</button>
+    </div>
+
     <div id="quizBody">
       <div class="quiz-meta-row">
         <span class="quiz-num" id="quizNum">QUESTION 1 / 4</span>
         <div class="quiz-timer-wrap">
-          <span class="quiz-timer-num" id="quizTimerNum">0:20</span>
+          <span class="quiz-timer-num" id="quizTimerNum">0:30</span>
           <div class="quiz-timer-bar"><div class="quiz-timer-fill" id="quizTimerFill"></div></div>
         </div>
       </div>
@@ -357,6 +361,9 @@
     <div class="assembled-key-wrap">
       <div class="assembled-key-header">GIT HEIST // ACCESS CREDENTIALS</div>
       <div id="assembledKey"></div>
+    </div>
+    <div class="end-cmdlog-section">
+      <button class="btn end-cmdlog-btn" onclick="openCheatSheet()">[cmd: log] — view &amp; download your command record</button>
     </div>
     <div class="tx-body end-fox-msg-body">
       <div class="end-fox-speech-label">[ fox // final transmission ]</div>

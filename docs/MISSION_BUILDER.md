@@ -194,7 +194,7 @@ const GAME_CONFIG = {
       correct: 1,
       explain: 'An image is the packaged template. A container is a live process created from that template.',
     },
-    // 5–8 static questions, used to fill the quiz to 4 total.
+    // 5–8 static questions, used to fill the quiz to 7 total.
   ],
 
 };
@@ -220,7 +220,7 @@ const GAME_CONFIG = {
 
 **`validateFile`** — Keep validation tight. Check for the specific string/pattern that proves the edit was correct. Return clear output either way — the player sees your `output` immediately after clicking SAVE FILE. If `pass: false`, tell them exactly what is wrong and what to do next.
 
-**`cmdQuizPool`** — Every key must exist in `cmdDescriptions`. Aim for 5–8 entries. The engine picks at most 2 from this pool (based on what the player actually used), then fills to 4 with `staticQuiz`. Write 4 options per question. `explain` is shown after the player answers — teach the concept, not just the answer.
+**`cmdQuizPool`** — Every key must exist in `cmdDescriptions`. Aim for 5–8 entries. The engine picks up to 4 from this pool (based on commands the player actually used), then fills to 7 total with `staticQuiz`. Write 4 options per question. `explain` is shown after the player answers — teach the concept, not just the answer.
 
 ---
 
@@ -463,7 +463,7 @@ Everything else in the HTML (modals, panels, IDs) is used by the engine and must
 - `#policeAlert`, `#policeCountdown`, `#policeBarFill`, `#policeVignette`
 - `#hintModal`, `#hintLvl`, `#hintTxt`, `#nextHintBtn`
 - `#roomDone`, `#doneStats`, `#doneMsg`, `#clueFragment`, `#clueKey`, `#clueVal`, `#clueCount`
-- `#quizScreen`, `#quizFoxSpeech`, `#quizBody`, `#quizNum`, `#quizQ`, `#quizOpts`, `#quizFeedback`
+- `#quizScreen`, `#quizFoxSpeech`, `#quizStartWrap`, `#quizBody`, `#quizNum`, `#quizQ`, `#quizOpts`, `#quizFeedback`
 - `#endScreen`, `#assembledKey`
 - `#fileEditor`, `#fileContent`, `#editorTitle`, `#editorHint`
 - `#conceptModal`, `#conceptTitle`, `#conceptBullets`, `#conceptAscii`
