@@ -43,7 +43,9 @@ const G = {
   stageWrongs:   0,
   stageHintLevel: -1,
   clues: [],
-  savedProgress: JSON.parse(localStorage.getItem('vz_progress') || '{}')
+  savedProgress: JSON.parse(localStorage.getItem('vz_progress') || '{}'),
+  userId:        null,
+  isAuthenticated: false
 };
 
 function room()  { return ROOMS[G.roomIdx]; }
@@ -826,7 +828,12 @@ function runBootSequence() {
         enterBtn.style.opacity      = '1';
         enterBtn.style.pointerEvents = '';
         nameInput.focus();
-        nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
+        const _onEnter = e => { if (e.key === 'Enter') handleAuth(); };
+        nameInput.addEventListener('keydown', _onEnter);
+        const _pwEl = document.getElementById('operativePassword');
+        const _cfEl = document.getElementById('operativeConfirm');
+        if (_pwEl) _pwEl.addEventListener('keydown', _onEnter);
+        if (_cfEl) _cfEl.addEventListener('keydown', _onEnter);
       }, 300);
     }, 600);
   }
@@ -845,7 +852,12 @@ function runBootSequence() {
     enterBtn.style.opacity      = '1';
     enterBtn.style.pointerEvents = '';
     nameInput.focus();
-    nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
+    const _onEnter = e => { if (e.key === 'Enter') handleAuth(); };
+    nameInput.addEventListener('keydown', _onEnter);
+    const _pwEl = document.getElementById('operativePassword');
+    const _cfEl = document.getElementById('operativeConfirm');
+    if (_pwEl) _pwEl.addEventListener('keydown', _onEnter);
+    if (_cfEl) _cfEl.addEventListener('keydown', _onEnter);
   }
 
   function nextLine() {
@@ -1038,7 +1050,8 @@ async function submitScore() {
     roomsCompleted: G.clues.length,
     hintsUsed:      G.totalHints,
     finalScore:     G.score,
-    commandsUsed:   cmdLog.map(e => e.cmd)
+    commandsUsed:   cmdLog.map(e => e.cmd),
+    userId:         G.userId || null
   });
   if (saved) {
     btn.style.display = 'none';
@@ -1274,6 +1287,71 @@ function skipTour() {
 initResizable();
 runBootSequence();
 
+
+// ─── Auth ─────────────────────────────────────────────────────────────
+
+let _authMode = 'login';
+
+function setAuthMode(mode) {
+  _authMode = mode;
+  document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
+  const confirmRow = document.getElementById('confirmRow');
+  if (confirmRow) confirmRow.style.display = mode === 'register' ? '' : 'none';
+  const errEl = document.getElementById('authError');
+  if (errEl) errEl.textContent = '';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  if (el) el.textContent = msg;
+}
+
+function playAnonymous() {
+  showAuthError('');
+  startGame();
+}
+
+async function handleAuth() {
+  const nameEl   = document.getElementById('operativeName');
+  const pwEl     = document.getElementById('operativePassword');
+  const codename = (nameEl ? nameEl.value : '').trim();
+  const password = pwEl ? pwEl.value : '';
+
+  showAuthError('');
+  if (!codename) { showAuthError('enter your operative codename'); return; }
+  if (!password) { showAuthError('enter your password'); return; }
+
+  const btn = document.getElementById('enterBtn');
+  btn.textContent = '[ CONNECTING... ]';
+  btn.disabled = true;
+
+  let result;
+  if (_authMode === 'register') {
+    const cfEl    = document.getElementById('operativeConfirm');
+    const confirm = cfEl ? cfEl.value : '';
+    if (password.length < 6) {
+      showAuthError('password must be at least 6 characters');
+      btn.textContent = '[ ENTER THE REPO ]'; btn.disabled = false; return;
+    }
+    if (password !== confirm) {
+      showAuthError('passwords do not match');
+      btn.textContent = '[ ENTER THE REPO ]'; btn.disabled = false; return;
+    }
+    result = await authSignUp(codename, password);
+  } else {
+    result = await authSignIn(codename, password);
+  }
+
+  btn.textContent = '[ ENTER THE REPO ]';
+  btn.disabled = false;
+
+  if (result.error) { showAuthError(result.error); return; }
+
+  G.userId = result.userId;
+  G.isAuthenticated = true;
+  startGame();
+}
 
 // ─── startGame ───────────────────────────────────────────────────────
 

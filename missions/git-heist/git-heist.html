@@ -31,11 +31,29 @@
       A previous crew breached the target's system and buried the access credentials inside their own repo. Never merged. Still in there.<br><br>
       Find it. I'll be watching."
     </div>
-    <div class="operative-input-row tx-fade" id="operativeRow" style="opacity:0;transform:translateY(8px)">
-      <label class="operative-input-label">operative_codename:</label>
-      <input type="text" id="operativeName" class="operative-input" placeholder="enter codename..." autocomplete="off" spellcheck="false" maxlength="20">
+    <div class="auth-section tx-fade" id="operativeRow" style="opacity:0;transform:translateY(8px)">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="setAuthMode('login')">[ LOG IN ]</button>
+        <button class="auth-tab" id="tabRegister" onclick="setAuthMode('register')">[ NEW OPERATIVE ]</button>
+      </div>
+      <div class="auth-fields">
+        <div class="operative-input-row">
+          <label class="operative-input-label">operative_codename:</label>
+          <input type="text" id="operativeName" class="operative-input" placeholder="enter codename..." autocomplete="off" spellcheck="false" maxlength="20">
+        </div>
+        <div class="operative-input-row">
+          <label class="operative-input-label">password:</label>
+          <input type="password" id="operativePassword" class="operative-input" placeholder="enter password...">
+        </div>
+        <div class="operative-input-row" id="confirmRow" style="display:none">
+          <label class="operative-input-label">confirm_password:</label>
+          <input type="password" id="operativeConfirm" class="operative-input" placeholder="confirm password...">
+        </div>
+      </div>
+      <div class="auth-error" id="authError"></div>
+      <button class="auth-anon-btn" onclick="playAnonymous()">— skip, play anonymously —</button>
     </div>
-    <button class="enter-btn tx-fade" id="enterBtn" style="opacity:0;pointer-events:none" onclick="startGame()">[ ENTER THE REPO ]</button>
+    <button class="enter-btn tx-fade" id="enterBtn" style="opacity:0;pointer-events:none" onclick="handleAuth()">[ ENTER THE REPO ]</button>
   </div>
 </div>
 
