@@ -1641,3 +1641,69 @@ body.resizing-col    { user-select: none; }
   letter-spacing: 3px;
   padding: 13px;
 }
+
+/* ─── FIRST-RUN TOUR ──────────────────────────────────────────── */
+#tourOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+#tourSpotlight {
+  position: fixed;
+  border-radius: 4px;
+  box-shadow: 0 0 0 9999px rgba(5, 12, 9, 0.86);
+  z-index: 1001;
+  pointer-events: none;
+  border: 1.5px solid rgba(29, 158, 117, 0.65);
+  transition: left 0.28s ease, top 0.28s ease, width 0.28s ease, height 0.28s ease;
+}
+#tourTooltip {
+  position: fixed;
+  z-index: 1002;
+  pointer-events: all;
+  width: 270px;
+  background: var(--surface-1);
+  border: 1px solid #1D9E75;
+  padding: 16px 18px 14px;
+  font-family: var(--font-mono);
+  transition: left 0.28s ease, top 0.28s ease;
+}
+#tourTooltip::before {
+  content: '▓ BRIEFING ▓';
+  display: block;
+  font-size: 8px;
+  color: var(--text-faint);
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+}
+.tour-step-num {
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+}
+.tour-tt-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.tour-tt-body {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  line-height: 1.65;
+  margin-bottom: 16px;
+}
+.tour-tt-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.tour-skip-btn {
+  font-size: 10px;
+  opacity: 0.5;
+  padding: 7px 12px;
+}
+.tour-skip-btn:hover { opacity: 1; }

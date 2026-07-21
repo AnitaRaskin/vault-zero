@@ -1101,6 +1101,131 @@ function initResizable() {
   });
 }
 
+// ─── First-run tour ──────────────────────────────────────────────────
+
+const TOUR_STEPS = [
+  {
+    sel: '.fox-panel',
+    pos: 'right',
+    title: 'FOX // COMMS',
+    body: 'Your encrypted contact. Fox briefs you stage by stage — read her message before you type anything.'
+  },
+  {
+    sel: '.terminal-panel',
+    pos: 'right',
+    title: 'TERMINAL',
+    body: 'Type real Git commands here. Real-looking output, real feedback. No clicking — only typing.'
+  },
+  {
+    sel: '.tree-panel',
+    pos: 'left',
+    title: 'REPO STATE',
+    body: 'A live SVG of your repo. Branches, commits, HEAD — watch it update as you work.'
+  },
+  {
+    sel: 'button[onclick*="openHint"]',
+    pos: 'bottom',
+    title: '[CMD: HINT]',
+    body: 'Stuck? Three hint levels available — nudge, method, full explanation. Each one costs points, so use them wisely.'
+  },
+  {
+    sel: 'button[onclick*="openCheatSheet"]',
+    pos: 'bottom',
+    title: '[CMD: LOG]',
+    body: 'Every command you type is recorded here. Download it as a cheat sheet when the heist is done.'
+  },
+  {
+    sel: '#scoreChip',
+    pos: 'bottom',
+    title: 'SCORE',
+    body: 'Earn points for each stage. Deductions for hints and wrong answers. Finish the heist and save to the leaderboard.'
+  },
+];
+
+let _tourStep = 0;
+
+function startTour() {
+  _tourStep = 0;
+  const overlay = document.getElementById('tourOverlay');
+  overlay.style.display = 'block';
+  // Place without transition on first step
+  const sp = document.getElementById('tourSpotlight');
+  const tt = document.getElementById('tourTooltip');
+  sp.style.transition = 'none';
+  tt.style.transition = 'none';
+  showTourStep(0);
+  requestAnimationFrame(() => {
+    sp.style.transition = '';
+    tt.style.transition = '';
+  });
+  document.addEventListener('keydown', _tourKeyHandler);
+}
+
+function _tourKeyHandler(e) {
+  if (e.key === 'Enter' || e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    nextTourStep();
+  } else if (e.key === 'Escape') {
+    skipTour();
+  }
+}
+
+function showTourStep(i) {
+  const step = TOUR_STEPS[i];
+  const el   = document.querySelector(step.sel);
+  if (!el) { nextTourStep(); return; }
+
+  const PAD  = 8;
+  const TW   = 270;
+  const TH   = 175;
+  const GAP  = 14;
+  const rect = el.getBoundingClientRect();
+  const vw   = window.innerWidth;
+  const vh   = window.innerHeight;
+
+  const sp = document.getElementById('tourSpotlight');
+  sp.style.left   = (rect.left   - PAD) + 'px';
+  sp.style.top    = (rect.top    - PAD) + 'px';
+  sp.style.width  = (rect.width  + PAD * 2) + 'px';
+  sp.style.height = (rect.height + PAD * 2) + 'px';
+
+  let tl, ttop;
+  if (step.pos === 'right') {
+    tl   = rect.right + GAP;
+    ttop = Math.max(16, Math.min(rect.top, vh - TH - 16));
+  } else if (step.pos === 'left') {
+    tl   = rect.left - GAP - TW;
+    ttop = Math.max(16, Math.min(rect.top, vh - TH - 16));
+  } else { // bottom
+    tl   = Math.max(16, Math.min(rect.left - PAD, vw - TW - 16));
+    ttop = rect.bottom + GAP;
+  }
+
+  const tt = document.getElementById('tourTooltip');
+  tt.style.left = tl + 'px';
+  tt.style.top  = ttop + 'px';
+
+  document.getElementById('tourStepNum').textContent = `STEP ${i + 1} / ${TOUR_STEPS.length}`;
+  document.getElementById('tourTtTitle').textContent  = step.title;
+  document.getElementById('tourTtBody').textContent   = step.body;
+  document.getElementById('tourNextBtn').textContent  = (i === TOUR_STEPS.length - 1) ? 'DONE ✓' : 'NEXT →';
+}
+
+function nextTourStep() {
+  _tourStep++;
+  if (_tourStep >= TOUR_STEPS.length) {
+    skipTour();
+  } else {
+    showTourStep(_tourStep);
+  }
+}
+
+function skipTour() {
+  localStorage.setItem('vz_tour_done', '1');
+  document.getElementById('tourOverlay').style.display = 'none';
+  document.removeEventListener('keydown', _tourKeyHandler);
+}
+
 initResizable();
 runBootSequence();
 
@@ -1121,4 +1246,5 @@ function startGame() {
   G.roomStart    = Date.now();
   startFooterClock();
   loadRoom();
+  if (!localStorage.getItem('vz_tour_done')) setTimeout(startTour, 600);
 }

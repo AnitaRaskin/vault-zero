@@ -378,6 +378,20 @@
   </div>
 </div>
 
+<!-- ═══ FIRST-RUN TOUR ══════════════════════════════════════════ -->
+<div id="tourOverlay" style="display:none">
+  <div id="tourSpotlight"></div>
+  <div id="tourTooltip">
+    <div class="tour-step-num" id="tourStepNum"></div>
+    <div class="tour-tt-title" id="tourTtTitle"></div>
+    <div class="tour-tt-body" id="tourTtBody"></div>
+    <div class="tour-tt-btns">
+      <button class="btn tour-skip-btn" onclick="skipTour()">SKIP TOUR</button>
+      <button class="btn primary" id="tourNextBtn" onclick="nextTourStep()">NEXT →</button>
+    </div>
+  </div>
+</div>
+
 <!-- scripts: config → data → renderer → supabase → engine -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="./config.js"></script>
