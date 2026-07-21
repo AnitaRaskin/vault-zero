@@ -13,6 +13,30 @@ function svgEl(tag, attrs) {
   return el;
 }
 
+// ─── Reactive resize ─────────────────────────────────────────────────────
+// Re-render whenever the tree panel changes size (e.g. user drags divider).
+
+let _currentStateKey = null;
+let _roTimer         = null;
+let _roLastW         = 0;
+let _roLastH         = 0;
+let _roSetup         = false;
+
+function _setupResizeObserver(svg) {
+  if (_roSetup) return;
+  _roSetup = true;
+  const target = svg.parentElement || svg;
+  new ResizeObserver(entries => {
+    const r = entries[0].contentRect;
+    if (Math.abs(r.width - _roLastW) < 1 && Math.abs(r.height - _roLastH) < 1) return;
+    _roLastW = r.width; _roLastH = r.height;
+    clearTimeout(_roTimer);
+    _roTimer = setTimeout(() => {
+      if (_currentStateKey != null) renderTree(_currentStateKey);
+    }, 60);
+  }).observe(target);
+}
+
 // ─── Tooltip ────────────────────────────────────────────────────────────
 
 let _ttBound = false;
@@ -45,7 +69,9 @@ function setupTooltip(svg) {
 // ─── Main render ────────────────────────────────────────────────────────
 
 function renderTree(stateKey) {
+  _currentStateKey = stateKey;
   const svg = document.getElementById('gitTree');
+  _setupResizeObserver(svg);
   svg.innerHTML = '';
   _ttBound = false;
   setupTooltip(svg);
