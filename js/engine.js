@@ -51,6 +51,18 @@ const G = {
 function room()  { return ROOMS[G.roomIdx]; }
 function stage() { return room().stages[G.stageIdx]; }
 
+// ─── Concept brief — show each (room, stage) at most once ────────────
+function _briefKey(ri, si) { return `vz_brief_${ri}_${si}`; }
+function maybeShowConceptBrief(brief, callback) {
+  const key = _briefKey(G.roomIdx, G.stageIdx);
+  if (brief && !localStorage.getItem(key)) {
+    localStorage.setItem(key, '1');
+    showConceptBrief(brief, callback);
+  } else {
+    callback();
+  }
+}
+
 
 // ─── Command log / cheat sheet ───────────────────────────────────────
 
@@ -372,6 +384,37 @@ function foxMsg(text, type) {
 }
 
 
+// ─── Near-miss detection ─────────────────────────────────────────────
+
+function checkNearMiss(cmd) {
+  if (cmd === 'git add')
+    return "correct command — but it needs a target. try: git add . (all files) or git add <filename>";
+  if (cmd === 'git commit')
+    return "correct command — but it needs -m and a message. try: git commit -m \"describe your change\"";
+  if (cmd === 'git commit -m')
+    return "you need a message in quotes after -m. try: git commit -m \"your message here\"";
+  if (cmd === 'git revert')
+    return "git revert needs a commit hash. run git log --oneline first, then: git revert <hash>";
+  if (cmd === 'git checkout' || cmd === 'git checkout --')
+    return "git checkout needs a branch name or commit hash after it";
+  if (cmd === 'git switch')
+    return "git switch needs a branch name — try: git switch <branchname>";
+  if (cmd === 'git checkout -b' || cmd === 'git checkout -B')
+    return "git checkout -b needs a new branch name — try: git checkout -b <branchname>";
+  if (cmd === 'git switch -c')
+    return "git switch -c needs a new branch name — try: git switch -c <branchname>";
+  if (cmd === 'git clean')
+    return "git clean needs -f to force removal of untracked files — try: git clean -fd";
+  if (cmd === 'git log oneline')
+    return "close — but the flag needs -- before it. try: git log --oneline";
+  if (cmd === 'git branch a')
+    return "close — the flag needs - before it. try: git branch -a";
+  if (['git stauts', 'git statsu', 'git staus', 'git statuts', 'git sttaus', 'git statu'].includes(cmd))
+    return "did you mean: git status?";
+  return null;
+}
+
+
 // ─── Command parsing ─────────────────────────────────────────────────
 
 function normalise(s) { return s.trim().replace(/\s+/g, ' '); }
@@ -447,6 +490,15 @@ function parseCmd(raw) {
     if (fallback) { tprint(fallback); return {}; }
   }
 
+  // Near-miss detection — targeted feedback before the generic fallback
+  const nearMiss = checkNearMiss(cmd);
+  if (nearMiss) {
+    tprint([[nearMiss, 'warn']]);
+    flashTerminal();
+    countWrong();
+    return {};
+  }
+
   tprint([["command not recognized in this environment. type 'help' for available commands.", 'warn']]);
   flashTerminal();
   countWrong();
@@ -517,10 +569,22 @@ function advance(treeState) {
     G.stageHintLevel = -1;
     updateProgress();
     setTimeout(() => {
-      if (stage().conceptBrief) showConceptBrief(stage().conceptBrief, loadNextStageUI);
+      if (stage().conceptBrief) maybeShowConceptBrief(stage().conceptBrief, loadNextStageUI);
       else                       loadNextStageUI();
     }, 700);
   }
+}
+
+function saveFullProgress() {
+  if (G.roomIdx + 1 >= ROOMS.length) return;
+  localStorage.setItem('vz_save', JSON.stringify({
+    roomIdx:    G.roomIdx + 1,
+    score:      G.score,
+    clues:      G.clues,
+    cmdLog:     cmdLog,
+    totalHints: G.totalHints,
+    elapsed:    Date.now() - G.missionStart
+  }));
 }
 
 function completeRoom() {
@@ -530,6 +594,7 @@ function completeRoom() {
   const completionMsg = room().stages[room().stages.length - 1].completionMsg || 'room cleared.';
   G.savedProgress[`room${room().id}`] = { complete: true, hints: G.hintsUsed, time: t };
   localStorage.setItem('vz_progress', JSON.stringify(G.savedProgress));
+  saveFullProgress();
   const clue = room().clue;
   if (clue && !G.clues.find(c => c.label === clue.label)) G.clues.push(clue);
   document.getElementById('doneStats').textContent = `Time: ${m}:${s}  ·  Hints used: ${G.hintsUsed}`;
@@ -602,11 +667,10 @@ function loadRoom() {
   updateProgress();
   renderTree(r.initialTree || ('r' + r.id + '_initial'));
   setTimeout(() => {
-    if (_tourPending && s.conceptBrief) {
-      _deferredBrief = s.conceptBrief;
-      loadNextStageUI();
+    if (_tourPending) {
+      startTour();
     } else if (s.conceptBrief) {
-      showConceptBrief(s.conceptBrief, loadNextStageUI);
+      maybeShowConceptBrief(s.conceptBrief, loadNextStageUI);
     } else {
       loadNextStageUI();
     }
@@ -1021,6 +1085,7 @@ function showQuizResult() {
 }
 
 function finishQuiz() {
+  localStorage.removeItem('vz_save');
   document.getElementById('quizScreen').classList.remove('open');
   buildEndScreen();
   document.getElementById('endScreen').classList.add('open');
@@ -1170,7 +1235,6 @@ const TOUR_STEPS = [
 
 let _tourStep = 0;
 let _tourPending  = false;
-let _deferredBrief = null;
 
 function startTour() {
   _tourStep = 0;
@@ -1267,11 +1331,9 @@ function skipTour() {
   _tourPending = false;
   document.getElementById('tourOverlay').style.display = 'none';
   document.removeEventListener('keydown', _tourKeyHandler);
-  if (_deferredBrief) {
-    const brief = _deferredBrief;
-    _deferredBrief = null;
-    showConceptBrief(brief, () => inp.focus());
-  }
+  const s = stage();
+  if (s && s.conceptBrief) maybeShowConceptBrief(s.conceptBrief, loadNextStageUI);
+  else loadNextStageUI();
 }
 
 initResizable();
@@ -1281,21 +1343,67 @@ runBootSequence();
 // ─── startGame ───────────────────────────────────────────────────────
 
 let gameStarted = false;
+let _pendingCodename = '';
+let _pendingSave = null;
+
 function startGame() {
   if (gameStarted) return;
-  gameStarted = true;
   const rawName  = (document.getElementById('operativeName').value || '').trim();
   const codename = rawName.replace(/[^a-zA-Z0-9_\-]/g, '').toLowerCase() || 'operative';
+  const save     = JSON.parse(localStorage.getItem('vz_save') || 'null');
+  if (save && save.roomIdx > 0 && save.roomIdx < ROOMS.length) {
+    _pendingCodename = codename;
+    _pendingSave     = save;
+    document.getElementById('resumeRoomNum').textContent    = save.roomIdx;
+    document.getElementById('resumeRoomsTotal').textContent = ROOMS.length;
+    document.getElementById('resumeScore').textContent      = save.score || 0;
+    document.getElementById('resumeModal').classList.add('open');
+    return;
+  }
+  gameStarted = true;
+  _launchGame(codename, 0, true);
+}
+
+function doResume() {
+  if (gameStarted) return;
+  gameStarted = true;
+  document.getElementById('resumeModal').classList.remove('open');
+  const save   = _pendingSave;
+  G.roomIdx    = save.roomIdx;
+  G.score      = save.score      || 0;
+  G.clues      = save.clues      || [];
+  cmdLog       = save.cmdLog     || [];
+  G.totalHints = save.totalHints || 0;
+  document.getElementById('scoreVal').textContent = G.score;
+  _launchGame(_pendingCodename, save.elapsed || 0, false);
+}
+
+function doStartFresh() {
+  if (gameStarted) return;
+  gameStarted = true;
+  document.getElementById('resumeModal').classList.remove('open');
+  localStorage.removeItem('vz_save');
+  _launchGame(_pendingCodename, 0, true);
+}
+
+function _launchGame(codename, elapsed, showTour) {
   G.codename = codename;
   document.getElementById('operativeTag').textContent = `${codename}@${GAME_CONFIG.promptSuffix || 'local:~$'}`;
   document.getElementById('introScreen').style.display = 'none';
   document.getElementById('gameShell').style.display   = 'flex';
-  G.missionStart = Date.now();
+  G.missionStart = Date.now() - elapsed;
   G.roomStart    = Date.now();
   startFooterClock();
-  if (!localStorage.getItem('vz_tour_done')) _tourPending = true;
+  if (showTour && !localStorage.getItem('vz_tour_done')) _tourPending = true;
   loadRoom();
-  if (_tourPending) setTimeout(startTour, 600);
+}
+
+// ─── Leave room ───────────────────────────────────────────────────────
+function openLeaveModal()  { document.getElementById('leaveModal').classList.add('open'); }
+function closeLeaveModal() { document.getElementById('leaveModal').classList.remove('open'); }
+function leaveRoom() {
+  localStorage.removeItem('vz_progress');
+  window.location.href = '../../index.html';
 }
 
 // ─── Session check on load ────────────────────────────────────────────

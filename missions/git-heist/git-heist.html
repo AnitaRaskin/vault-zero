@@ -17,6 +17,7 @@
 
 <!-- ═══ INTRO ════════════════════════════════════════════════ -->
 <div id="introScreen">
+  <a href="../../index.html" class="intro-back-btn">← hub</a>
   <div class="transmission">
     <div class="tx-header">▓ ENCRYPTED TRANSMISSION ▓</div>
     <div class="vault-logo">GIT HEIST</div>
@@ -43,6 +44,7 @@
 <div id="gameShell">
   <div class="top-bar">
     <div class="top-bar-left">
+      <button class="top-bar-leave" onclick="openLeaveModal()">← leave</button>
       <div class="vault-tag">git_heist_v1</div>
       <div class="top-bar-meta">
         <span>sec_protocol: aes-256</span>
@@ -118,7 +120,7 @@
     </div>
     <div class="resize-handle" id="resizeLeft"></div>
     <!-- Terminal -->
-    <div class="panel terminal-panel" onclick="document.getElementById('termInput').focus()">
+    <div class="panel terminal-panel">
       <div class="terminal-header">
         <span class="operative-tag" id="operativeTag">operative@layer-01:~/vault-repo$</span>
         <div class="terminal-node-meta">
@@ -380,6 +382,41 @@
           <div class="leaderboard-header">TOP OPERATIVES</div>
           <div id="leaderboardRows"></div>
         </div>
+      </div>
+    </div>
+    <div class="end-hub-row">
+      <a href="../../index.html" class="btn end-hub-btn">← RETURN TO HUB</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESUME MODAL ════════════════════════════════════════════════ -->
+<div id="resumeModal">
+  <div class="leave-box">
+    <div class="leave-header">
+      <span class="leave-tag">▓ OPERATIVE DATA RECOVERED ▓</span>
+    </div>
+    <div class="leave-body">
+      <div class="leave-msg">you left a mission unfinished.<br><br>room <span id="resumeRoomNum">0</span> of <span id="resumeRoomsTotal">8</span> cleared — score: <span id="resumeScore">0</span></div>
+      <div class="modal-btns">
+        <button class="btn" onclick="doStartFresh()">[ START FRESH ]</button>
+        <button class="btn primary" onclick="doResume()">[ RESUME MISSION ] →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LEAVE ROOM MODAL ═════════════════════════════════════════════ -->
+<div id="leaveModal">
+  <div class="leave-box">
+    <div class="leave-header">
+      <span class="leave-tag">▓ ABORT MISSION ▓</span>
+    </div>
+    <div class="leave-body">
+      <div class="leave-msg">abandon the mission?<br><br>progress is saved through your last completed room — you can resume next time. your in-room score for this session will be lost.</div>
+      <div class="modal-btns">
+        <button class="btn" onclick="closeLeaveModal()">STAY IN</button>
+        <button class="btn primary" onclick="leaveRoom()">← RETURN TO HUB</button>
       </div>
     </div>
   </div>

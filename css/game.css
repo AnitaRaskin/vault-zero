@@ -115,6 +115,67 @@ body {
 .operative-input::placeholder { color: var(--text-muted); }
 .operative-input[readonly] { opacity: 0.6; cursor: default !important; }
 
+/* ─── INTRO BACK BUTTON ──────────────────────────────────── */
+.intro-back-btn {
+  position: absolute;
+  top: 24px; left: 28px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 1px;
+  transition: color 0.15s;
+}
+.intro-back-btn:hover { color: var(--primary); }
+
+/* ─── TOP BAR LEAVE ──────────────────────────────────────── */
+.top-bar-leave {
+  background: transparent; border: none;
+  color: var(--text-muted);
+  font-family: var(--font);
+  font-size: 10px; letter-spacing: 2px;
+  cursor: pointer !important; padding: 0;
+  transition: color 0.15s;
+}
+.top-bar-leave:hover { color: var(--primary); }
+
+/* ─── RESUME MODAL ───────────────────────────────────────── */
+#resumeModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(5, 8, 7, 0.88);
+  z-index: 300; align-items: center; justify-content: center;
+}
+#resumeModal.open { display: flex; }
+
+/* ─── LEAVE ROOM MODAL ───────────────────────────────────── */
+#leaveModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(5, 8, 7, 0.78);
+  z-index: 200; align-items: center; justify-content: center;
+}
+#leaveModal.open { display: flex; }
+.leave-box {
+  width: 380px; max-width: 90vw;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.leave-header {
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.leave-tag { color: var(--warn); font-size: 10px; font-weight: 500; letter-spacing: 3px; }
+.leave-body { padding: 24px 20px; }
+.leave-msg { color: var(--text-dim); font-size: 13px; line-height: 1.7; margin-bottom: 24px; }
+
+/* ─── END SCREEN HUB BUTTON ──────────────────────────────── */
+.end-hub-row { text-align: center; margin-top: 24px; padding-bottom: 8px; }
+.end-hub-btn {
+  text-decoration: none; font-size: 10px; letter-spacing: 2px;
+  padding: 8px 24px; opacity: 0.65;
+  transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+}
+.end-hub-btn:hover { opacity: 1; border-color: var(--primary); color: var(--primary); }
+
 .tx-header {
   color: var(--primary);
   font-size: 11px;
