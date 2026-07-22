@@ -638,8 +638,8 @@ body.resizing-col    { user-select: none; }
 
 /* ─── ACTION STRIP ────────────────────────────────────────── */
 .tree-action-strip {
-  height: 26px;
-  padding: 0 14px;
+  min-height: 26px;
+  padding: 4px 14px;
   display: flex;
   align-items: center;
   font-family: var(--font);
@@ -649,9 +649,9 @@ body.resizing-col    { user-select: none; }
   letter-spacing: 0.5px;
   flex-shrink: 0;
   opacity: 0.75;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
 }
 .tree-action-strip:empty {
   opacity: 0;
