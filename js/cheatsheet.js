@@ -40,9 +40,11 @@ function downloadCheatSheet() {
   const lines    = [title, '═'.repeat(40), ''];
   cmdLog.forEach(({ cmd, desc }) => lines.push(`  ${cmd.padEnd(28)}${desc}`));
   lines.push('', '═'.repeat(40), footer);
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-  const a    = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
   a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
 }

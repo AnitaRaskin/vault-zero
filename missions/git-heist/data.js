@@ -111,7 +111,7 @@ const ROOMS = [
     id: 1,
     name: 'THE BLUEPRINT',
     clue: { label: 'ENDPOINT', value: '/internal/v0' },
-    intro: "A previous operative breached the target's banking system and buried the access credentials inside their own repo. Never merged. We know it's in here — find the branch, find the commit, read the file.",
+    intro: "Credentials buried in a branch. Never merged. Find the branch, find the commit, read the file.",
     stages: [
       {
         conceptBrief: {
@@ -285,7 +285,7 @@ const ROOMS = [
     name: 'INTO POSITION',
     initialTree: 'r2_remote',
     clue: { label: 'WINDOW', value: '02:00 — 02:15' },
-    intro: "The syndicate's access system is live on their server. You can't touch the original — any write trips the alarm. Get your own copy, get on the right branch, and start working.",
+    intro: "Their server. Touch the original, you trip the alarm. Clone it, get on the right branch, start working.",
     stages: [
       {
         conceptBrief: {
@@ -314,6 +314,18 @@ const ROOMS = [
             ["  Push  URL: https://syndicate-server.vault/access-system.git", "sys"]
           ]
         }
+      },
+      {
+        foxMsg: "that's their server. get out of their directory — you can't clone inside an existing repo. step out first.",
+        task: "Navigate up and out of the syndicate's repo.",
+        accepted: ["cd ..", "cd ../"],
+        output: [
+          ["../", "sys"],
+          ["", ""],
+          ["you're outside their repo. clean ground.", "dim"],
+        ],
+        tree: "r2_remote",
+        wrong: {}
       },
       {
         conceptBrief: {
@@ -474,6 +486,11 @@ const ROOMS = [
         "git remote -v lists every remote connection with its full URL. -v stands for verbose. you'll see at least one entry: origin.\n\nrun: git remote -v"
       ],
       [
+        "you're inside the syndicate's repo directory. you need to step out before you can clone.",
+        "cd moves you between directories. two dots means 'go up one level'.",
+        "cd .. navigates up one directory — out of the current repo folder. you can't clone into an existing repo, so you need to be outside it first.\n\nrun: cd .."
+      ],
+      [
         "cloning downloads the repo to your local machine. clone YOUR fork, not the syndicate's original.",
         "git clone <url> — use the URL of your fork: https://operative.vault/access-system.git",
         "git clone <url> creates a local copy of a repo. clone your fork — its URL points to your account, not the syndicate's server.\n\nrun: git clone https://operative.vault/access-system.git"
@@ -630,7 +647,7 @@ const ROOMS = [
     name: 'THE CREW CONFLICT',
     initialTree: 'r_conflict_initial',
     clue: { label: 'TOKEN', value: 'tok_override_9x77' },
-    intro: "Two operatives edited the same file at the same time. The repo is in conflict. You need to resolve it — or the whole job falls apart.",
+    intro: "Same file, same line. The repo is in conflict. Resolve it.",
     stages: [
       {
         foxMsg: "another operative pushed changes while you were working. pull their work down.",

@@ -501,6 +501,7 @@ async function submitScore() {
   const totalTime = Math.floor((Date.now() - G.missionStart) / 1000);
   const saved = await saveScore({
     codename:       G.codename,
+    mission:        GAME_CONFIG.missionKey || 'unknown',
     totalTime,
     roomsCompleted: G.clues.length,
     hintsUsed:      G.totalHints,
@@ -511,7 +512,7 @@ async function submitScore() {
   if (saved) {
     btn.style.display = 'none';
     document.getElementById('scoreSaved').style.display = '';
-    const board = await getLeaderboard();
+    const board = await getLeaderboard(GAME_CONFIG.missionKey);
     renderLeaderboard(board);
   } else {
     btn.textContent = '[ SAVE FAILED — CHECK CONSOLE ]';
@@ -560,23 +561,12 @@ let quizTimeLeft  = 20;
 let quizAnswered  = false;
 
 function buildQuiz() {
-  const pool    = GAME_CONFIG.cmdQuizPool   || {};
-  const statics = GAME_CONFIG.staticQuiz    || [];
-  const picked  = [];
-  const usedKeys = new Set();
-  for (const { cmd } of cmdLog) {
-    for (const key of Object.keys(pool)) {
-      if (!usedKeys.has(key) && (cmd === key || cmd.startsWith(key + ' '))) {
-        picked.push(pool[key]);
-        usedKeys.add(key);
-        break;
-      }
-    }
-    if (picked.length >= 4) break;
+  const pool = (GAME_CONFIG.quizPool || []).slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  const shuffled = statics.slice().sort(() => 0.5 - Math.random());
-  for (const q of shuffled) { if (picked.length >= 7) break; picked.push(q); }
-  quizQuestions = picked.slice(0, 7);
+  quizQuestions = pool.slice(0, 8);
   quizIdx       = 0;
   quizCorrect   = 0;
 
@@ -683,9 +673,10 @@ function showQuizResult() {
   const total = quizQuestions.length;
   const pct   = quizCorrect / total;
   let verdict;
-  if      (pct === 1)   verdict = '"Perfect. Identity confirmed. You didn\'t just get lucky — you know this. The vault is yours."';
-  else if (pct >= 0.5)  verdict = '"Close enough. You know the tools that matter. The vault is open."';
-  else                  verdict = '"Shaky. But you made it this far. The vault opens. Study up."';
+  const qm = GAME_CONFIG.quizMessages || {};
+  if      (pct === 1)   verdict = qm.perfect || '"Perfect. Identity confirmed. You didn\'t just get lucky — you know this. The vault is yours."';
+  else if (pct >= 0.5)  verdict = qm.pass    || '"Close enough. You know the tools that matter. The vault is open."';
+  else                  verdict = qm.fail     || '"Shaky. But you made it this far. The vault opens. Study up."';
   const speech = document.getElementById('quizFoxSpeech');
   speech.textContent = '';
   let ci = 0;

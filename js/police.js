@@ -49,6 +49,7 @@ function clearPolice(silent) {
   clearInterval(policeIntervalId);
   policeIntervalId = null;
   stopPoliceAudio();
+  if (window.nsLeakTimer) window.nsLeakTimer.resetFull();
   const alertEl = document.getElementById('policeAlert');
   alertEl.classList.remove('active', 'urgent-mode');
   document.getElementById('policeVignette').classList.remove('active');
@@ -58,6 +59,7 @@ function clearPolice(silent) {
 
 function policeRaid() {
   clearPolice(true);
+  if (window.nsLeakTimer) window.nsLeakTimer.resetFull();
   addScore(-10);
   setTimeout(() => foxMsg("too slow. they logged the attempt. we took a hit.", 'sys'), 100);
 }
@@ -77,15 +79,21 @@ function updatePoliceUI() {
   alertEl.classList.toggle('urgent-mode', urgent);
   vigEl.classList.toggle('active', urgent);
   termEl.classList.toggle('police-urgent', urgent);
+  if (window.nsLeakTimer) window.nsLeakTimer.setUrgent(s);
   if (urgent && !footstepId) {
-    footstepId = setInterval(() => { if (policeActive) playFootstep(); }, 550);
+    const soundFn = GAME_CONFIG.policeSound === 'alert' ? playAlert
+                  : GAME_CONFIG.policeSound === 'pulse'  ? playPulse
+                  : playFootstep;
+    footstepId = setInterval(() => { if (policeActive) soundFn(); }, 700);
   }
   if (s === 6 && !voiceTriggered) {
     voiceTriggered = true;
     try {
       if (window.speechSynthesis) {
-        const utt  = new SpeechSynthesisUtterance("who's there?");
-        utt.volume = 0.85; utt.rate = 0.75; utt.pitch = 0.6;
+        const utt  = new SpeechSynthesisUtterance(GAME_CONFIG.policeVoiceText || "who's there?");
+        utt.volume = 0.85;
+        utt.rate   = GAME_CONFIG.policeVoiceRate  ?? 0.75;
+        utt.pitch  = GAME_CONFIG.policeVoicePitch ?? 0.6;
         window.speechSynthesis.speak(utt);
       }
     } catch(e) {}

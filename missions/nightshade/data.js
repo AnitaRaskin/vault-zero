@@ -217,6 +217,9 @@ const ROOMS = [
           'git checkout -b forensics/cardinal-evidence',
           'git checkout -b evidence',
           'git checkout -b cardinal-evidence',
+          'git checkout -c forensics/cardinal-evidence',
+          'git checkout -c evidence',
+          'git checkout -c cardinal-evidence',
           'git branch forensics/cardinal-evidence',
           'git branch evidence'
         ],
@@ -232,6 +235,18 @@ const ROOMS = [
           'git switch main': [
             ['you need to name this position first — create a branch at this commit before you leave.', 'warn'],
             ['git switch -c <branch-name> creates a branch here and attaches HEAD to it.', 'dim']
+          ],
+          'git switch -c forensics': [
+            ['close — but the branch needs the full name: forensics/cardinal-evidence', 'warn'],
+            ['run: git switch -c forensics/cardinal-evidence', 'dim']
+          ],
+          'git checkout -b forensics': [
+            ['close — but the branch needs the full name: forensics/cardinal-evidence', 'warn'],
+            ['run: git checkout -b forensics/cardinal-evidence', 'dim']
+          ],
+          'git checkout -c forensics': [
+            ['close — but the branch needs the full name: forensics/cardinal-evidence', 'warn'],
+            ['run: git checkout -c forensics/cardinal-evidence', 'dim']
           ]
         }
       },
@@ -354,6 +369,7 @@ const ROOMS = [
       {
         foxMsg: "LION: \"Commit. The merge doesn't exist until the commit does.\"",
         task: 'Complete the merge with a commit.',
+        flexCommit: true,
         accepted: [
           'git commit',
           'git commit --no-edit',
@@ -408,7 +424,7 @@ const ROOMS = [
     name: 'THE GREAT ERASURE',
     initialTree: 'n3_reset',
     clue: { label: 'CREDENTIAL', value: 'NS-DISABLE-7731' },
-    intro: "NIGHTSHADE wasn't just building — they were covering tracks. Before detention: git reset --hard, then git push --force. From everywhere a normal investigation would look, those commits don't exist. The shutdown credential was in one of them. Git doesn't delete. It orphans. And there's one place a force push can't reach.",
+    intro: "Before detention, NIGHTSHADE ran git reset --hard, then git push --force. The credential is gone from every normal view. But git doesn't delete — it orphans. Find it.",
     stages: [
       {
         conceptBrief: {
@@ -420,7 +436,7 @@ const ROOMS = [
           ],
           ascii: '  reset --hard  →  local only, reflog recovers it\n  push --force  →  overwrites remote, no recovery for others\n\n  reflog: YOUR private diary. exists locally only.'
         },
-        foxMsg: "LION: \"Run git log. Tell me what's there — and what's obviously missing.\"",
+        foxMsg: "LION: \"Check the commit history. Tell me what's visible — and what should be there but isn't.\"",
         task: 'Check the current commit history.',
         accepted: ['git log --oneline', 'git log'],
         output: [
@@ -435,8 +451,8 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "LION: \"Run git reflog. Every position HEAD has ever been. The orphaned commits are still in there.\"",
-        task: 'Find the orphaned commits using git reflog.',
+        foxMsg: "LION: \"Those commits aren't gone — git tracks every HEAD movement, even after a reset. There's a record. Find it.\"",
+        task: 'Find the orphaned commits.',
         accepted: ['git reflog', 'git reflog show', 'git log -g'],
         output: [
           ['{{H4}} (HEAD -> main) HEAD@{0}: merge: Merge nightshade/inject', 'cm'],
@@ -707,7 +723,7 @@ const ROOMS = [
     name: 'THE DEAD DROP',
     initialTree: 'n5_stash',
     clue: { label: 'STATUS', value: 'DISARMED' },
-    intro: "Three stashes on NIGHTSHADE's machine. One is a killswitch. One is a trap — looks almost identical, but applying it re-enables the trigger. One is noise. The labels were written by NIGHTSHADE — not helping you. Read the actual diff before you touch anything. Never pop without reading.",
+    intro: "Three stashes on NIGHTSHADE's machine. One kills the pipeline. One re-enables it. One is noise. The labels aren't yours to trust. Read the diff before you touch anything.",
     stages: [
       {
         conceptBrief: {

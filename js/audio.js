@@ -44,6 +44,46 @@ function playFootstep() {
   } catch(e) {}
 }
 
+function playAlert() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    [0, 0.12].forEach(offset => {
+      const osc = ctx.createOscillator();
+      const env = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1200, now + offset);
+      osc.frequency.setValueAtTime(900,  now + offset + 0.04);
+      env.gain.setValueAtTime(0,    now + offset);
+      env.gain.linearRampToValueAtTime(0.12, now + offset + 0.01);
+      env.gain.setValueAtTime(0.12, now + offset + 0.07);
+      env.gain.linearRampToValueAtTime(0,    now + offset + 0.1);
+      osc.connect(env); env.connect(ctx.destination);
+      osc.start(now + offset); osc.stop(now + offset + 0.11);
+    });
+  } catch(e) {}
+}
+
+function playPulse() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const env = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.linearRampToValueAtTime(190, now + 0.35);
+    env.gain.setValueAtTime(0,    now);
+    env.gain.linearRampToValueAtTime(0.18, now + 0.05);
+    env.gain.setValueAtTime(0.18, now + 0.22);
+    env.gain.linearRampToValueAtTime(0,    now + 0.45);
+    osc.connect(env); env.connect(ctx.destination);
+    osc.start(now); osc.stop(now + 0.46);
+  } catch(e) {}
+}
+
 function stopPoliceAudio() {
   if (footstepId) { clearInterval(footstepId); footstepId = null; }
   voiceTriggered = false;

@@ -58,7 +58,7 @@ body {
   height: 182px;
   overflow: hidden;
 }
-.boot-line       { display: block; }
+.boot-line       { display: block; opacity: 0.4; }
 .boot-line.dim   { color: var(--text-muted); }
 .boot-line.ok    { color: var(--ok); }
 .boot-line.warn  { color: var(--warn); }
@@ -307,7 +307,7 @@ body {
 
 .panels {
   display: grid;
-  grid-template-columns: var(--left-w, 250px) 1px 1fr 1px var(--right-w, 250px);
+  grid-template-columns: var(--left-w, 300px) 1px 1fr 1px var(--right-w, 250px);
   flex: 1;
   overflow: hidden;
   min-height: 0;

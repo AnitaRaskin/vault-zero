@@ -35,6 +35,7 @@
     </div>
   </div>
   <div class="hub-topbar-right">
+    <button class="hub-lb-btn" onclick="openLbModal()">[ RANKINGS ]</button>
     <div class="hub-gic-badge"><span class="hub-gic-dot"></span>GIC-NET: SECURE</div>
     <div id="hubAuthBar" class="hub-topbar-auth"></div>
   </div>
@@ -174,6 +175,21 @@
 
 </div>
 
+<!-- ─── LEADERBOARD OVERLAY ───────────────────────────────── -->
+<div id="lbOverlay">
+  <div class="lb-modal-box">
+    <div class="auth-modal-header">
+      <span class="auth-modal-tag">▓ OPERATIVE RANKINGS ▓</span>
+      <button class="auth-modal-close" onclick="closeLbModal()">✕</button>
+    </div>
+    <div class="auth-hub-tabs">
+      <button class="auth-hub-tab active" id="lbTab1" onclick="switchLbTab('git-heist')">[ GIT HEIST ]</button>
+      <button class="auth-hub-tab" id="lbTab2" onclick="switchLbTab('nightshade')">[ NIGHTSHADE ]</button>
+    </div>
+    <div id="lbContent" class="lb-content"></div>
+  </div>
+</div>
+
 <!-- ─── AUTH OVERLAY ──────────────────────────────────────── -->
 <div id="authOverlay">
   <div class="auth-modal-box">
@@ -289,6 +305,59 @@
   window.handleHubAuth    = handleHubAuth;
   window.handleGoogleAuth = handleGoogleAuth;
   window.handleHubLogout  = handleHubLogout;
+
+  // ── Leaderboard modal ─────────────────────────────────────
+  var _lbMission = 'git-heist';
+
+  function openLbModal() {
+    document.getElementById('lbOverlay').classList.add('open');
+    loadLbTab(_lbMission);
+  }
+  function closeLbModal() {
+    document.getElementById('lbOverlay').classList.remove('open');
+  }
+  function switchLbTab(mission) {
+    _lbMission = mission;
+    document.getElementById('lbTab1').classList.toggle('active', mission === 'git-heist');
+    document.getElementById('lbTab2').classList.toggle('active', mission === 'nightshade');
+    loadLbTab(mission);
+  }
+  async function loadLbTab(mission) {
+    var content = document.getElementById('lbContent');
+    content.innerHTML = '<div class="lb-loading">loading...</div>';
+    var rows;
+    try { rows = await getLeaderboard(mission); } catch(e) { rows = []; }
+    if (!rows || rows.length === 0) {
+      content.innerHTML = '<div class="lb-empty">no scores recorded yet.</div>';
+      return;
+    }
+    var html = '<table class="lb-table"><thead class="lb-thead"><tr>'
+      + '<th></th><th>Operative</th><th>Rooms</th>'
+      + '<th class="lb-score">Score</th><th class="lb-time">Time</th>'
+      + '</tr></thead><tbody>';
+    rows.forEach(function(row, i) {
+      var t = row.total_time || 0;
+      var mins = Math.floor(t / 60);
+      var secs = String(t % 60).padStart(2, '0');
+      html += '<tr class="lb-row">'
+        + '<td class="lb-rank">' + (i + 1) + '</td>'
+        + '<td>' + esc(row.codename || 'anonymous') + '</td>'
+        + '<td>' + (row.rooms_completed || 0) + '</td>'
+        + '<td class="lb-score">' + (row.final_score || 0) + '</td>'
+        + '<td class="lb-time">' + mins + ':' + secs + '</td>'
+        + '</tr>';
+    });
+    html += '</tbody></table>';
+    content.innerHTML = html;
+  }
+
+  document.getElementById('lbOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeLbModal();
+  });
+
+  window.openLbModal  = openLbModal;
+  window.closeLbModal = closeLbModal;
+  window.switchLbTab  = switchLbTab;
 
   ['hubCodename', 'hubPassword', 'hubConfirm'].forEach(function(id) {
     var el = document.getElementById(id);

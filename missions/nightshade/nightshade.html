@@ -489,7 +489,8 @@
 (function () {
   const CYCLE = 5 * 60; // 5-minute leak cycle
   let remaining = Math.floor(Math.random() * CYCLE) + 30; // random start: 30s–5min
-  let savedRemaining = null; // saved when police urgency overrides timer
+  let savedRemaining = null;
+  let locked = false; // true while police countdown is driving the display
   let interval = null;
 
   function fmt(s) {
@@ -521,6 +522,7 @@
   }
 
   function tick() {
+    if (locked) return;
     if (remaining <= 0) {
       triggerLeak();
     } else {
@@ -529,19 +531,18 @@
     }
   }
 
-  // Engine hook: called when 3 wrong answers trigger the leak warning
+  // Engine hook: police.js calls these to sync the display
   window.nsLeakTimer = {
     setUrgent: function (secs) {
-      if (savedRemaining === null) savedRemaining = remaining;
+      if (!locked) { savedRemaining = remaining; locked = true; }
       remaining = secs;
       updateDisplay();
     },
-    restore: function () {
-      if (savedRemaining !== null) {
-        remaining = savedRemaining;
-        savedRemaining = null;
-        updateDisplay();
-      }
+    resetFull: function () {
+      locked = false;
+      savedRemaining = null;
+      remaining = CYCLE;
+      updateDisplay();
     },
     triggerLeak: triggerLeak
   };
