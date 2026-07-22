@@ -28,6 +28,11 @@ function saveFile() {
     const result = GAME_CONFIG.validateFile(val, isConflict);
     if (result.pass) G.fileEditDone = true;
     tprint(result.output || []);
+    // Stages without an accepted array (pure editor stages) auto-advance on success
+    if (result.pass && (!s.accepted || s.accepted.length === 0)) {
+      advance(s.tree);
+      return;
+    }
   }
   inp.focus();
 }

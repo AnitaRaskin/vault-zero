@@ -203,7 +203,7 @@ const ROOMS = [
         }
       },
       {
-        foxMsg: "you're at the commit. see what's here.",
+        foxMsg: "you're at the commit. the files here are exactly what was saved at this point in history — same as any working directory. check what's in it.",
         task: "List the files in this commit.",
         accepted: ["ls"],
         output: [
@@ -213,7 +213,7 @@ const ROOMS = [
         wrong: {}
       },
       {
-        foxMsg: "there it is. read it.",
+        foxMsg: "there's vault.txt. open it — cat reads it raw. or use git show HEAD:vault.txt if you want to read it the git way, straight from the commit object.",
         task: "Read the vault file.",
         accepted: ["cat vault.txt", "git show HEAD:vault.txt", "git show"],
         output: [

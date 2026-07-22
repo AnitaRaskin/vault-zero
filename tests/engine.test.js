@@ -147,6 +147,9 @@ before(() => {
     window._getQuizQs      = () => quizQuestions;
     window._getQuizIdx     = () => quizIdx;
     window._getQuizCorrect = () => quizCorrect;
+    // Setters for quiz state (needed for isolated answerQuiz / showQuizResult tests)
+    window._setQuizAnswered = (v) => { quizAnswered = v; };
+    window._setQuizState    = (correct, idx) => { quizCorrect = correct; quizIdx = idx; };
     // Reset helper — runs inside the shared global scope so it can reach
     // variables from any of the split files (G, cmdLog, policeActive, etc.)
     window._resetG = function() {
@@ -529,5 +532,390 @@ describe('parseCmd()', () => {
     G.roomIdx = 4; G.stageIdx = 3;  // Room 4 Stage 3 is flexStashPop
     win.parseCmd('git stash pop');
     assert.equal(G.score, 10);
+  });
+  test('wrong-dict command triggers countWrong but does not advance', () => {
+    resetG();
+    G.roomIdx = 0; G.stageIdx = 1;  // Stage 1 accepts git log --oneline; wrong dict has "ls"
+    win.parseCmd('ls');
+    assert.equal(G.stageIdx, 1);
+    assert.equal(G.stageWrongs, 1);
+  });
+  test('near-miss: git stauts → increments stageWrongs, does not advance', () => {
+    resetG();
+    G.roomIdx = 0; G.stageIdx = 0;
+    win.parseCmd('git stauts');
+    assert.equal(G.stageIdx, 0);
+    assert.equal(G.stageWrongs, 1);
+  });
+  test('near-miss: git log oneline (missing --) → increments stageWrongs', () => {
+    resetG();
+    G.roomIdx = 0; G.stageIdx = 0;
+    win.parseCmd('git log oneline');
+    assert.equal(G.stageWrongs, 1);
+  });
+  test('help command does not advance stage', () => {
+    resetG();
+    G.roomIdx = 0; G.stageIdx = 0;
+    win.parseCmd('help');
+    assert.equal(G.stageIdx, 0);
+    assert.equal(G.score, 0);
+  });
+  test('clear wipes terminal output without advancing', () => {
+    resetG();
+    win.document.getElementById('termOut').innerHTML = '<div>line</div><div>line2</div>';
+    win.parseCmd('clear');
+    assert.equal(win.document.getElementById('termOut').innerHTML, '');
+    assert.equal(G.stageIdx, 0);
+  });
+  test('//jump without admin access prints error and does not advance', () => {
+    resetG();
+    G.isAdmin = false;
+    win.parseCmd('//jump');
+    assert.equal(G.stageIdx, 0);
+  });
+});
+
+
+// ─── checkNearMiss() ──────────────────────────────────────────────────
+
+describe('checkNearMiss()', () => {
+  test('git add (no target) → suggests git add .', () => {
+    assert.match(win.checkNearMiss('git add'), /git add \./);
+  });
+  test('git commit (no -m) → mentions -m flag', () => {
+    assert.match(win.checkNearMiss('git commit'), /-m/);
+  });
+  test('git commit -m (no message) → mentions message in quotes', () => {
+    assert.match(win.checkNearMiss('git commit -m'), /message/i);
+  });
+  test('git revert (no hash) → suggests running git log first', () => {
+    assert.match(win.checkNearMiss('git revert'), /git log/);
+  });
+  test('git checkout (no args) → hints at branch or hash', () => {
+    assert.ok(win.checkNearMiss('git checkout'));
+  });
+  test('git checkout -- → hints at branch or hash', () => {
+    assert.ok(win.checkNearMiss('git checkout --'));
+  });
+  test('git switch (no branch) → suggests branch name', () => {
+    assert.ok(win.checkNearMiss('git switch'));
+  });
+  test('git checkout -b (no name) → suggests supplying a name', () => {
+    assert.ok(win.checkNearMiss('git checkout -b'));
+  });
+  test('git checkout -B (no name) → suggests supplying a name', () => {
+    assert.ok(win.checkNearMiss('git checkout -B'));
+  });
+  test('git switch -c (no name) → suggests supplying a name', () => {
+    assert.ok(win.checkNearMiss('git switch -c'));
+  });
+  test('git clean (no -f) → suggests -fd', () => {
+    assert.match(win.checkNearMiss('git clean'), /-fd/);
+  });
+  test('git log oneline (missing --) → suggests --oneline', () => {
+    assert.match(win.checkNearMiss('git log oneline'), /--oneline/);
+  });
+  test('git branch a → suggests git branch -a', () => {
+    assert.match(win.checkNearMiss('git branch a'), /git branch -a/);
+  });
+  test('"git stauts" typo → suggests git status', () => {
+    assert.match(win.checkNearMiss('git stauts'), /git status/);
+  });
+  test('"git statsu" typo → suggests git status', () => {
+    assert.match(win.checkNearMiss('git statsu'), /git status/);
+  });
+  test('"git staus" typo → suggests git status', () => {
+    assert.match(win.checkNearMiss('git staus'), /git status/);
+  });
+  test('valid commands return null', () => {
+    assert.equal(win.checkNearMiss('git status'),        null);
+    assert.equal(win.checkNearMiss('git log --oneline'), null);
+    assert.equal(win.checkNearMiss('ls'),                null);
+    assert.equal(win.checkNearMiss('clear'),             null);
+  });
+});
+
+
+// ─── _treeStatus() ───────────────────────────────────────────────────
+
+describe('_treeStatus()', () => {
+  test('null key → text includes "clean", cls ts-clean', () => {
+    const r = win._treeStatus(null);
+    assert.match(r.text, /clean/);
+    assert.equal(r.cls, 'ts-clean');
+  });
+  test('undefined key → clean', () => {
+    assert.equal(win._treeStatus(undefined).cls, 'ts-clean');
+  });
+  test('key with "conflict" → ts-err', () => {
+    const r = win._treeStatus('room_conflict_state');
+    assert.equal(r.cls, 'ts-err');
+    assert.match(r.text, /conflict/);
+  });
+  test('key with "dirty" → ts-warn', () => {
+    const r = win._treeStatus('r2_dirty');
+    assert.equal(r.cls, 'ts-warn');
+    assert.match(r.text, /dirty/);
+  });
+  test('key with "staged" → ts-ok', () => {
+    const r = win._treeStatus('r1_staged');
+    assert.equal(r.cls, 'ts-ok');
+    assert.match(r.text, /staged/);
+  });
+  test('key with "stash_clean" → ts-amber', () => {
+    const r = win._treeStatus('r4_stash_clean');
+    assert.equal(r.cls, 'ts-amber');
+    assert.match(r.text, /stash/);
+  });
+  test('key with "reverted" → ts-ok', () => {
+    const r = win._treeStatus('r3_reverted');
+    assert.equal(r.cls, 'ts-ok');
+    assert.match(r.text, /revert/i);
+  });
+  test('key with "pushed" → ts-ok and synced', () => {
+    const r = win._treeStatus('r7_pushed');
+    assert.equal(r.cls, 'ts-ok');
+    assert.match(r.text, /sync/i);
+  });
+  test('key with "cloned" → ts-ok and synced', () => {
+    const r = win._treeStatus('r7_cloned');
+    assert.equal(r.cls, 'ts-ok');
+  });
+  test('unrecognised key → clean default', () => {
+    const r = win._treeStatus('r0_initial');
+    assert.equal(r.cls, 'ts-clean');
+  });
+});
+
+
+// ─── updateProgress() ────────────────────────────────────────────────
+
+describe('updateProgress()', () => {
+  test('at room 0 stage 0 → progressFill width is "0%"', () => {
+    resetG();
+    win.updateProgress();
+    assert.equal(win.document.getElementById('progressFill').style.width, '0%');
+  });
+  test('advancing stage increases the fill percentage', () => {
+    resetG();
+    win.updateProgress();
+    const before = parseFloat(win.document.getElementById('progressFill').style.width);
+    G.stageIdx = 1;
+    win.updateProgress();
+    const after = parseFloat(win.document.getElementById('progressFill').style.width);
+    assert.ok(after > before, `expected fill to grow: ${before} → ${after}`);
+  });
+  test('last room last stage → fill is near 100%', () => {
+    resetG();
+    G.roomIdx  = ROOMS.length - 1;
+    G.stageIdx = ROOMS[ROOMS.length - 1].stages.length - 1;
+    win.updateProgress();
+    const pct = parseFloat(win.document.getElementById('progressFill').style.width);
+    assert.ok(pct > 90, `expected > 90% but got ${pct}%`);
+  });
+});
+
+
+// ─── renderLeaderboard() ─────────────────────────────────────────────
+
+describe('renderLeaderboard()', () => {
+  function lbEl() { return win.document.getElementById('leaderboardRows'); }
+
+  test('null board → "no other scores" message', () => {
+    win.renderLeaderboard(null);
+    assert.match(lbEl().innerHTML, /no other scores/i);
+  });
+  test('empty array → "no other scores" message', () => {
+    win.renderLeaderboard([]);
+    assert.match(lbEl().innerHTML, /no other scores/i);
+  });
+  test('one entry: codename and score appear', () => {
+    win.renderLeaderboard([{ codename: 'testagent', final_score: 42, total_time: 90, rooms_completed: 3 }]);
+    assert.match(lbEl().innerHTML, /testagent/);
+    assert.match(lbEl().innerHTML, /42/);
+  });
+  test('rank numbers are sequential (#1, #2)', () => {
+    win.renderLeaderboard([
+      { codename: 'alpha', final_score: 100, total_time: 60, rooms_completed: 5 },
+      { codename: 'beta',  final_score: 80,  total_time: 90, rooms_completed: 4 },
+    ]);
+    assert.match(lbEl().innerHTML, /#1/);
+    assert.match(lbEl().innerHTML, /#2/);
+  });
+  test('total_time 90s → displays 1:30', () => {
+    win.renderLeaderboard([{ codename: 'x', final_score: 10, total_time: 90, rooms_completed: 1 }]);
+    assert.match(lbEl().innerHTML, /1:30/);
+  });
+  test('null final_score → shows em-dash —', () => {
+    win.renderLeaderboard([{ codename: 'x', final_score: null, total_time: 60, rooms_completed: 1 }]);
+    assert.match(lbEl().innerHTML, /—/);
+  });
+  test('rooms_completed shown relative to ROOMS.length', () => {
+    win.renderLeaderboard([{ codename: 'x', final_score: 50, total_time: 60, rooms_completed: 3 }]);
+    const html = lbEl().innerHTML;
+    assert.match(html, new RegExp(`3/${ROOMS.length}`));
+  });
+});
+
+
+// ─── countWrong() ────────────────────────────────────────────────────
+
+describe('countWrong()', () => {
+  test('increments G.stageWrongs each call', () => {
+    resetG();
+    win.countWrong();
+    assert.equal(G.stageWrongs, 1);
+    win.countWrong();
+    assert.equal(G.stageWrongs, 2);
+  });
+  test('first wrong (stageWrongs becomes 1) does NOT deduct score', () => {
+    resetG(); G.score = 20;
+    win.countWrong();
+    assert.equal(G.score, 20);
+  });
+  test('second wrong (stageWrongs becomes 2) deducts 1 point', () => {
+    resetG(); G.score = 20;
+    win.countWrong(); win.countWrong();
+    assert.equal(G.score, 19);
+  });
+  test('score never goes below 0 even with many wrongs', () => {
+    resetG(); G.score = 1;
+    for (let i = 0; i < 10; i++) win.countWrong();
+    assert.ok(G.score >= 0, `score went negative: ${G.score}`);
+  });
+});
+
+
+// ─── answerQuiz() ────────────────────────────────────────────────────
+
+describe('answerQuiz()', () => {
+  test('correct answer increments quizCorrect', () => {
+    resetG();
+    win.buildQuiz();
+    win._setQuizAnswered(false);
+    const qs = win._getQuizQs();
+    win.answerQuiz(qs[0].correct);
+    assert.equal(win._getQuizCorrect(), 1);
+  });
+  test('correct answer awards 5 points', () => {
+    resetG();
+    win.buildQuiz();
+    win._setQuizAnswered(false);
+    const qs = win._getQuizQs();
+    win.answerQuiz(qs[0].correct);
+    assert.equal(G.score, 5);
+  });
+  test('wrong answer does not increment quizCorrect', () => {
+    resetG();
+    win.buildQuiz();
+    win._setQuizAnswered(false);
+    const qs = win._getQuizQs();
+    const wrongChoice = (qs[0].correct + 1) % qs[0].options.length;
+    win.answerQuiz(wrongChoice);
+    assert.equal(win._getQuizCorrect(), 0);
+  });
+  test('timeout answer (-1) does not increment quizCorrect', () => {
+    resetG();
+    win.buildQuiz();
+    win._setQuizAnswered(false);
+    win.answerQuiz(-1);
+    assert.equal(win._getQuizCorrect(), 0);
+  });
+  test('feedback element shows correct prefix for right answer', () => {
+    resetG();
+    win.buildQuiz();
+    win._setQuizAnswered(false);
+    const qs = win._getQuizQs();
+    win.answerQuiz(qs[0].correct);
+    const fb = win.document.getElementById('quizFeedback').textContent;
+    assert.match(fb, /CORRECT/);
+  });
+  test('feedback element shows wrong prefix for wrong answer', () => {
+    resetG();
+    win.buildQuiz();
+    win._setQuizAnswered(false);
+    const qs = win._getQuizQs();
+    const wrongChoice = (qs[0].correct + 1) % qs[0].options.length;
+    win.answerQuiz(wrongChoice);
+    const fb = win.document.getElementById('quizFeedback').textContent;
+    assert.match(fb, /WRONG/);
+  });
+  test('timeout feedback shows TIME UP', () => {
+    resetG();
+    win.buildQuiz();
+    win._setQuizAnswered(false);
+    win.answerQuiz(-1);
+    assert.match(win.document.getElementById('quizFeedback').textContent, /TIME UP/);
+  });
+  test('quizAnswered guard: second answerQuiz call without reset is ignored', () => {
+    resetG();
+    win.buildQuiz();
+    win._setQuizAnswered(false);
+    const qs = win._getQuizQs();
+    win.answerQuiz(qs[0].correct);  // quizAnswered = true after this
+    win.answerQuiz(qs[0].correct);  // should be ignored
+    assert.equal(win._getQuizCorrect(), 1);  // still 1, not 2
+  });
+  test('quizIdx increments after each answer', () => {
+    resetG();
+    win.buildQuiz();
+    assert.equal(win._getQuizIdx(), 0);
+    win._setQuizAnswered(false);
+    win.answerQuiz(0);
+    assert.equal(win._getQuizIdx(), 1);
+  });
+});
+
+
+// ─── showQuizResult() ────────────────────────────────────────────────
+
+describe('showQuizResult()', () => {
+  test('quizResultScore shows correct / total', () => {
+    resetG();
+    win.buildQuiz();
+    const total = win._getQuizQs().length;
+    win._setQuizState(3, total);
+    win.showQuizResult();
+    assert.equal(
+      win.document.getElementById('quizResultScore').textContent,
+      `3 / ${total}`
+    );
+  });
+  test('perfect score: quizResultScore shows full marks', () => {
+    resetG();
+    win.buildQuiz();
+    const total = win._getQuizQs().length;
+    win._setQuizState(total, total);
+    win.showQuizResult();
+    assert.equal(
+      win.document.getElementById('quizResultScore').textContent,
+      `${total} / ${total}`
+    );
+  });
+  test('zero score: quizResultScore shows 0 / total', () => {
+    resetG();
+    win.buildQuiz();
+    const total = win._getQuizQs().length;
+    win._setQuizState(0, total);
+    win.showQuizResult();
+    assert.equal(
+      win.document.getElementById('quizResultScore').textContent,
+      `0 / ${total}`
+    );
+  });
+  test('quizResult element becomes visible', () => {
+    resetG();
+    win.buildQuiz();
+    const total = win._getQuizQs().length;
+    win._setQuizState(1, total);
+    win.showQuizResult();
+    assert.equal(win.document.getElementById('quizResult').style.display, '');
+  });
+  test('quizBody element is hidden', () => {
+    resetG();
+    win.buildQuiz();
+    win._setQuizState(0, win._getQuizQs().length);
+    win.showQuizResult();
+    assert.equal(win.document.getElementById('quizBody').style.display, 'none');
   });
 });

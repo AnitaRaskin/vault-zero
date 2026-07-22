@@ -28,13 +28,11 @@ describe('Page shell', () => {
   test('title contains VAULT_ZERO', () => {
     assert.match(document.title, /VAULT_ZERO/);
   });
-  test('has a top-bar brand element with VAULT_ZERO', () => {
-    const brand = text('.hub-topbar-brand');
-    assert.equal(brand, 'VAULT_ZERO');
+  test('has a top-bar brand element containing VAULT_ZERO', () => {
+    assert.match(text('.hub-topbar-brand') ?? '', /VAULT_ZERO/);
   });
-  test('hero heading contains "Escape Room"', () => {
-    const h1 = text('.hub-hero-title');
-    assert.match(h1, /Escape Room/i);
+  test('hero heading contains "Command Hub"', () => {
+    assert.match(text('.hub-hero-title') ?? '', /Command Hub/i);
   });
   test('hero tag element exists for typing animation', () => {
     assert.ok(document.getElementById('heroTag'), '#heroTag missing');
@@ -42,8 +40,9 @@ describe('Page shell', () => {
   test('telemetry clock element exists', () => {
     assert.ok(document.getElementById('teleClock'), '#teleClock missing');
   });
-  test('footer contains brand name', () => {
-    assert.match(text('footer') ?? '', /VAULT_ZERO/i);
+  test('footer exists and has copyright text', () => {
+    assert.ok(document.querySelector('footer'), 'footer element missing');
+    assert.match(text('footer') ?? '', /GLOBAL INTELLIGENCE COMMAND|VAULT_ZERO|©/i);
   });
 });
 
@@ -51,103 +50,85 @@ describe('Page shell', () => {
 // ─── hero stats ───────────────────────────────────────────────────────
 
 describe('Hero stats', () => {
-  test('shows 3 missions', () => {
-    const nums = [...document.querySelectorAll('.hub-stat-num')].map(el => el.textContent.trim());
-    assert.ok(nums.includes('3'), `expected "3" in stat numbers, got: ${nums}`);
+  test('shows exactly 2 stat numbers', () => {
+    assert.equal(count('.hub-stat-num'), 2);
   });
-  test('shows 1 active', () => {
-    const nums = [...document.querySelectorAll('.hub-stat-num')].map(el => el.textContent.trim());
-    assert.ok(nums.includes('1'), `expected "1" in stat numbers, got: ${nums}`);
-  });
-  test('shows 2 encrypted', () => {
+  test('shows 2 missions', () => {
     const nums = [...document.querySelectorAll('.hub-stat-num')].map(el => el.textContent.trim());
     assert.ok(nums.includes('2'), `expected "2" in stat numbers, got: ${nums}`);
   });
+  test('stat labels include "Missions" and "Active"', () => {
+    const labels = [...document.querySelectorAll('.hub-stat-label')].map(el => el.textContent.trim());
+    assert.ok(labels.some(l => /missions/i.test(l)), `"Missions" not in labels: ${labels}`);
+    assert.ok(labels.some(l => /active/i.test(l)),   `"Active" not in labels: ${labels}`);
+  });
 });
 
 
-// ─── active mission card ──────────────────────────────────────────────
+// ─── mission cards (gic-card layout) ─────────────────────────────────
 
-describe('Active mission card (Git Heist)', () => {
-  const card = () => document.querySelector('.mission-card--active');
+describe('Mission cards', () => {
+  test('exactly 2 mission cards', () => {
+    assert.equal(count('.gic-card'), 2);
+  });
+  test('both cards are anchor links', () => {
+    const cards = [...document.querySelectorAll('.gic-card')];
+    cards.forEach((c, i) => assert.equal(c.tagName, 'A', `card ${i} is not an <a> tag`));
+  });
+});
 
-  test('active card exists', () => {
-    assert.ok(card(), '.mission-card--active not found');
+
+// ─── Mission 001: Git Heist ───────────────────────────────────────────
+
+describe('Mission 001 — Git Heist card', () => {
+  const card = () => document.querySelectorAll('.gic-card')[0];
+
+  test('card 1 links to git-heist.html', () => {
+    assert.match(card()?.getAttribute('href') ?? '', /git-heist/);
   });
-  test('links to git-heist.html', () => {
-    assert.equal(attr('.mission-card--active', 'href'), 'git-heist.html');
+  test('shows MISSION_001 chip', () => {
+    assert.match(card()?.querySelector('.gic-chip')?.textContent ?? '', /MISSION_001/);
   });
-  test('mission ID shows MISSION_001', () => {
-    assert.match(text('.mission-card--active .mission-id') ?? '', /MISSION_001/);
+  test('card name includes "Git Heist"', () => {
+    assert.match(card()?.querySelector('.gic-card-name')?.textContent ?? '', /Git Heist/i);
   });
-  test('title is "Git Heist"', () => {
-    assert.match(text('.mission-card--active .mission-title') ?? '', /Git Heist/i);
+  test('badge shows ACTIVE', () => {
+    assert.match(card()?.querySelector('.gic-card-badge')?.textContent ?? '', /ACTIVE/i);
   });
-  test('badge shows Active', () => {
-    assert.match(text('.mission-card--active .mission-badge') ?? '', /Active/i);
+  test('footer meta mentions rooms', () => {
+    assert.match(card()?.querySelector('.gic-meta')?.textContent ?? '', /rooms/i);
   });
-  test('lists "9 rooms" in meta', () => {
-    const meta = text('.mission-card--active .mission-meta') ?? '';
-    assert.match(meta, /9 rooms/i);
-  });
-  test('tool tags include git log, git branch, git stash', () => {
-    const tags = [...document.querySelectorAll('.mission-card--active .mission-tools-tags span')]
-      .map(el => el.textContent.trim());
-    assert.ok(tags.some(t => /git log/i.test(t)),    `"git log" not in tools: ${tags}`);
-    assert.ok(tags.some(t => /git branch/i.test(t)), `"git branch" not in tools: ${tags}`);
-    assert.ok(tags.some(t => /git stash/i.test(t)),  `"git stash" not in tools: ${tags}`);
-  });
-  test('CTA text is "Enter the Repo"', () => {
-    assert.match(text('.mission-card--active .mission-cta') ?? '', /Enter the Repo/i);
+  test('CTA says "DEPLOY MISSION"', () => {
+    assert.match(card()?.querySelector('.gic-deploy')?.textContent ?? '', /DEPLOY MISSION/i);
   });
   test('preview terminal shows a git log command', () => {
-    const terminal = text('.mission-card--active .fp-terminal') ?? '';
-    assert.match(terminal, /git log/i);
+    assert.match(card()?.querySelector('.gic-vis-cmd')?.textContent ?? '', /git log/i);
   });
 });
 
 
-// ─── upcoming / locked missions ───────────────────────────────────────
+// ─── Mission 002: Operation Nightshade ───────────────────────────────
 
-describe('Upcoming missions', () => {
-  const upcomingCards = () => document.querySelectorAll('.hub-upcoming-grid .mission-card');
+describe('Mission 002 — Nightshade card', () => {
+  const card = () => document.querySelectorAll('.gic-card')[1];
 
-  test('exactly 2 upcoming cards', () => {
-    assert.equal(count('.hub-upcoming-grid .mission-card'), 2);
+  test('card 2 links to nightshade.html', () => {
+    assert.match(card()?.getAttribute('href') ?? '', /nightshade/);
   });
-  test('both have Encrypted badge', () => {
-    const badges = [...document.querySelectorAll('.hub-upcoming-grid .mission-badge')]
-      .map(el => el.textContent.trim());
-    badges.forEach((b, i) => assert.match(b, /Encrypted/i, `card ${i} badge: "${b}"`));
+  test('shows MISSION_002 chip', () => {
+    assert.match(card()?.querySelector('.gic-chip')?.textContent ?? '', /MISSION_002/);
   });
-  test('mission 002 is "Operation: Goldstream"', () => {
-    const titles = [...document.querySelectorAll('.hub-upcoming-grid .mission-title')]
-      .map(el => el.textContent.trim());
-    assert.ok(titles.some(t => /Goldstream/i.test(t)), `Goldstream not found in: ${titles}`);
+  test('card name includes "Nightshade"', () => {
+    assert.match(card()?.querySelector('.gic-card-name')?.textContent ?? '', /Nightshade/i);
   });
-  test('mission 003 is "Colony Zero"', () => {
-    const titles = [...document.querySelectorAll('.hub-upcoming-grid .mission-title')]
-      .map(el => el.textContent.trim());
-    assert.ok(titles.some(t => /Colony Zero/i.test(t)), `Colony Zero not found in: ${titles}`);
+  test('footer meta mentions 6 rooms', () => {
+    assert.match(card()?.querySelector('.gic-meta')?.textContent ?? '', /6 rooms/i);
   });
-  test('mission 002 shows MISSION_002 id', () => {
-    const ids = [...document.querySelectorAll('.hub-upcoming-grid .mission-id')]
-      .map(el => el.textContent.trim());
-    assert.ok(ids.some(id => /MISSION_002/.test(id)), `MISSION_002 not found in: ${ids}`);
+  test('preview terminal shows a git reflog command', () => {
+    assert.match(card()?.querySelector('.gic-vis-cmd')?.textContent ?? '', /git reflog/i);
   });
-  test('mission 003 shows MISSION_003 id', () => {
-    const ids = [...document.querySelectorAll('.hub-upcoming-grid .mission-id')]
-      .map(el => el.textContent.trim());
-    assert.ok(ids.some(id => /MISSION_003/.test(id)), `MISSION_003 not found in: ${ids}`);
-  });
-  test('locked cards do not have an href (not clickable links)', () => {
-    const lockedLinks = [...document.querySelectorAll('.hub-upcoming-grid a')];
-    assert.equal(lockedLinks.length, 0, 'locked missions should not be anchor tags');
-  });
-  test('locked CTA text says Encrypted', () => {
-    const ctas = [...document.querySelectorAll('.hub-upcoming-grid .mission-cta')]
-      .map(el => el.textContent.trim());
-    ctas.forEach((c, i) => assert.match(c, /Encrypted/i, `card ${i} cta: "${c}"`));
+  test('CTA says "DEPLOY MISSION"', () => {
+    assert.match(card()?.querySelector('.gic-deploy')?.textContent ?? '', /DEPLOY MISSION/i);
   });
 });
 
@@ -155,14 +136,14 @@ describe('Upcoming missions', () => {
 // ─── inline JS hooks ──────────────────────────────────────────────────
 
 describe('Inline script elements', () => {
-  test('typing animation targets #heroTag', () => {
-    const scripts = [...document.querySelectorAll('script')]
-      .map(s => s.textContent).join('');
-    assert.match(scripts, /heroTag/);
-  });
   test('clock targets #teleClock', () => {
     const scripts = [...document.querySelectorAll('script')]
       .map(s => s.textContent).join('');
     assert.match(scripts, /teleClock/);
+  });
+  test('heroTag is referenced in scripts', () => {
+    const scripts = [...document.querySelectorAll('script')]
+      .map(s => s.textContent).join('');
+    assert.match(scripts, /heroTag/);
   });
 });

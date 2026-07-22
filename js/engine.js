@@ -363,6 +363,7 @@ function renderLeaderboard(board) {
       <span class="lb-rank">#${i + 1}</span>
       <span class="lb-name">${row.codename}</span>
       <span class="lb-score">${score}</span>
+      <span class="lb-time">${m}:${s}</span>
       <span class="lb-rooms">${rooms}/${ROOMS.length}</span>
     </div>`;
   }).join('');
