@@ -977,36 +977,71 @@ const ROOMS = [
 const TREE = {
   r1_initial: {
     branches: [
-      { name: "main", y: 60, color: "#1D9E75", commits: [{x:40}, {x:90}] }
+      { name: "main", y: 60, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "main", ci: 1 }
   },
   r1_branches: {
     branches: [
-      { name: "main",                   y: 50,  color: "#1D9E75", commits: [{x:40}, {x:85}] },
-      { name: "security-audit-2019",    y: 130, color: "#3d4943", commits: [{x:40}, {x:85}, {x:130}] },
-      { name: "vault-schematics",   y: 210, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
+      { name: "main", y: 50, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'}
+      ]},
+      { name: "security-audit-2019", y: 130, color: "#3d4943", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'9d0e1f2', msg:'archive audit log'}
+      ]},
+      { name: "vault-schematics", y: 210, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'9d0e1f2', msg:'archive audit log'},
+        {x:175, hash:'2a3b4c5', msg:'upload schematics'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "main", ci: 1 },
     headBranchY: 50
   },
   r1_on_fox: {
     branches: [
-      { name: "main",                 y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}] },
-      { name: "vault-schematics", y: 160, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
+      { name: "main", y: 55, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'}
+      ]},
+      { name: "vault-schematics", y: 160, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'9d0e1f2', msg:'archive audit log'},
+        {x:175, hash:'2a3b4c5', msg:'upload schematics'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "vault-schematics", ci: 3, branchY: 160 }
   },
   r1_detached: {
     branches: [
-      { name: "main",                 y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}] },
-      { name: "vault-schematics", y: 160, color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}, {x:175}] }
+      { name: "main", y: 55, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'}
+      ]},
+      { name: "vault-schematics", y: 160, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'9d0e1f2', msg:'archive audit log'},
+        {x:175, hash:'2a3b4c5', msg:'upload schematics'}
+      ]}
     ],
     HEAD: { type: "detached", cx: 130, cy: 160 }
   },
   r2_remote: {
     branches: [
-      { name: "main", y: 80, color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'},
+        {x:140, hash:'b2c3d4e', msg:'update route table'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "main", ci: 2, branchY: 80 },
     extras: [
@@ -1015,89 +1050,163 @@ const TREE = {
   },
   r2_fork: {
     branches: [
-      { name: "main", y: 80, color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'},
+        {x:140, hash:'b2c3d4e', msg:'update route table'}
+      ]}
     ],
-    HEAD: { type: "branch", ref: "main", ci: 2, branchY: 80 },
-    extras: [
-      { type: "remote-box", x: 30,  y: 160, label: "upstream (syndicate)", color: "#3d4943" },
-      { type: "remote-box", x: 130, y: 160, label: "origin (your fork)",   color: "#1D9E75" },
-      { type: "arrow", x1: 140, y1: 100, x2: 170, y2: 155 }
-    ]
+    HEAD: { type: "branch", ref: "main", ci: 2, branchY: 80 }
   },
   r2_cloned: {
     branches: [
-      { name: "main (local)",  y: 70,  color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] },
-      { name: "origin/main",   y: 140, color: "#1D9E7566", commits: [{x:40}, {x:90}, {x:140}], dashed: true }
+      { name: "main (local)", y: 70, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'},
+        {x:140, hash:'b2c3d4e', msg:'update route table'}
+      ]},
+      { name: "origin/main", y: 140, color: "#1D9E7566", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'},
+        {x:140, hash:'b2c3d4e', msg:'update route table'}
+      ], dashed: true }
     ],
     HEAD: { type: "branch", ref: "main", ci: 2, branchY: 70 }
   },
   r3_clean: {
     branches: [
-      { name: "main", y: 80, color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'},
+        {x:140, hash:'b2c3d4e', msg:'update route table'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "main", ci: 2, branchY: 80 }
   },
   r3_feature: {
     branches: [
-      { name: "main",                    y: 60,  color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] },
-      { name: "operative/entry-window",  y: 140, color: "#7eb8d4", commits: [{x:140}] }
+      { name: "main", y: 60, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'},
+        {x:140, hash:'b2c3d4e', msg:'update route table'}
+      ]},
+      { name: "operative/entry-window", y: 140, color: "#7eb8d4", commits: [
+        {x:140, hash:'5c6d7e8', msg:'create entry window'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 0, branchY: 140 }
   },
   r3_staged: {
     branches: [
-      { name: "main",                    y: 60,  color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] },
-      { name: "operative/entry-window",  y: 140, color: "#7eb8d4", commits: [{x:140}] }
+      { name: "main", y: 60, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'},
+        {x:140, hash:'b2c3d4e', msg:'update route table'}
+      ]},
+      { name: "operative/entry-window", y: 140, color: "#7eb8d4", commits: [
+        {x:140, hash:'5c6d7e8', msg:'create entry window'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 0, branchY: 140 },
     extras: [{ type: "staged-indicator", x: 10, y: 240 }]
   },
   r3_committed: {
     branches: [
-      { name: "main",                    y: 60,  color: "#1D9E75", commits: [{x:40}, {x:90}, {x:140}] },
-      { name: "operative/entry-window",  y: 140, color: "#7eb8d4", commits: [{x:140}, {x:190}] }
+      { name: "main", y: 60, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'},
+        {x:140, hash:'b2c3d4e', msg:'update route table'}
+      ]},
+      { name: "operative/entry-window", y: 140, color: "#7eb8d4", commits: [
+        {x:140, hash:'5c6d7e8', msg:'create entry window'},
+        {x:190, hash:'6d7e8f9', msg:'plant access key'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 1, branchY: 140 }
   },
   r4_ahead: {
     branches: [
-      { name: "main",                    y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}] },
-      { name: "operative/entry-window",  y: 120, color: "#7eb8d4", commits: [{x:130}, {x:180}] },
-      { name: "origin/entry-window",     y: 185, color: "#7eb8d455", commits: [{x:130}], dashed: true }
+      { name: "main", y: 55, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'b2c3d4e', msg:'update route table'}
+      ]},
+      { name: "operative/entry-window", y: 120, color: "#7eb8d4", commits: [
+        {x:130, hash:'5c6d7e8', msg:'create entry window'},
+        {x:180, hash:'6d7e8f9', msg:'plant access key'}
+      ]},
+      { name: "origin/entry-window", y: 185, color: "#7eb8d455", commits: [
+        {x:130, hash:'5c6d7e8', msg:'create entry window'}
+      ], dashed: true }
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 1, branchY: 120 }
   },
   r4_pushed: {
     branches: [
-      { name: "main",                    y: 55,  color: "#1D9E75", commits: [{x:40}, {x:85}, {x:130}] },
-      { name: "operative/entry-window",  y: 120, color: "#7eb8d4", commits: [{x:130}, {x:180}] },
-      { name: "origin/entry-window",     y: 185, color: "#7eb8d455", commits: [{x:130}, {x:180}], dashed: true }
+      { name: "main", y: 55, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'b2c3d4e', msg:'update route table'}
+      ]},
+      { name: "operative/entry-window", y: 120, color: "#7eb8d4", commits: [
+        {x:130, hash:'5c6d7e8', msg:'create entry window'},
+        {x:180, hash:'6d7e8f9', msg:'plant access key'}
+      ]},
+      { name: "origin/entry-window", y: 185, color: "#7eb8d455", commits: [
+        {x:130, hash:'5c6d7e8', msg:'create entry window'},
+        {x:180, hash:'6d7e8f9', msg:'plant access key'}
+      ], dashed: true }
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 1, branchY: 120 }
   },
   r5_dirty: {
     branches: [
-      { name: "main", y: 80, color: "#1D9E75", commits: [{x:30}, {x:70}, {x:110}, {x:150}, {x:190}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [
+        {x:30, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:70, hash:'f4e5b6a', msg:'add vault config'},
+        {x:110, hash:'b2c3d4e', msg:'update route table'},
+        {x:150, hash:'c3d4e5f', msg:'patch security layer'},
+        {x:190, hash:'d4e5f6a', msg:'clean vault state'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "main", ci: 4, branchY: 80 },
     extras: [{ type: "dirty-indicator", x: 10, y: 200 }]
   },
   r6_dirty: {
     branches: [
-      { name: "main", y: 80, color: "#1D9E75", commits: [{x:30}, {x:70}, {x:110}, {x:150}, {x:190}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [
+        {x:30, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:70, hash:'f4e5b6a', msg:'add vault config'},
+        {x:110, hash:'b2c3d4e', msg:'update route table'},
+        {x:150, hash:'c3d4e5f', msg:'patch security layer'},
+        {x:190, hash:'d4e5f6a', msg:'clean vault state'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "main", ci: 4, branchY: 80 },
     extras: [{ type: "dirty-indicator", x: 10, y: 200 }]
   },
   r6_partial: {
     branches: [
-      { name: "main", y: 80, color: "#1D9E75", commits: [{x:30}, {x:70}, {x:110}, {x:150}, {x:190}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [
+        {x:30, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:70, hash:'f4e5b6a', msg:'add vault config'},
+        {x:110, hash:'b2c3d4e', msg:'update route table'},
+        {x:150, hash:'c3d4e5f', msg:'patch security layer'},
+        {x:190, hash:'d4e5f6a', msg:'clean vault state'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "main", ci: 4, branchY: 80 }
   },
   r6_reverted: {
     branches: [
-      { name: "main", y: 80, color: "#1D9E75", commits: [{x:25}, {x:60}, {x:95}, {x:130}, {x:165}, {x:205}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [
+        {x:25, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:60, hash:'f4e5b6a', msg:'add vault config'},
+        {x:95, hash:'b2c3d4e', msg:'update route table'},
+        {x:130, hash:'c3d4e5f', msg:'patch security layer'},
+        {x:165, hash:'d4e5f6a', msg:'clean vault state'},
+        {x:205, hash:'e5f6a7b', msg:'revert: clean vault state'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "main", ci: 5, branchY: 80 },
     extras: [{ type: "revert-label", x: 205, y: 80 }]
@@ -1106,7 +1215,10 @@ const TREE = {
   // Room 0: THE EQUIPMENT
   r0_initial: {
     branches: [
-      { name: "main", y: 80, color: "#1D9E75", commits: [{x:40}, {x:90}] }
+      { name: "main", y: 80, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:90, hash:'f4e5b6a', msg:'add vault config'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "main", ci: 1, branchY: 80 }
   },
@@ -1114,14 +1226,22 @@ const TREE = {
   // Room 4: HIDE THE EVIDENCE
   r_stash_dirty: {
     branches: [
-      { name: "operative/entry-window", y: 80, color: "#7eb8d4", commits: [{x:40}, {x:90}, {x:140}] }
+      { name: "operative/entry-window", y: 80, color: "#7eb8d4", commits: [
+        {x:40, hash:'5c6d7e8', msg:'create entry window'},
+        {x:90, hash:'6d7e8f9', msg:'plant access key'},
+        {x:140, hash:'7e8f9a0', msg:'inject bypass route'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 2, branchY: 80 },
     extras: [{ type: "dirty-indicator", x: 10, y: 200 }]
   },
   r_stash_clean: {
     branches: [
-      { name: "operative/entry-window", y: 80, color: "#7eb8d4", commits: [{x:40}, {x:90}, {x:140}] }
+      { name: "operative/entry-window", y: 80, color: "#7eb8d4", commits: [
+        {x:40, hash:'5c6d7e8', msg:'create entry window'},
+        {x:90, hash:'6d7e8f9', msg:'plant access key'},
+        {x:140, hash:'7e8f9a0', msg:'inject bypass route'}
+      ]}
     ],
     HEAD: { type: "branch", ref: "operative/entry-window", ci: 2, branchY: 80 },
     extras: [{ type: "stash-indicator", x: 10, y: 200 }]
@@ -1130,24 +1250,52 @@ const TREE = {
   // Room 6: THE CREW CONFLICT
   r_conflict_initial: {
     branches: [
-      { name: "main",         y: 60,  color: "#1D9E75",   commits: [{x:40}, {x:85}, {x:130}] },
-      { name: "origin/main",  y: 130, color: "#1D9E7566", commits: [{x:40}, {x:85}, {x:130}, {x:175}], dashed: true }
+      { name: "main", y: 60, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'b2c3d4e', msg:'local: update manifest'}
+      ]},
+      { name: "origin/main", y: 130, color: "#1D9E7566", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'e6f7a8b', msg:'remote: update manifest'},
+        {x:175, hash:'7a8b9c0', msg:'remote: sync config'}
+      ], dashed: true }
     ],
     HEAD: { type: "branch", ref: "main", ci: 2, branchY: 60 },
     extras: [{ type: "conflict-indicator", x: 10, y: 220 }]
   },
   r_conflict_resolved: {
     branches: [
-      { name: "main",         y: 60,  color: "#1D9E75",   commits: [{x:40}, {x:85}, {x:130}] },
-      { name: "origin/main",  y: 130, color: "#1D9E7566", commits: [{x:40}, {x:85}, {x:130}, {x:175}], dashed: true }
+      { name: "main", y: 60, color: "#1D9E75", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'b2c3d4e', msg:'local: update manifest'}
+      ]},
+      { name: "origin/main", y: 130, color: "#1D9E7566", commits: [
+        {x:40, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:85, hash:'f4e5b6a', msg:'add vault config'},
+        {x:130, hash:'e6f7a8b', msg:'remote: update manifest'},
+        {x:175, hash:'7a8b9c0', msg:'remote: sync config'}
+      ], dashed: true }
     ],
     HEAD: { type: "branch", ref: "main", ci: 2, branchY: 60 },
     extras: [{ type: "staged-indicator", x: 10, y: 220 }]
   },
   r_conflict_merged: {
     branches: [
-      { name: "main",         y: 65,  color: "#1D9E75",   commits: [{x:35}, {x:75}, {x:115}, {x:160}] },
-      { name: "origin/main",  y: 130, color: "#1D9E7566", commits: [{x:35}, {x:75}, {x:115}, {x:160}], dashed: true }
+      { name: "main", y: 65, color: "#1D9E75", commits: [
+        {x:35, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:75, hash:'f4e5b6a', msg:'add vault config'},
+        {x:115, hash:'b2c3d4e', msg:'local: update manifest'},
+        {x:160, hash:'8b9c0d1', msg:'merge: origin/main'}
+      ]},
+      { name: "origin/main", y: 130, color: "#1D9E7566", commits: [
+        {x:35, hash:'a1b2c3d', msg:'initial repo setup'},
+        {x:75, hash:'f4e5b6a', msg:'add vault config'},
+        {x:115, hash:'e6f7a8b', msg:'remote: update manifest'},
+        {x:160, hash:'8b9c0d1', msg:'merge: origin/main'}
+      ], dashed: true }
     ],
     HEAD: { type: "branch", ref: "main", ci: 3, branchY: 65 }
   }

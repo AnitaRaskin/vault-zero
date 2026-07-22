@@ -1,11 +1,8 @@
 // ═══════════════════════════════════════════════════════════════════════
-// SVG TREE RENDERER  v4  — vertical, normalized coords
-// Data convention (unchanged): branch.y = lane, commit.x = depth.
-// Rendering: normalizes branch.y → display x, commit.x → display y
-// so the tree always fills the canvas regardless of raw data values.
+// SVG TREE RENDERER  v5  — git-graph style table
 // ═══════════════════════════════════════════════════════════════════════
 
-const NS = "http://www.w3.org/2000/svg";
+const NS = 'http://www.w3.org/2000/svg';
 
 function svgEl(tag, attrs) {
   const el = document.createElementNS(NS, tag);
@@ -13,376 +10,211 @@ function svgEl(tag, attrs) {
   return el;
 }
 
-// ─── Reactive resize ─────────────────────────────────────────────────────
-// Re-render whenever the tree panel changes size (e.g. user drags divider).
-
-let _currentStateKey = null;
-let _roTimer         = null;
-let _roLastW         = 0;
-let _roLastH         = 0;
-let _roSetup         = false;
-
-function _setupResizeObserver(svg) {
-  if (_roSetup) return;
-  _roSetup = true;
-  const target = svg.parentElement || svg;
-  new ResizeObserver(entries => {
-    const r = entries[0].contentRect;
-    if (Math.abs(r.width - _roLastW) < 1 && Math.abs(r.height - _roLastH) < 1) return;
-    _roLastW = r.width; _roLastH = r.height;
-    clearTimeout(_roTimer);
-    _roTimer = setTimeout(() => {
-      if (_currentStateKey != null) renderTree(_currentStateKey);
-    }, 280);
-  }).observe(target);
+function _stripAlpha(color) {
+  if (typeof color !== 'string') return '#1D9E75';
+  return color.length > 7 ? color.slice(0, 7) : color;
 }
-
-// ─── Tooltip ────────────────────────────────────────────────────────────
-
-let _ttBound = false;
-
-function setupTooltip(svg) {
-  if (_ttBound) return;
-  _ttBound = true;
-  const tt = document.getElementById('treeTooltip');
-  if (!tt) return;
-  svg.addEventListener('mousemove', e => {
-    const hit = e.target.closest('[data-tip]');
-    if (!hit) { tt.style.display = 'none'; return; }
-    const parts = (hit.dataset.tip || '').split('|');
-    tt.innerHTML = parts.map((p, i) =>
-      `<span class="tt-${i === 0 ? 'main' : 'sub'}">${p.trim()}</span>`
-    ).join('');
-    tt.style.display = 'block';
-    const r = svg.getBoundingClientRect();
-    let tx = e.clientX - r.left + 14;
-    let ty = e.clientY - r.top  - 42;
-    if (tx + 170 > r.width)  tx = e.clientX - r.left - 175;
-    if (ty < 0)               ty = e.clientY - r.top  + 16;
-    tt.style.left = tx + 'px';
-    tt.style.top  = ty + 'px';
-  });
-  svg.addEventListener('mouseleave', () => { if (tt) tt.style.display = 'none'; });
-}
-
 
 // ─── Main render ────────────────────────────────────────────────────────
 
+let _currentStateKey = null;
+
 function renderTree(stateKey) {
   _currentStateKey = stateKey;
-  const svg = document.getElementById('gitTree');
-  _setupResizeObserver(svg);
-  svg.innerHTML = '';
-  _ttBound = false;
-  setupTooltip(svg);
+  const container = document.getElementById('gitTree');
+  if (!container) return;
+  container.innerHTML = '';
 
   const state = TREE[stateKey];
   if (!state) {
-    const t = svgEl('text', {
-      x: '20', y: '30', fill: '#333',
-      'font-size': '10', 'font-family': 'JetBrains Mono, Courier New'
-    });
-    t.textContent = stateKey ? `loading: ${stateKey}` : 'initializing...';
-    svg.appendChild(t);
+    const p = document.createElement('div');
+    p.className = 'gg-loading';
+    p.textContent = stateKey ? `loading: ${stateKey}` : 'initializing...';
+    container.appendChild(p);
     return;
   }
 
-  // ── Canvas & normalization ────────────────────────────────────────────
-  // Use actual rendered SVG size for the viewBox.
-  const CW = svg.clientWidth  || 220;
-  const CH = svg.clientHeight || 320;
-  svg.setAttribute('viewBox', `0 0 ${CW} ${CH}`);
-
   const branches = state.branches || [];
   const h        = state.HEAD;
+  const extras   = state.extras || [];
 
-  // Quantize: assign a discrete row to each unique depth value, and a
-  // discrete column to each unique lane value. This means commit spacing
-  // is always fixed (ROW_H px) regardless of raw data coordinate spread.
-  const PAD_X = 76, PAD_Y = 36; // room for HEAD chip (left) and labels (top)
+  // ── Lane assignment (left-to-right by branch y value) ────────────────
+  const sorted  = [...branches].sort((a, b) => a.y - b.y);
+  const laneOf  = {};
+  sorted.forEach((b, i) => { laneOf[b.name] = i; });
+  const numLanes = sorted.length;
 
-  // Quantize: assign a discrete row/col to each unique depth/lane value.
-  const uniqueDepths = [...new Set(branches.flatMap(b => b.commits.map(c => c.x)))].sort((a,b)=>a-b);
-  const uniqueLanes  = [...new Set(branches.map(b => b.y))].sort((a,b)=>a-b);
-  const depthRow = Object.fromEntries(uniqueDepths.map((d,i)=>[d,i]));
-  const laneCol  = Object.fromEntries(uniqueLanes.map((l,i) =>[l,i]));
-
-  const numRows = Math.max(uniqueDepths.length, 1);
-  const numCols = Math.max(uniqueLanes.length,  1);
-
-  // Row/col spacing: fill 82% of the available panel space, clamped to
-  // [55, 160]px per row and [55, 110]px per col.
-  const availH = CH - PAD_Y * 2;
-  const availW = CW - PAD_X * 2;
-
-  const rowH = numRows <= 1 ? 0 :
-    Math.max(55, Math.min(160, availH * 0.82 / (numRows - 1)));
-  const colW = numCols <= 1 ? 0 :
-    Math.max(55, Math.min(110, availW * 0.78 / (numCols - 1)));
-
-  const contentH = (numRows - 1) * rowH;
-  const contentW = (numCols - 1) * colW;
-
-  // Center content in the panel
-  const offsetY = (CH - contentH) / 2;
-  const offsetX = (CW - contentW) / 2;
-
-  function nx(lane) {
-    const col = laneCol[lane] ?? 0;
-    return offsetX + (numCols === 1 ? 0 : col / (numCols - 1) * contentW);
-  }
-  function ny(depth) {
-    const row = depthRow[depth] ?? 0;
-    return offsetY + (numRows === 1 ? 0 : row / (numRows - 1) * contentH);
-  }
-
-  // ── Defs ──────────────────────────────────────────────────────────────
-  const defs = svgEl('defs', {});
-
-  const mk = svgEl('marker', { id: 'arr', markerWidth: '5', markerHeight: '7', refX: '2.5', refY: '6', orient: 'auto' });
-  mk.appendChild(svgEl('polygon', { points: '0 0,5 0,2.5 6', fill: '#3d4943' }));
-  defs.appendChild(mk);
-
-  const flt = svgEl('filter', { id: 'head-glow', x: '-60%', y: '-60%', width: '220%', height: '220%' });
-  const blr = svgEl('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '2.8', result: 'blur' });
-  const mrg = svgEl('feMerge', {});
-  mrg.appendChild(svgEl('feMergeNode', { in: 'blur' }));
-  mrg.appendChild(svgEl('feMergeNode', { in: 'SourceGraphic' }));
-  flt.appendChild(blr);
-  flt.appendChild(mrg);
-  defs.appendChild(flt);
-  svg.appendChild(defs);
+  const LANE_W = 14;
+  const ROW_H  = 26;
+  const DOT_R  = 3.5;
+  const graphW = numLanes * LANE_W + 4;
 
   // ── Resolve HEAD ──────────────────────────────────────────────────────
-  let headBranch = null, headCommit = null, headCI = -1;
-  if (h && h.type === 'branch') {
+  let headBranch   = null;
+  let headCommitX  = null;
+  let detachedX    = null;
+  let detachedLane = null;
+
+  if (h?.type === 'branch') {
     headBranch = branches.find(b =>
       b.name === h.ref || (h.branchY !== undefined && b.y === h.branchY)
     );
-    if (headBranch && h.ci !== undefined) {
-      headCI     = h.ci;
-      headCommit = headBranch.commits[h.ci];
+    if (headBranch && h.ci != null) {
+      headCommitX = headBranch.commits[h.ci]?.x;
     }
+  } else if (h?.type === 'detached') {
+    detachedX = h.cx;
+    const detB = branches.find(b => b.y === h.cy);
+    if (detB) detachedLane = laneOf[detB.name];
   }
 
-  // ── Horizontal connectors (branch forks / merges) ─────────────────────
-  branches.forEach((branch, bi) => {
-    if (!branch.commits.length) return;
-    const forkDepth = branch.commits[0].x;
-    const thisBx    = nx(branch.y);
-    for (let oi = 0; oi < bi; oi++) {
-      const other = branches[oi];
-      if (other.commits.some(c => c.x === forkDepth)) {
-        const otherBx = nx(other.y);
-        svg.appendChild(svgEl('line', {
-          x1: Math.min(thisBx, otherBx), y1: ny(forkDepth),
-          x2: Math.max(thisBx, otherBx), y2: ny(forkDepth),
-          stroke: branch.color, 'stroke-width': '1',
-          'stroke-dasharray': branch.dashed ? '3,2' : 'none',
-          opacity: branch.dashed ? '0.2' : '0.4'
-        }));
-        break;
-      }
-    }
-  });
+  // ── All unique depths, newest first ──────────────────────────────────
+  const allXs = [...new Set(branches.flatMap(b => b.commits.map(c => c.x)))]
+    .sort((a, b) => b - a);
 
-  // ── Vertical spines + commits ─────────────────────────────────────────
-  branches.forEach(branch => {
-    const branchX  = nx(branch.y);
-    const cs       = branch.commits;
-    const isActive = branch === headBranch;
-    const color    = branch.color;
+  // ── Inline SVG defs (glow filter) ────────────────────────────────────
+  const defsSvg = svgEl('svg', { width: '0', height: '0', style: 'position:absolute;overflow:hidden' });
+  const defs    = svgEl('defs', {});
+  const flt     = svgEl('filter', { id: 'gg-glow', x: '-60%', y: '-60%', width: '220%', height: '220%' });
+  const blr     = svgEl('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: '2.5', result: 'blur' });
+  const mrg     = svgEl('feMerge', {});
+  mrg.appendChild(svgEl('feMergeNode', { in: 'blur' }));
+  mrg.appendChild(svgEl('feMergeNode', { in: 'SourceGraphic' }));
+  flt.appendChild(blr); flt.appendChild(mrg);
+  defs.appendChild(flt);
+  defsSvg.appendChild(defs);
+  container.appendChild(defsSvg);
 
-    // Vertical spine
-    if (cs.length >= 2) {
-      const ys = cs.map(c => ny(c.x));
-      svg.appendChild(svgEl('line', {
-        x1: branchX, y1: Math.min(...ys),
-        x2: branchX, y2: Math.max(...ys),
-        stroke: color,
-        'stroke-width':     branch.dashed ? '1'   : '1.5',
-        'stroke-dasharray': branch.dashed ? '5,4' : 'none',
-        opacity: branch.dashed ? '0.3' : '0.8'
-      }));
-    }
+  // ── Rows ──────────────────────────────────────────────────────────────
+  allXs.forEach(rowX => {
+    const row = document.createElement('div');
+    row.className = 'gg-row';
 
-    // Commits
-    cs.forEach((c, ci) => {
-      const isHead  = isActive && ci === headCI;
-      const commitY = ny(c.x);
-      const tip     = `${branch.name} | commit ${ci + 1} / ${cs.length}`;
-      const g       = svgEl('g', { 'data-tip': tip });
+    // Branches with a commit at this depth
+    const atRow = branches.filter(b => b.commits.some(c => c.x === rowX));
 
-      g.appendChild(svgEl('circle', { cx: branchX, cy: commitY, r: '11', fill: 'transparent', stroke: 'none' }));
+    // Primary branch for hash/msg: prefer HEAD branch, else first
+    const primaryBranch = (headBranch && atRow.includes(headBranch)) ? headBranch : atRow[0];
+    const primaryCommit = primaryBranch?.commits.find(c => c.x === rowX);
 
-      if (isHead) {
-        g.appendChild(svgEl('circle', {
-          cx: branchX, cy: commitY, r: '13',
-          fill: 'none', stroke: color, 'stroke-width': '1', opacity: '0',
-          class: 'head-pulse-ring'
-        }));
-      }
+    const isHead     = headBranch != null && rowX === headCommitX;
+    const isDetached = detachedX === rowX;
 
-      g.appendChild(svgEl('circle', {
-        cx: branchX, cy: commitY,
-        r: isHead ? '7' : '5.5',
-        fill: '#0a0c0b', stroke: color,
-        'stroke-width': isHead ? '2' : (branch.dashed ? '1' : '1.5'),
-        opacity: branch.dashed ? '0.45' : '1',
-        ...(isHead ? { filter: 'url(#head-glow)' } : {})
-      }));
+    if (isHead || isDetached) row.classList.add('gg-row-head');
 
-      if (isHead) {
-        g.appendChild(svgEl('circle', { cx: branchX, cy: commitY, r: '2.5', fill: color, opacity: '0.9' }));
-      }
-
-      svg.appendChild(g);
+    // ── Per-row graph SVG ─────────────────────────────────────────────
+    const svg = svgEl('svg', {
+      width: graphW, height: ROW_H,
+      viewBox: `0 0 ${graphW} ${ROW_H}`,
+      class: 'gg-graph'
     });
 
-    // Branch label — centered ABOVE the topmost commit, no overlap
-    if (!cs.length) return;
-    const topY    = Math.min(...cs.map(c => ny(c.x)));
-    const labelEl = svgEl('text', {
-      x: branchX, y: topY - 10,
-      fill: color,
-      'font-size':    isActive ? '8' : '7',
-      'font-family':  'JetBrains Mono, Courier New',
-      'font-weight':  isActive ? '700' : '400',
-      'text-anchor':  'middle',
-      opacity: branch.dashed ? '0.4' : (isActive ? '1' : '0.65')
+    sorted.forEach(branch => {
+      const lane   = laneOf[branch.name];
+      const bx     = lane * LANE_W + LANE_W / 2;
+      const color  = _stripAlpha(branch.color);
+      const isDash = !!branch.dashed;
+      const opac   = isDash ? '0.38' : '0.85';
+      const sw     = isDash ? '1' : '1.5';
+
+      const xs   = branch.commits.map(c => c.x);
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const has  = xs.includes(rowX);
+      const span = rowX >= minX && rowX <= maxX;
+
+      function mkLine(y1, y2) {
+        const l = svgEl('line', { x1: bx, y1, x2: bx, y2, stroke: color, 'stroke-width': sw, opacity: opac });
+        if (isDash) l.setAttribute('stroke-dasharray', '4,3');
+        return l;
+      }
+
+      if (has) {
+        if (rowX > minX) svg.appendChild(mkLine(0, ROW_H / 2));
+        if (rowX < maxX) svg.appendChild(mkLine(ROW_H / 2, ROW_H));
+
+        const isHd     = branch === headBranch && rowX === headCommitX;
+        const isDt     = isDetached && detachedLane === lane;
+        const glowing  = isHd || isDt;
+        const r        = glowing ? DOT_R + 1 : DOT_R;
+
+        const circ = svgEl('circle', {
+          cx: bx, cy: ROW_H / 2, r,
+          fill: '#0a0c0b', stroke: color,
+          'stroke-width': glowing ? '2' : sw,
+          opacity: isDash ? '0.5' : '1'
+        });
+        if (glowing) circ.setAttribute('filter', 'url(#gg-glow)');
+        svg.appendChild(circ);
+
+        if (glowing) {
+          svg.appendChild(svgEl('circle', {
+            cx: bx, cy: ROW_H / 2, r: '2.2',
+            fill: color, opacity: '0.9'
+          }));
+        }
+      } else if (span) {
+        svg.appendChild(mkLine(0, ROW_H));
+      }
     });
-    labelEl.textContent = branch.name;
-    svg.appendChild(labelEl);
-  });
 
-  // ── HEAD indicator ────────────────────────────────────────────────────
-  if (h) {
-    if (h.type === 'detached') {
-      // h.cx = commit depth → ny, h.cy = branch lane → nx
-      const dcx = nx(h.cy);
-      const dcy = ny(h.cx);
-      svg.appendChild(svgEl('circle', {
-        cx: dcx, cy: dcy, r: '13',
-        fill: 'none', stroke: '#ffb4ab', 'stroke-width': '1', opacity: '0',
-        class: 'head-pulse-ring'
-      }));
-      svg.appendChild(svgEl('polygon', {
-        points: `${dcx},${dcy-8} ${dcx+6},${dcy} ${dcx},${dcy+8} ${dcx-6},${dcy}`,
-        fill: 'rgba(255,180,171,0.12)', stroke: '#ffb4ab', 'stroke-width': '1.5'
-      }));
-      const dt = svgEl('text', {
-        x: dcx + 12, y: dcy + 4,
-        fill: '#ffb4ab', 'font-size': '8',
-        'font-family': 'JetBrains Mono, Courier New', 'font-weight': '700'
-      });
-      dt.textContent = '◈ HEAD (detached)';
-      svg.appendChild(dt);
-
-    } else if (headBranch && headCommit) {
-      const hcx   = nx(headBranch.y);
-      const hcy   = ny(headCommit.x);
-      const color = headBranch.color;
-
-      // Chip goes left normally; flip right if too close to left edge
-      const chipW = 36, chipH = 14, stemLen = 20, gap = 9;
-      const goRight = hcx < PAD_X + 10;
-      const dir     = goRight ? 1 : -1;
-
+    // Horizontal connector for fork/merge rows
+    if (atRow.length > 1) {
+      const lxs = atRow.map(b => laneOf[b.name] * LANE_W + LANE_W / 2);
       svg.appendChild(svgEl('line', {
-        x1: hcx + dir * gap, y1: hcy, x2: hcx + dir * (gap + stemLen), y2: hcy,
-        stroke: color, 'stroke-width': '1',
-        'stroke-dasharray': '2,2', opacity: '0.5'
+        x1: Math.min(...lxs), y1: ROW_H / 2,
+        x2: Math.max(...lxs), y2: ROW_H / 2,
+        stroke: '#3d4943', 'stroke-width': '1', opacity: '0.5'
       }));
-
-      const chipX = goRight ? hcx + gap + stemLen : hcx - gap - stemLen - chipW;
-      const chipY = hcy - 7;
-      svg.appendChild(svgEl('rect', {
-        x: chipX, y: chipY, width: chipW, height: chipH, rx: '3',
-        fill: color, opacity: '0.18',
-        stroke: color, 'stroke-width': '0.5', 'stroke-opacity': '0.5'
-      }));
-      const ht = svgEl('text', {
-        x: chipX + chipW / 2, y: chipY + 9.5,
-        fill: color, 'font-size': '8.5',
-        'font-family': 'JetBrains Mono, Courier New',
-        'text-anchor': 'middle', 'font-weight': '700'
-      });
-      ht.textContent = 'HEAD';
-      svg.appendChild(ht);
-    }
-  }
-
-  // ── Extras ────────────────────────────────────────────────────────────
-  (state.extras || []).forEach(ex => {
-
-    if (ex.type === 'remote-box') {
-      // Transpose + normalize: ex.x was depth → y, ex.y was lane → x
-      const rx = nx(ex.y);
-      const ry = ny(ex.x);
-      const g  = svgEl('g', { 'data-tip': ex.label });
-      g.appendChild(svgEl('rect', {
-        x: rx, y: ry, width: '80', height: '18', rx: '2',
-        fill: ex.color, opacity: '0.07',
-        stroke: ex.color, 'stroke-width': '1', 'stroke-opacity': '0.45'
-      }));
-      const t = svgEl('text', {
-        x: rx + 6, y: ry + 12,
-        fill: ex.color, 'font-size': '7',
-        'font-family': 'JetBrains Mono, Courier New', opacity: '0.8'
-      });
-      t.textContent = ex.label;
-      g.appendChild(t);
-      svg.appendChild(g);
-      return;
     }
 
-    if (ex.type === 'arrow') {
-      svg.appendChild(svgEl('line', {
-        x1: nx(ex.y1), y1: ny(ex.x1),
-        x2: nx(ex.y2), y2: ny(ex.x2),
-        stroke: '#3d4943', 'stroke-width': '1',
-        'stroke-dasharray': '3,3', 'marker-end': 'url(#arr)'
-      }));
-      return;
+    row.appendChild(svg);
+
+    // ── Content: chips + message (flex: 1) ───────────────────────────
+    const contentEl = document.createElement('div');
+    contentEl.className = 'gg-content';
+
+    if (isDetached) {
+      _chip(contentEl, 'HEAD', '#ffb4ab', true);
+    } else if (isHead) {
+      _chip(contentEl, `HEAD → ${headBranch.name}`, _stripAlpha(headBranch.color), true);
     }
 
-    if (ex.type === 'revert-label') {
-      const t = svgEl('text', {
-        x: nx(ex.y) + 12, y: ny(ex.x),
-        fill: '#68dbae', 'font-size': '8',
-        'font-family': 'JetBrains Mono, Courier New', 'font-weight': '700'
-      });
-      t.textContent = '↩ revert';
-      svg.appendChild(t);
-      return;
-    }
-
-    // Status pills — anchored bottom-right of tree area
-    const PILLS = {
-      'staged-indicator':   { icon: '●', text: 'staged',      color: '#68dbae' },
-      'dirty-indicator':    { icon: '⚠', text: 'dirty',       color: '#ffb4ab' },
-      'stash-indicator':    { icon: '◎', text: 'stashed',     color: '#c8a87a' },
-      'conflict-indicator': { icon: '✕', text: 'conflict',    color: '#ffb4ab' },
-    };
-    const pill = PILLS[ex.type];
-    if (!pill) return;
-
-    const pillX = 6;
-    const pillY = CH - 18;
-    const pillW = pill.text.length * 5.8 + 28;
-    const g = svgEl('g', { 'data-tip': pill.text });
-    g.appendChild(svgEl('rect', {
-      x: pillX, y: pillY - 3, width: pillW, height: 16, rx: '2',
-      fill: pill.color, opacity: '0.09',
-      stroke: pill.color, 'stroke-width': '0.5', 'stroke-opacity': '0.5'
-    }));
-    const t = svgEl('text', {
-      x: pillX + 6, y: pillY + 9,
-      fill: pill.color, 'font-size': '8',
-      'font-family': 'JetBrains Mono, Courier New', opacity: '0.9'
+    // Non-head branch tips at this row
+    atRow.forEach(branch => {
+      if (branch === headBranch) return;
+      const tip = branch.commits[branch.commits.length - 1].x;
+      if (tip === rowX) _chip(contentEl, branch.name, _stripAlpha(branch.color), false);
     });
-    t.textContent = `${pill.icon}  ${pill.text}`;
-    g.appendChild(t);
-    svg.appendChild(g);
+
+    // Revert label extra
+    const revExtra = extras.find(e => e.type === 'revert-label' && e.x === rowX);
+    if (revExtra) _chip(contentEl, '↩ revert', '#68dbae', false);
+
+    if (primaryCommit?.msg) {
+      const msgEl = document.createElement('span');
+      msgEl.className = 'gg-msg';
+      msgEl.textContent = primaryCommit.msg;
+      contentEl.appendChild(msgEl);
+    }
+
+    row.appendChild(contentEl);
+
+    // ── Hash (right side, secondary) ──────────────────────────────────
+    const hashEl = document.createElement('span');
+    hashEl.className = 'gg-hash';
+    hashEl.textContent = (primaryCommit?.hash || '???????').slice(0, 7);
+    row.appendChild(hashEl);
+
+    container.appendChild(row);
   });
+}
+
+function _chip(parent, label, color, isHead) {
+  const el = document.createElement('span');
+  el.className = 'gg-chip' + (isHead ? ' gg-chip-head' : '');
+  el.textContent = label;
+  el.style.color = color;
+  el.style.borderColor = color + '55';
+  parent.appendChild(el);
 }

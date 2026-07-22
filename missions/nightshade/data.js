@@ -909,112 +909,215 @@ const ROOMS = [
 // TREE STATE DEFINITIONS
 // ═══════════════════════════════════════════════════════════════════════
 
+
 const TREE = {
 
-  // ── Room 0: CONTAINMENT ───────────────────────────────────────────────
+  // Room 0: CONTAINMENT
   n0_initial: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 2, branchY: 80 }
   },
   n0_staged: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 2, branchY: 80 },
     extras: [{ type: 'staged-indicator', x: 10, y: 240 }]
   },
   n0_committed: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+      { x: 185, hash: '2a3b4c5', msg: 'log: audit entry' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 80 }
   },
 
-  // ── Room 1: DEAD RECKONING ────────────────────────────────────────────
+  // Room 1: DEAD RECKONING
   n1_log: {
-    branches: [{ name: 'main', y: 70, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] }],
+    branches: [{ name: 'main', y: 70, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+      { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 70 }
   },
   n1_detached: {
     branches: [
-      { name: 'main', y: 55, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] },
-      { name: 'nightshade/cardinal', y: 145, color: '#cc4444', commits: [{ x: 35 }, { x: 85 }], dashed: true }
+      { name: 'main', y: 55, color: '#1D9E75', commits: [
+        { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+        { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+        { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+        { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+      ]},
+      { name: 'nightshade/cardinal', y: 145, color: '#cc4444', commits: [
+        { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+        { x: 85, hash: '4d5e6f7', msg: 'cardinal: exfil route' }
+      ], dashed: true }
     ],
     HEAD: { type: 'detached', cx: 85, cy: 145 }
   },
   n1_evidence: {
     branches: [
-      { name: 'main', y: 55, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] },
-      { name: 'forensics/cardinal-evidence', y: 145, color: '#7eb8d4', commits: [{ x: 35 }, { x: 85 }] }
+      { name: 'main', y: 55, color: '#1D9E75', commits: [
+        { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+        { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+        { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+        { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+      ]},
+      { name: 'forensics/cardinal-evidence', y: 145, color: '#7eb8d4', commits: [
+        { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+        { x: 85, hash: '5e6f7a8', msg: 'preserve evidence branch' }
+      ]}
     ],
     HEAD: { type: 'branch', ref: 'forensics/cardinal-evidence', ci: 1, branchY: 145 }
   },
   n1_main: {
     branches: [
-      { name: 'main', y: 55, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] },
-      { name: 'forensics/cardinal-evidence', y: 145, color: '#7eb8d4', commits: [{ x: 35 }, { x: 85 }] }
+      { name: 'main', y: 55, color: '#1D9E75', commits: [
+        { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+        { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+        { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+        { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+      ]},
+      { name: 'forensics/cardinal-evidence', y: 145, color: '#7eb8d4', commits: [
+        { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+        { x: 85, hash: '5e6f7a8', msg: 'preserve evidence branch' }
+      ]}
     ],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 55 }
   },
 
-  // ── Room 2: CONFLICTED LOYALTIES ──────────────────────────────────────
+  // Room 2: CONFLICTED LOYALTIES
   n2_conflict: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 2, branchY: 80 },
     extras: [{ type: 'dirty-indicator', x: 10, y: 240 }]
   },
   n2_staged_pre: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 2, branchY: 80 }
   },
   n2_staged: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 2, branchY: 80 },
     extras: [{ type: 'staged-indicator', x: 10, y: 240 }]
   },
   n2_merged: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+      { x: 185, hash: '3b4c5d6', msg: 'merge: resolve conflict' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 80 }
   },
 
-  // ── Room 3: THE GREAT ERASURE ─────────────────────────────────────────
+  // Room 3: THE GREAT ERASURE
   n3_reset: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 2, branchY: 80 }
   },
   n3_cherry: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+      { x: 185, hash: '4c5d6e7', msg: 'cherry-pick: critical fix' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 80 }
   },
 
-  // ── Room 4: INCOMING SIGNAL ───────────────────────────────────────────
+  // Room 4: INCOMING SIGNAL
   n4_local: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+      { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 80 }
   },
   n4_fetched: {
     branches: [
-      { name: 'main', y: 55, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] },
-      { name: 'origin/nightshade/transmit', y: 150, color: '#cc4444', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }], dashed: true }
+      { name: 'main', y: 55, color: '#1D9E75', commits: [
+        { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+        { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+        { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+        { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+      ]},
+      { name: 'origin/nightshade/transmit', y: 150, color: '#cc4444', commits: [
+        { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+        { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+        { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+        { x: 185, hash: '6f7a8b9', msg: 'nightshade: transmit key' }
+      ], dashed: true }
     ],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 55 },
     extras: [{ type: 'remote-box', x: 148, y: 132, label: 'origin (gchq-atlas)', color: '#cc4444' }]
   },
   n4_deleted: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+      { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 80 }
   },
 
-  // ── Room 5: THE DEAD DROP ─────────────────────────────────────────────
+  // Room 5: THE DEAD DROP
   n5_stash: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+      { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 80 },
     extras: [{ type: 'staged-indicator', x: 10, y: 240 }]
   },
   n5_applied: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+      { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 80 },
     extras: [{ type: 'dirty-indicator', x: 10, y: 240 }]
   },
   n5_clean: {
-    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [{ x: 35 }, { x: 85 }, { x: 135 }, { x: 185 }] }],
+    branches: [{ name: 'main', y: 80, color: '#1D9E75', commits: [
+      { x: 35, hash: 'a3f9b2c', msg: 'initial atlas deployment' },
+      { x: 85, hash: 'e1d4c5b', msg: 'add meridian ops log' },
+      { x: 135, hash: 'f6a7b8c', msg: 'configure cron pipeline' },
+      { x: 185, hash: 'c9d0e1f', msg: 'nightshade: dead drop' }
+    ]}],
     HEAD: { type: 'branch', ref: 'main', ci: 3, branchY: 80 }
   }
-
 };
