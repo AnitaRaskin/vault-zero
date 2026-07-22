@@ -41,6 +41,180 @@ function checkNearMiss(cmd) {
 }
 
 
+// ─── Free commands (valid git/shell, no penalty, no advance) ─────────
+
+function _freeCommand(cmd) {
+  const treeData = (typeof _currentStateKey !== 'undefined' && TREE[_currentStateKey]) || {};
+  const branches = treeData.branches || [];
+  const extras   = treeData.extras   || [];
+  const head     = treeData.HEAD;
+
+  const headBranch = branches.find(b =>
+    b.name === head?.ref || (head?.branchY !== undefined && b.y === head?.branchY)
+  ) || branches.find(b => !b.dashed) || branches[0];
+  const headCI     = head?.ci ?? ((headBranch?.commits.length ?? 1) - 1);
+  const headCommit = headBranch?.commits[headCI];
+  const branchName = headBranch?.name || 'main';
+
+  const hasStaged   = extras.some(e => e.type === 'staged-indicator');
+  const hasDirty    = extras.some(e => e.type === 'dirty-indicator');
+  const hasConflict = extras.some(e => e.type === 'conflict-indicator');
+  const hasStash    = extras.some(e => e.type === 'stash-indicator');
+  const remoteBox   = extras.find(e => e.type === 'remote-box');
+
+  // git status
+  if (cmd === 'git status') {
+    const o = [['On branch ' + branchName, 'br'], ['', '']];
+    if (hasConflict) {
+      o.push(['You have unmerged paths.', 'err']);
+      o.push(['  (fix conflicts and run "git commit")', 'dim']);
+      o.push(['', '']);
+      o.push(['Unmerged paths:', 'sys']);
+      o.push(['    both modified:   firewall-rules.json', 'err']);
+    } else if (hasStaged && hasDirty) {
+      o.push(['Changes to be committed:', 'sys']);
+      o.push(['    modified:   firewall-rules.json', 'ok']);
+      o.push(['', '']);
+      o.push(['Changes not staged for commit:', 'sys']);
+      o.push(['    modified:   entry-tokens.txt', 'warn']);
+    } else if (hasStaged) {
+      o.push(['Changes to be committed:', 'sys']);
+      o.push(['    modified:   firewall-rules.json', 'ok']);
+    } else if (hasDirty) {
+      o.push(['Changes not staged for commit:', 'sys']);
+      o.push(['    modified:   firewall-rules.json', 'warn']);
+    } else {
+      o.push(['nothing to commit, working tree clean', 'ok']);
+    }
+    if (hasStash) { o.push(['', '']); o.push(['stash@{0}: WIP on ' + branchName, 'dim']); }
+    return o;
+  }
+
+  // git log / git log --oneline
+  if (['git log', 'git log --oneline', 'git log -1', 'git log -1 --oneline'].includes(cmd)) {
+    if (!headBranch?.commits.length) return [['no commits yet.', 'dim']];
+    const oneline = cmd.includes('--oneline');
+    const limit   = cmd.includes('-1') ? 1 : Infinity;
+    const commits = [...headBranch.commits].reverse().slice(0, limit);
+    const o = [];
+    commits.forEach((c, i) => {
+      const hash = (c.hash || 'a1b2c3d').slice(0, 7);
+      const ref  = i === 0 ? ` (HEAD -> ${branchName})` : '';
+      const msg  = c.msg || `commit ${headBranch.commits.length - i}`;
+      if (oneline) {
+        o.push([`${hash}${ref} ${msg}`, i === 0 ? 'cm' : '']);
+      } else {
+        o.push([`commit ${hash}xxxxxxxxxxxxxxxxxxxxxxx`, 'cm']);
+        o.push([`Author: Operative <op@vault-zero.io>`, 'dim']);
+        o.push(['', '']);
+        o.push([`    ${msg}`, '']);
+        o.push(['', '']);
+      }
+    });
+    return o;
+  }
+
+  // git log --all --oneline (and --oneline --all)
+  if (cmd === 'git log --all --oneline' || cmd === 'git log --oneline --all' ||
+      cmd === 'git log --oneline --graph --all' || cmd === 'git log --graph --oneline --all') {
+    const seen = new Set();
+    const o = [];
+    branches.forEach(branch => {
+      const isActive = branch === headBranch;
+      [...branch.commits].reverse().forEach((c, i) => {
+        const hash = (c.hash || 'a1b2c3d').slice(0, 7);
+        if (seen.has(hash)) return;
+        seen.add(hash);
+        const isHd = isActive && i === 0;
+        const ref  = isHd ? ` (HEAD -> ${branch.name})` : (i === 0 && !isActive ? ` (${branch.name})` : '');
+        o.push([`${hash}${ref} ${c.msg || 'commit'}`, isHd ? 'cm' : '']);
+      });
+    });
+    return o;
+  }
+
+  // git branch
+  if (cmd === 'git branch') {
+    const local = branches.filter(b => !b.dashed);
+    if (!local.length) return [['no local branches.', 'dim']];
+    return local.map(b => [(b === headBranch ? '* ' : '  ') + b.name, b === headBranch ? 'br' : '']);
+  }
+
+  // git branch -a
+  if (cmd === 'git branch -a') {
+    const o = [];
+    branches.filter(b => !b.dashed).forEach(b =>
+      o.push([(b === headBranch ? '* ' : '  ') + b.name, b === headBranch ? 'br' : '']));
+    branches.filter(b => b.dashed).forEach(b =>
+      o.push(['  remotes/' + b.name, 'dim']));
+    return o.length ? o : [['(no branches)', 'dim']];
+  }
+
+  // git remote -v
+  if (cmd === 'git remote -v') {
+    const url = remoteBox
+      ? 'https://syndicate-server.vault/access-system.git'
+      : 'https://operative.vault/access-system.git';
+    if (!remoteBox && !branches.some(b => b.dashed)) return [['fatal: no remotes configured.', 'err']];
+    return [
+      ['origin  ' + url + ' (fetch)', 'sys'],
+      ['origin  ' + url + ' (push)',  'sys'],
+    ];
+  }
+
+  // git diff / git diff --staged / git diff --cached
+  if (cmd === 'git diff' || cmd === 'git diff --staged' || cmd === 'git diff --cached') {
+    const isStaged = cmd !== 'git diff';
+    const hasChange = isStaged ? hasStaged : hasDirty;
+    if (!hasChange) return [['(no changes)', 'dim']];
+    return [
+      ['diff --git a/firewall-rules.json b/firewall-rules.json', 'dim'],
+      ['@@ -1,4 +1,4 @@', 'dim'],
+      ['-  "access": "locked"', 'err'],
+      ['+  "access": "open"', 'ok'],
+    ];
+  }
+
+  // git stash list
+  if (cmd === 'git stash list') {
+    if (!hasStash) return [];
+    const hash = (headCommit?.hash || 'a1b2c3d').slice(0, 7);
+    return [['stash@{0}: WIP on ' + branchName + ': ' + hash + ' ' + (headCommit?.msg || 'latest'), 'sys']];
+  }
+
+  // git show / git show HEAD
+  if (cmd === 'git show' || cmd === 'git show HEAD') {
+    if (!headCommit) return [['nothing to show.', 'dim']];
+    const hash = (headCommit.hash || 'a1b2c3d').slice(0, 7);
+    return [
+      [`commit ${hash}xxxxxxxxxxxxxxxxxxxxxxx`, 'cm'],
+      [`Author: Operative <op@vault-zero.io>`, 'dim'],
+      ['', ''],
+      [`    ${headCommit.msg || 'commit'}`, ''],
+    ];
+  }
+
+  // ls
+  if (cmd === 'ls' || cmd === 'ls -la' || cmd === 'ls -l' || cmd === 'ls -a') {
+    return [
+      ['README.md', 'sys'],
+      ['.gitignore', 'dim'],
+      ['vault.txt', 'sys'],
+      ['access-routes.json', 'sys'],
+      ['firewall-rules.json', 'sys'],
+    ];
+  }
+
+  // pwd / whoami / git --version
+  if (cmd === 'pwd')                                     return [['/home/operative/access-system', 'sys']];
+  if (cmd === 'whoami')                                  return [['operative', 'sys']];
+  if (cmd === 'git --version' || cmd === 'git version') return [['git version 2.42.0', 'sys']];
+  if (cmd === 'echo $?')                                 return [['0', 'sys']];
+
+  return null;
+}
+
+
 // ─── Command parsing ─────────────────────────────────────────────────
 
 function normalise(s) { return s.trim().replace(/\s+/g, ' '); }
@@ -120,6 +294,10 @@ function parseCmd(raw) {
     if (fallback) { tprint(fallback); return {}; }
   }
 
+  // Free commands — valid git/shell commands accepted without penalty or advancement
+  const freeOut = _freeCommand(cmd);
+  if (freeOut !== null) { tprint(freeOut); return {}; }
+
   // Near-miss detection — targeted feedback before the generic fallback
   const nearMiss = checkNearMiss(cmd);
   if (nearMiss) {
@@ -149,12 +327,14 @@ function loadNextStageUI() {
         showPoliceWarnModal(popupMsg, () => {
           foxMsg(s.foxMsg || s.foxMessage || '');
           triggerPolice(true);
+          inp.focus();
         });
       }, 800);
     } else {
       setTimeout(() => triggerPolice(true), 1400);
     }
   }
+  inp.focus();
 }
 
 function advance(treeState) {
