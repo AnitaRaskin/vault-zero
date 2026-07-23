@@ -357,17 +357,6 @@ body {
   animation: blink 2s ease-in-out infinite;
 }
 
-/* activity log */
-#activityLog {
-  display: flex; flex-direction: column; gap: 10px;
-  font-family: var(--font-mono); font-size: 11px; line-height: 1.5;
-  max-height: 180px; overflow: hidden;
-}
-.gic-log-entry { display: flex; gap: 10px; }
-.gic-log-ts { color: var(--primary); flex-shrink: 0; }
-.gic-log-ts--err { color: var(--err); }
-.gic-log-msg { color: var(--text-muted); }
-.gic-log-msg--err { color: var(--err); }
 
 /* signal monitor */
 .hub-signal-vis {

@@ -397,40 +397,6 @@
   setInterval(updateClock, 1000);
   updateClock();
 
-  // Activity log
-  var logMsgs = [
-    'INBOUND TRANSMISSION: ENCRYPTED DATA DETECTED.',
-    'SUBSYSTEM REBOOT COMPLETE.',
-    'GEO-LOCATION SYNC: LONDON COMMAND HUB.',
-    'CLEANUP PROTOCOL: ARCHIVING SESSION LOGS.',
-    'KERNEL UPGRADE: VERSION 9.0.4 APPLIED.',
-    'OPERATIVE AUTHENTICATION: SUCCESS.',
-    'MISSION_001 STATE: READY.',
-    'MISSION_002 STATE: COUNTDOWN ACTIVE.',
-  ];
-  var logContainer = document.getElementById('activityLog');
-  function addLogEntry() {
-    if (!logContainer) return;
-    var now = new Date();
-    var h = String(now.getUTCHours()).padStart(2,'0');
-    var m = String(now.getUTCMinutes()).padStart(2,'0');
-    var s = String(now.getUTCSeconds()).padStart(2,'0');
-    var ts = '[' + h + ':' + m + ':' + s + ']';
-    var msg = logMsgs[Math.floor(Math.random() * logMsgs.length)];
-    var entry = document.createElement('div');
-    entry.className = 'gic-log-entry';
-    entry.innerHTML = '<span class="gic-log-ts">' + ts + '</span><span class="gic-log-msg">' + msg + '</span>';
-    logContainer.insertBefore(entry, logContainer.firstChild);
-    while (logContainer.children.length > 5) logContainer.removeChild(logContainer.lastChild);
-  }
-  setInterval(addLogEntry, 8000);
-  // Stamp initial log entries with current time
-  var logTsEls = logContainer ? logContainer.querySelectorAll('.gic-log-ts') : [];
-  var now0 = new Date();
-  logTsEls.forEach(function(el, i) {
-    var d = new Date(now0 - i * 45000);
-    el.textContent = '[' + String(d.getUTCHours()).padStart(2,'0') + ':' + String(d.getUTCMinutes()).padStart(2,'0') + ':' + String(d.getUTCSeconds()).padStart(2,'0') + ']';
-  });
 })();
 </script>
 </body>
