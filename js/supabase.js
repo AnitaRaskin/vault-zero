@@ -121,20 +121,6 @@ async function getSessionUser() {
   return { userId: data.user.id, codename: profile?.username || '', role: profile?.role || 'player' };
 }
 
-async function authSignInWithGoogle() {
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: window.location.href.split('?')[0].split('#')[0] }
-  });
-  if (error) {
-    const msg = error.message.toLowerCase().includes('not enabled') || error.message.includes('validation_failed')
-      ? 'Google login not configured yet — use codename + password'
-      : error.message;
-    return { error: msg };
-  }
-  return {};
-}
-
 async function ensureProfile(user) {
   const { data: existing } = await sb.from('profiles').select('username').eq('id', user.id).single();
   if (existing) return existing.username;

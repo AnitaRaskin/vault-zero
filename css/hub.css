@@ -515,15 +515,6 @@ body {
   font-family: var(--font-mono); font-size: 9px;
   color: var(--text-faint); letter-spacing: 0.1em;
 }
-.auth-hub-google {
-  display: block; width: 100%;
-  background: transparent; border: 1px solid var(--border-hi);
-  color: var(--text-muted); font-family: var(--font-mono);
-  font-size: 11px; letter-spacing: 0.12em;
-  padding: 11px; cursor: pointer; transition: all 0.15s;
-  margin-bottom: 14px; text-align: center; box-sizing: border-box;
-}
-.auth-hub-google:hover { border-color: var(--text-muted); color: var(--text); }
 .auth-hub-anon {
   display: block; width: 100%;
   background: transparent; border: none; color: var(--text-faint);

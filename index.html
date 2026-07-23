@@ -287,13 +287,6 @@
     updateHubUI(codename);
   }
 
-  async function handleGoogleAuth() {
-    showHubAuthError('');
-    var result = await authSignInWithGoogle();
-    if (result.error) showHubAuthError(result.error);
-    // On success the browser redirects to Google; session is restored on return
-  }
-
   async function handleHubLogout() {
     await authSignOut();
     updateHubUI(null);
@@ -303,7 +296,6 @@
   window.closeAuthModal   = closeAuthModal;
   window.setHubAuthMode   = setHubAuthMode;
   window.handleHubAuth    = handleHubAuth;
-  window.handleGoogleAuth = handleGoogleAuth;
   window.handleHubLogout  = handleHubLogout;
 
   // ── Leaderboard modal ─────────────────────────────────────
